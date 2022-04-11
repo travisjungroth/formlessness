@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Generic, Protocol
+from typing import TYPE_CHECKING, Callable, Generic, Protocol
 
 from formlessness.exceptions import ValidationIssue
-from formlessness.forms import AbstractBasicForm
 from formlessness.types import D, JSONDict, T
+
+if TYPE_CHECKING:
+    from formlessness.forms import AbstractBasicForm
 
 
 class Deserializer(Protocol[T, D]):

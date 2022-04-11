@@ -53,10 +53,7 @@ class ValidationIssueMap(Mapping[str, Sequence[ValidationIssue]], ValidationIssu
         return self.sub_issues.get(head, {}).get(rest, ())
 
     def __len__(self) -> int:
-        return len(self.keys())
-
-    def __bool__(self):
-        return bool(self.keys())
+        return sum(map(len, self.sub_issues)) + len(self.top_level_issues)
 
     def items(self) -> Iterable[tuple[str, Sequence[ValidationIssue]]]:
         if self.top_level_issues:

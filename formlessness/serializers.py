@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import Protocol, Callable, Generic
+from typing import TYPE_CHECKING, Callable, Generic, Protocol
 
-from formlessness.types import T, D, JSONDict
-from formlessness.forms import AbstractBasicForm
+from formlessness.types import D, JSONDict, T
+
+if TYPE_CHECKING:
+    from formlessness.forms import AbstractBasicForm
 
 
 class Serializer(Protocol[T, D]):

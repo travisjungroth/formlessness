@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Any, Generic, Iterable, Mapping, Protocol, Sequence
+from typing import TYPE_CHECKING, Any, Generic, Iterable, Mapping, Protocol, Sequence
 
 from formlessness.deserializers import Deserializer
 from formlessness.exceptions import ValidationIssueMap
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
-from formlessness.validators import Validator
-from formlessness.views import ViewMaker
-from formlessness.widgets import Widget
+
+if TYPE_CHECKING:
+    from formlessness.validators import Validator
+    from formlessness.views import ViewMaker
+    from formlessness.widgets import Widget
 
 
 class Keyed(Protocol):
