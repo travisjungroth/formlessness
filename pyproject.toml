@@ -8,7 +8,13 @@ authors = ["Travis Jungroth <jungroth@gmail.com>"]
 python = "^3.9"
 
 [tool.poetry.dev-dependencies]
+pytest = "^7.1.1"
+black = "^22.3.0"
+pre-commit = "^2.18.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"

@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import runtime_checkable, Protocol
+from typing import Protocol, runtime_checkable
 
 from formlessness.abstract_classes import Keyed
 from formlessness.exceptions import ValidationIssueMap
-from formlessness.types import JSONDict, T, D
+from formlessness.types import D, JSONDict, T
 
 View = JSONDict
 ViewInfo = JSONDict
@@ -34,6 +34,7 @@ class HasViewMaker(ViewMaker, Protocol):
     """
     Proxy a ViewMaker
     """
+
     view_maker: ViewMaker
 
     def into_view(self) -> View:

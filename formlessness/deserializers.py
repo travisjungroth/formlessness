@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol, Generic, Callable
+from typing import Callable, Generic, Protocol
 
 from formlessness.exceptions import ValidationIssue
-from formlessness.types import T, D, JSONDict
 from formlessness.forms import AbstractBasicForm
+from formlessness.types import D, JSONDict, T
 
 
 class Deserializer(Protocol[T, D]):
@@ -31,7 +31,6 @@ class FunctionDeserializer(Deserializer, Generic[T, D]):
 
 @dataclass
 class KwargsDeserializer(FunctionDeserializer[T, D]):
-
     def deserialize(self, data: D) -> T:
         try:
             return self.function(**data)
@@ -46,7 +45,10 @@ class FormDeserializer(Deserializer[T, JSONDict]):
         """
         todo: change to build up ValidationIssueMap on errors
         """
-        data = {child.key: child.deserialize(sub_data) for child, sub_data in self.form.converter_to_sub_data(data)}
+        data = {
+            child.key: child.deserialize(sub_data)
+            for child, sub_data in self.form.converter_to_sub_data(data)
+        }
         return super().deserialize(data)
 
 

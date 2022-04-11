@@ -2,7 +2,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import runtime_checkable, Protocol, Sequence, Generic, Callable, Container, Iterable
+from typing import (
+    Callable,
+    Container,
+    Generic,
+    Iterable,
+    Protocol,
+    Sequence,
+    runtime_checkable,
+)
 
 from formlessness.exceptions import ValidationIssue
 from formlessness.types import T
@@ -21,7 +29,7 @@ Each validator has its required validators. Given a list of validators, resolve 
 Everything is anded. Or would be nice.
 
 
-Validators should/could have a .validators attribute/method for things they 
+Validators should/could have a .validators attribute/method for things they
 need to be true before getting checked. Then could resolve the order. Typing, mostly.
 
 Could I collapse to one list of validator? Probably not. To go from object_validator to data_validator
@@ -81,12 +89,13 @@ class FunctionValidator(PredicateValidator[T]):
     """
     Pass in a predicate function that takes a value and returns True if valid.
     """
+
     function: Callable[[T], bool]
-    message: str = ''
+    message: str = ""
 
     def __post_init__(self):
         if not self.message:
-            self.message = f'Must pass `{self.function.__qualname__}` validator.'
+            self.message = f"Must pass `{self.function.__qualname__}` validator."
 
     def __call__(self, *args, **kwargs):
         # Preserve the function, should do wraps or something maybe
@@ -101,6 +110,7 @@ class TypeValidator(PredicateValidator[T]):
     """
     Do an isinstance check against a type.
     """
+
     type_: type
     message: str
 
@@ -111,14 +121,14 @@ class TypeValidator(PredicateValidator[T]):
         return isinstance(value, self.type_)
 
 
-is_int = TypeValidator(int, 'Must be an integer.')
-is_str = TypeValidator(str, 'Must be a string.')
+is_int = TypeValidator(int, "Must be an integer.")
+is_str = TypeValidator(str, "Must be a string.")
 
 
 @dataclass
 class ChoicesValidator(PredicateValidator[T]):
     choices: Container
-    message: str = 'Must be a valid choice.'
+    message: str = "Must be a valid choice."
 
     def predicate(self, value: T) -> bool:
         return value in self.choices
@@ -127,17 +137,21 @@ class ChoicesValidator(PredicateValidator[T]):
 @dataclass
 class EachItem(PredicateValidator[Iterable[T]]):
     item_validator: Validator[T]
-    message: str = ''
+    message: str = ""
 
     def __post_init__(self):
-        if not isinstance(self.item_validator, Validator) and isinstance(self.item_validator, Callable):
+        if not isinstance(self.item_validator, Validator) and isinstance(
+            self.item_validator, Callable
+        ):
             self.item_validator = FunctionValidator(self.item_validator)
         if not self.message:
-            self.message = f'Each item {str(self.item_validator).lower()}.'
+            self.message = f"Each item {str(self.item_validator).lower()}."
 
     def predicate(self, value: Iterable[T]) -> bool:
-        return isinstance(value, Iterable) and not any(self.item_validator.validate(item) for item in value)
+        return isinstance(value, Iterable) and not any(
+            self.item_validator.validate(item) for item in value
+        )
 
 
 each_item_is_str = EachItem(is_str)
-is_list = TypeValidator(list, 'Must be a list.')
+is_list = TypeValidator(list, "Must be a list.")
