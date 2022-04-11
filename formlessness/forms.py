@@ -5,7 +5,7 @@ from typing import Callable, Mapping
 
 from formlessness.abstract_classes import Parent
 from formlessness.exceptions import ValidationIssueMap
-from formlessness.forms import Converter
+from formlessness.abstract_classes import Converter
 from formlessness.types import JSONDict, T
 
 
@@ -15,23 +15,18 @@ class AbstractBasicForm(Parent, Converter, ABC):
     """
 
     def data_issues(self, data: JSONDict) -> ValidationIssueMap:
-        return self._validate_form(
-            super().data_issues, self.converter_to_sub_data, data
-        )
+        return _validate_form(super().data_issues, self.converter_to_sub_data, data)
 
     def object_issues(self, obj: T) -> ValidationIssueMap:
-        return self._validate_form(
-            super().object_issues, self.converter_to_sub_object, obj
-        )
+        return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
 
     def object_issues_skip_data(self, obj: T) -> ValidationIssueMap:
-        return self._validate_form(
+        return _validate_form(
             super().object_issues_skip_data, self.converter_to_sub_object, obj
         )
 
 
 def _validate_form(
-    self,
     validation_method: Callable[[T], ValidationIssueMap],
     mapping_method: Callable[[T], Mapping[Converter, T]],
     value: T,
