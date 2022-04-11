@@ -1,0 +1,61 @@
+from __future__ import annotations
+
+from abc import ABC
+from dataclasses import dataclass
+from typing import Protocol, Callable, Generic
+
+from formlessness.types import T, D, JSONDict
+from formlessness.forms import AbstractBasicForm
+
+
+class Serializer(Protocol[T, D]):
+    """
+    Moves from the object stage to the data stage.
+
+    todo: have serializers optionally return their json validators, IE type checks. In and/or out?
+    """
+
+    def serialize(self, obj: T) -> D:
+        return obj
+
+
+@dataclass
+class FunctionSerializer(Serializer):
+    function: Callable
+
+    def __call__(self, *args, **kwargs):
+        return self.function(*args, **kwargs)
+
+    def serialize(self, obj: T) -> D:
+        return self.function(obj)
+
+
+def serializer(f):
+    return FunctionSerializer(f)
+
+
+class FormSerializer(Serializer, Generic[T], ABC):
+    form: AbstractBasicForm
+
+    def serialize(self, obj: T) -> JSONDict:
+        d = {}
+        for child, sub_obj in self.form.converter_to_sub_object(obj):
+            d[child.key] = child.serialize(sub_obj)
+        return super().serialize(d)
+
+
+class AsDict(Protocol):
+    def as_dict(self) -> JSONDict:
+        pass
+
+
+@serializer
+def as_dict(obj: AsDict) -> JSONDict:
+    return obj.as_dict()
+
+
+class HasSerializer(Serializer, Protocol):
+    serializer: Serializer
+
+    def serialize(self, obj: T) -> D:
+        return self.serializer.serialize(obj)
