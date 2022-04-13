@@ -10,7 +10,6 @@ from typing import (
     Mapping,
     Protocol,
     Sequence,
-    Set,
 )
 
 from formlessness.deserializers import Deserializer
