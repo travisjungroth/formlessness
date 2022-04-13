@@ -20,11 +20,6 @@ class AbstractBasicForm(Parent, Converter, ABC):
     def object_issues(self, obj: T) -> ValidationIssueMap:
         return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
 
-    def object_issues_skip_data(self, obj: T) -> ValidationIssueMap:
-        return _validate_form(
-            super().object_issues_skip_data, self.converter_to_sub_object, obj
-        )
-
 
 def _validate_form(
     validation_method: Callable[[T], ValidationIssueMap],

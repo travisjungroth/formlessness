@@ -48,11 +48,9 @@ class TestCommaListStrField:
         assert field.data_issues(bad_data)
 
     def test_no_object_issues(self, field, good_obj):
-        assert not field.object_issues_skip_data(good_obj)
         assert not field.object_issues(good_obj)
 
     def test_has_object_issues(self, field, bad_obj: list[str]):
-        assert field.object_issues_skip_data(bad_obj)
         assert field.object_issues(bad_obj)
 
     def test_deserialize(self, field, good_data, good_obj):

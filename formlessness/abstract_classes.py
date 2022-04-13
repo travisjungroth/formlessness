@@ -32,23 +32,13 @@ class Converter(Serializer, Deserializer, Keyed, ABC, Generic[T, D]):
     data_validators: Sequence[Validator[T]] = ()
     object_validators: Sequence[Validator[T]] = ()
 
-    @property
-    def object_only_validators(self) -> Iterable[T]:
-        """
-        For when you already validated it at the data stage and don't want to rerun the same validators.
-        """
-        # This could be expanded to offer more shortcutting, maybe.
-        # Except, you know something is true. Then it goes through a serializer.
-        # Is it still true? Maybe, probably. Could run tests.
-        return [v for v in self.object_validators if v not in self.data_validators]
-
     def make_object(self, data: D) -> T:
         """
         Validation and deserialization. Raises ValidationIssueMap
         """
         self.data_issues(data).raise_if_not_empty()
         obj = self.deserialize(data)
-        self.object_issues_skip_data(obj).raise_if_not_empty()
+        self.object_issues(obj).raise_if_not_empty()
         return obj
 
     def data_issues(self, data: D) -> ValidationIssueMap:
@@ -56,9 +46,6 @@ class Converter(Serializer, Deserializer, Keyed, ABC, Generic[T, D]):
 
     def object_issues(self, obj: T) -> ValidationIssueMap:
         return self._validate(obj, self.object_validators)
-
-    def object_issues_skip_data(self, obj: T) -> ValidationIssueMap:
-        return self._validate(obj, self.object_only_validators)
 
     def _validate(
         self, obj: Any, validators: Iterable[Validator]
