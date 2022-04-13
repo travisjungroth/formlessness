@@ -1,11 +1,18 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Callable, Mapping
+from collections.abc import Callable, Mapping, Sequence
+from typing import TYPE_CHECKING
 
 from formlessness.abstract_classes import Converter, Parent
 from formlessness.exceptions import ValidationIssueMap
-from formlessness.types import JSONDict, T
+from formlessness.types import D, JSONDict, T
+from formlessness.utils import key_and_label
+
+if TYPE_CHECKING:
+    from formlessness.deserializers import Deserializer
+    from formlessness.serializers import Serializer
+    from formlessness.validators import Validator
 
 
 class Form(Parent, Converter, ABC):
@@ -15,6 +22,41 @@ class Form(Parent, Converter, ABC):
 
 
 class BasicForm(Form):
+    default_serializer: Serializer
+    default_deserializer: Deserializer
+    default_data_validators: tuple[Validator[D], ...] = ()
+    default_object_validators: tuple[Validator[T], ...] = ()
+
+    def __init__(
+        self,
+        label: str = "",
+        description: str = "",
+        collapsable: bool = False,
+        collapsed: bool = False,
+        extra_data_validators: Sequence[Validator] = (),
+        extra_object_validators: Sequence[Validator] = (),
+        serializer: Serializer[T, D] = None,
+        deserializer: Deserializer[T, D] = None,
+        key: str = "",
+    ):
+        key, label = key_and_label(key, label)
+        self.key = key
+        self.serializer = serializer or self.default_serializer
+        self.deserializer = deserializer or self.default_deserializer
+        self.data_validators = self.default_data_validators + tuple(
+            extra_data_validators
+        )
+        self.object_validators = self.default_object_validators + tuple(
+            extra_object_validators
+        )
+        # todo: only add truthy values
+        self.view_info = {
+            "label": label,
+            "description": description,
+            "collapsable": collapsable,
+            "collapsed": collapsed,
+        }
+
     def data_issues(self, data: JSONDict) -> ValidationIssueMap:
         return _validate_form(super().data_issues, self.converter_to_sub_data, data)
 

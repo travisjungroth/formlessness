@@ -15,6 +15,7 @@ from formlessness.serializers import (
     serializer as serializer_decorator,
 )
 from formlessness.types import D, T
+from formlessness.utils import key_and_label
 from formlessness.validators import (
     ChoicesValidator,
     Validator,
@@ -60,10 +61,7 @@ class BasicField(Field[T, D], Generic[T, D]):
         deserializer: Deserializer[T, D] = None,
         key: str = "",
     ) -> None:
-        if not key:
-            if not label:
-                raise ValueError("Must set key or label.")
-            key = "".join([c for c in label.lower() if c.isalnum()])
+        key, label = key_and_label(key, label)
 
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
