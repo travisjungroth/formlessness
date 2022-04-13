@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Callable, Generic, Protocol
 from formlessness.types import D, JSONDict, T
 
 if TYPE_CHECKING:
-    from formlessness.forms import AbstractBasicForm
+    from formlessness.forms import Form
 
 
 class Serializer(Protocol[T, D]):
@@ -37,7 +37,7 @@ def serializer(f):
 
 
 class FormSerializer(Serializer, Generic[T], ABC):
-    form: AbstractBasicForm
+    form: Form
 
     def serialize(self, obj: T) -> JSONDict:
         d = {}

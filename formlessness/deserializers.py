@@ -7,7 +7,7 @@ from formlessness.exceptions import ValidationIssue
 from formlessness.types import D, JSONDict, T
 
 if TYPE_CHECKING:
-    from formlessness.forms import AbstractBasicForm
+    from formlessness.forms import Form
 
 
 class Deserializer(Protocol[T, D]):
@@ -41,7 +41,7 @@ class KwargsDeserializer(FunctionDeserializer[T, D]):
 
 
 class FormDeserializer(Deserializer[T, JSONDict]):
-    form: AbstractBasicForm
+    form: Form
 
     def deserialize(self, data: JSONDict) -> T:
         """

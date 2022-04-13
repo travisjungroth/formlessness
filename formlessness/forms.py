@@ -9,11 +9,13 @@ from formlessness.abstract_classes import Converter
 from formlessness.types import JSONDict, T
 
 
-class AbstractBasicForm(Parent, Converter, ABC):
+class Form(Parent, Converter, ABC):
     """
     Converts and has other converters.
     """
 
+
+class BasicForm(Form):
     def data_issues(self, data: JSONDict) -> ValidationIssueMap:
         return _validate_form(super().data_issues, self.converter_to_sub_data, data)
 
