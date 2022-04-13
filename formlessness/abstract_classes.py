@@ -42,18 +42,19 @@ class Converter(Serializer, Deserializer, Keyed, ABC, Generic[T, D]):
         return obj
 
     def data_issues(self, data: D) -> ValidationIssueMap:
-        return self._validate(data, self.data_validators)
+        return _validate(self.key, data, self.data_validators)
 
     def object_issues(self, obj: T) -> ValidationIssueMap:
-        return self._validate(obj, self.object_validators)
+        return _validate(self.key, obj, self.object_validators)
 
-    def _validate(
-        self, obj: Any, validators: Iterable[Validator]
-    ) -> ValidationIssueMap:
-        return ValidationIssueMap(
-            self.key,
-            [issue for validator in validators for issue in validator.validate(obj)],
-        )
+
+def _validate(
+    key: str, value: Any, validators: Iterable[Validator]
+) -> ValidationIssueMap:
+    return ValidationIssueMap(
+        key,
+        [issue for validator in validators for issue in validator.validate(value)],
+    )
 
 
 class Parent(Keyed):
