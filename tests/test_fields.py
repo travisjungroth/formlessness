@@ -4,7 +4,7 @@ from formlessness.exceptions import ValidationIssue, ValidationIssueMap
 from formlessness.fields import CommaListStrField, IntField
 
 
-class TestBasicCommaListStrField:
+class TestCommaListStrField:
     @pytest.fixture(scope="session")
     def field(self):
         return CommaListStrField("Label")
