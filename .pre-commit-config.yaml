@@ -1,19 +1,23 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-- repo: https://github.com/pycqa/isort
-  rev: 5.10.1
-  hooks:
+  - repo: https://github.com/PyCQA/autoflake
+    rev: 3c3b2a2274e40a03d3d8f14815509662e9f454e0
+    hooks:
+      - id: autoflake
+  - repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
       - id: isort
         name: isort (python)
--   repo: https://github.com/pre-commit/pre-commit-hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.2.0
     hooks:
-    -   id: trailing-whitespace
-    -   id: end-of-file-fixer
-    -   id: check-yaml
-    -   id: check-added-large-files
--   repo: https://github.com/psf/black
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/psf/black
     rev: 22.3.0
     hooks:
-    -   id: black
+      - id: black

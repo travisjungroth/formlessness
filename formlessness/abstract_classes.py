@@ -1,7 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Generic, Iterable, Mapping, Protocol, Sequence
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Generic,
+    Iterable,
+    Iterator,
+    Mapping,
+    Protocol,
+    Sequence,
+    Set,
+)
 
 from formlessness.deserializers import Deserializer
 from formlessness.exceptions import ValidationIssueMap
@@ -57,8 +67,17 @@ def _validate(
     )
 
 
-class Parent(Keyed):
+class Parent(Keyed, Mapping):
     children: dict[str, Keyed]
+
+    def __getitem__(self, item: str) -> Keyed:
+        return self.children[item]
+
+    def __len__(self) -> int:
+        return len(self.children)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.children)
 
     @property
     def converters(self) -> dict[str, Converter]:
