@@ -52,7 +52,6 @@ class Validator(Protocol[T]):
         Returns because this isn't normally game-breaking.
         Maybe should yield? Would make batch and complex easier.
         """
-        pass
 
 
 def validator(message: str):

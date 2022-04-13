@@ -1,15 +1,6 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-  - repo: https://github.com/PyCQA/autoflake
-    rev: 3c3b2a2274e40a03d3d8f14815509662e9f454e0
-    hooks:
-      - id: autoflake
-  - repo: https://github.com/pycqa/isort
-    rev: 5.10.1
-    hooks:
-      - id: isort
-        name: isort (python)
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.2.0
     hooks:
@@ -17,7 +8,9 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
-  - repo: https://github.com/psf/black
-    rev: 22.3.0
+  - repo: https://github.com/Zac-HD/shed
+    rev: 0.9.5
     hooks:
-      - id: black
+      - id: shed
+        args: [--refactor, --py39-plus]
+        types_or: [python, markdown, rst]

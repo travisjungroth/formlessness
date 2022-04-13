@@ -77,7 +77,7 @@ class ValidationIssueMap(Mapping[str, Sequence[ValidationIssue]], ValidationIssu
 
     def __or__(self, other: ValidationIssueMap):
         if not isinstance(other, ValidationIssueMap):
-            raise NotImplemented
+            raise NotImplementedError
         sub_issues = self.sub_issues.copy()
         for key, issue_map in other.sub_issues.items():
             sub_issues[key] = (

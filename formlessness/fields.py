@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from typing import Generic, Iterable, Optional, Sequence
+from typing import Generic, Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
 from formlessness.deserializers import (
@@ -9,8 +9,11 @@ from formlessness.deserializers import (
     FunctionDeserializer,
     HasDeserializer,
 )
-from formlessness.serializers import HasSerializer, Serializer
-from formlessness.serializers import serializer as serializer_decorator
+from formlessness.serializers import (
+    HasSerializer,
+    Serializer,
+    serializer as serializer_decorator,
+)
 from formlessness.types import D, T
 from formlessness.validators import (
     ChoicesValidator,
@@ -50,7 +53,7 @@ class BasicField(Field[T, D], Generic[T, D]):
         description: str = "",
         shadow: str = "",
         widget: Widget = None,
-        choices: Optional[Iterable[T]] = (),
+        choices: Iterable[T] | None = (),
         extra_data_validators: Sequence[Validator] = (),
         extra_object_validators: Sequence[Validator] = (),
         serializer: Serializer[T, D] = None,

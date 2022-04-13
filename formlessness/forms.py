@@ -3,9 +3,8 @@ from __future__ import annotations
 from abc import ABC
 from typing import Callable, Mapping
 
-from formlessness.abstract_classes import Parent
+from formlessness.abstract_classes import Converter, Parent
 from formlessness.exceptions import ValidationIssueMap
-from formlessness.abstract_classes import Converter
 from formlessness.types import JSONDict, T
 
 
