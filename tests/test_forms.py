@@ -8,6 +8,7 @@ import pytest
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.fields import DateField, StrField
 from formlessness.forms import BasicForm
+from formlessness.sections import BasicSection
 from formlessness.serializers import serializer
 from formlessness.validators import validator
 
@@ -54,9 +55,16 @@ def form() -> BasicForm[Film]:
                 extra_object_validators=[not_sunday],
                 key="release_date",
             ),
-            DateField(
-                label="Green Light Date",
-                required=False,
+            BasicSection(
+                label="Optional Film Details",
+                collapsable=True,
+                collapsed=True,
+                children=[
+                    DateField(
+                        label="Green Light Date",
+                        required=False,
+                    ),
+                ],
             ),
         ],
     )
@@ -96,19 +104,35 @@ def test_form(form):
 
 def test_display(form):
     expected = {
+        "type": "form",
         "label": "Favorite Film",
         "description": "If you had to pick one.",
-        "children": {
-            "title": {"label": "Title", "widget": "text_box", "value": "The King"},
+        "sub_forms": {
+            "title": {
+                "type": "field",
+                "label": "Title",
+                "widget": "text_box",
+                "value": "The King",
+            },
             "release_date": {
+                "type": "field",
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": "date_selector",
                 "value": "2021-10-09",
             },
-            "green_light_date": {
-                "label": "Green Light Date",
-                "widget": "date_selector",
+            "optional_film_details": {
+                "type": "section",
+                "label": "Optional Film Details",
+                "collapsable": True,
+                "collapsed": True,
+                "sub_forms": {
+                    "green_light_date": {
+                        "type": "field",
+                        "label": "Green Light Date",
+                        "widget": "date_selector",
+                    },
+                },
             },
         },
     }

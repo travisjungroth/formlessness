@@ -53,6 +53,7 @@ class BasicForm(Form[JSONDict, T]):
         )
         self.display_info = filter_display_info(
             {
+                "type": "form",
                 "label": label,
                 "description": description,
                 "collapsable": collapsable,

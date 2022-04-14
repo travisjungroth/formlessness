@@ -119,4 +119,4 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], ABC)
                 children_displays[key] = cast(Displayer, child).display(data.get(key))
             else:
                 children_displays[key] = child.display(data.get(key))
-        return self.display_info | {"children": children_displays}
+        return self.display_info | {"sub_forms": children_displays}

@@ -79,6 +79,7 @@ class BasicField(Field[D, T]):
 
         self.display_info: JSONDict = filter_display_info(
             {
+                "type": "field",
                 "label": label,
                 "description": description,
                 "shadow": shadow,
