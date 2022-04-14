@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from abc import ABC
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Callable, Generic, Protocol
+from typing import TYPE_CHECKING, Callable, Generic
 
 from formlessness.exceptions import ValidationIssue
 from formlessness.types import D, JSONDict, T
@@ -10,7 +11,7 @@ if TYPE_CHECKING:
     from formlessness.forms import Form
 
 
-class Deserializer(Protocol[T, D]):
+class Deserializer(ABC, Generic[T, D]):
     """
     Moves from the data stage to the object stage. Raise ValidationError if unable.
     """
@@ -40,7 +41,7 @@ class KwargsDeserializer(FunctionDeserializer[T, D]):
             raise ValidationIssue(self.error_message) from e
 
 
-class FormDeserializer(Deserializer[T, D], Protocol[T, D]):
+class FormDeserializer(Deserializer[T, D], ABC, Generic[T, D]):
     def deserialize(self, data: D, form: Form | None = None) -> T:
         return super().deserialize(data)
 
@@ -68,7 +69,7 @@ def deserializer(error_message: str):
     return f
 
 
-class HasDeserializer(Deserializer, Protocol):
+class HasDeserializer(Deserializer[T, D], ABC, Generic[T, D]):
     deserializer: Deserializer
 
     def deserialize(self, data: D) -> T:

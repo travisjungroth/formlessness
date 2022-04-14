@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from abc import abstractmethod
-from typing import Protocol, runtime_checkable
+from abc import ABC, abstractmethod
+from typing import Generic
 
 from formlessness.abstract_classes import Keyed
 from formlessness.exceptions import ValidationIssueMap
@@ -11,8 +11,7 @@ View = JSONDict
 ViewInfo = JSONDict
 
 
-@runtime_checkable
-class ViewMaker(Keyed, Protocol[T, D]):
+class ViewMaker(Keyed, ABC, Generic[T, D]):
     """
     If you wanted to make a totally weird view that didn't match the tree structure of the object, you could.
     """
@@ -30,7 +29,7 @@ class ViewMaker(Keyed, Protocol[T, D]):
         pass
 
 
-class HasViewMaker(ViewMaker, Protocol):
+class HasViewMaker(ViewMaker[T, D], ABC, Generic[T, D]):
     """
     Proxy a ViewMaker
     """

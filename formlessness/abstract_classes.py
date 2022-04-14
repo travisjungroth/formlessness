@@ -30,7 +30,7 @@ class Keyed(Protocol):
         return hash(self.key)
 
 
-class Converter(Serializer, Deserializer, Keyed, ABC, Generic[T, D]):
+class Converter(Keyed, Serializer, Deserializer, ABC, Generic[T, D]):
     """
     Things that validate, serialize and deserialize data, like Forms and Fields.
     """

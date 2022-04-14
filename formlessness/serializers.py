@@ -10,7 +10,7 @@ if TYPE_CHECKING:
     from formlessness.forms import Form
 
 
-class Serializer(Protocol[T, D]):
+class Serializer(ABC, Generic[T, D]):
     """
     Moves from the object stage to the data stage.
 
@@ -36,7 +36,7 @@ def serializer(f):
     return FunctionSerializer(f)
 
 
-class FormSerializer(Serializer, Generic[T], ABC):
+class FormSerializer(Serializer[T, JSONDict], ABC, Generic[T]):
     form: Form
 
     def serialize(self, obj: T) -> JSONDict:
@@ -56,7 +56,7 @@ def as_dict(obj: AsDict) -> JSONDict:
     return obj.as_dict()
 
 
-class HasSerializer(Serializer, Protocol):
+class HasSerializer(Serializer[T, D], Generic[T, D]):
     serializer: Serializer
 
     def serialize(self, obj: T) -> D:
