@@ -1,3 +1,4 @@
+import json
 from dataclasses import asdict, dataclass
 from datetime import date
 from typing import Optional
@@ -62,7 +63,6 @@ def form() -> BasicForm[Film]:
 
 
 def test_form(form):
-    print(form.children)
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
@@ -92,3 +92,24 @@ def test_form(form):
         "release_date": 20211009,
     }
     assert form.data_issues(data)
+
+
+def test_display(form):
+    expected = {
+        "children": {
+            "title": {"label": "Title", "widget": "text_box", "value": "The King"},
+            "release_date": {
+                "label": "Released",
+                "description": "Date of US release.",
+                "widget": "date_selector",
+                "value": "2021-10-09",
+            },
+            "green_light_date": {
+                "label": "Green Light Date",
+                "widget": "date_selector",
+            },
+        }
+    }
+    display = form.display({"title": "The King", "release_date": "2021-10-09"})
+    assert display == expected
+    assert json.dumps(display) == json.dumps(expected)

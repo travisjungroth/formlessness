@@ -110,11 +110,13 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], ABC)
             if isinstance(child, Displayer)
         }
 
-    def display(self, data: JSONDict = None) -> Display:
+    def display(self, data: JSONDict | None = None) -> Display:
+        if data is None:
+            data = {}
         children_displays = {}
         for key, child in self.displayers.items():
             if isinstance(child, Converter):
-                children_displays[key] = cast(child, Displayer).display(data.get(key))
+                children_displays[key] = cast(Displayer, child).display(data.get(key))
             else:
                 children_displays[key] = child.display(data.get(key))
-        return children_displays
+        return {"children": children_displays}

@@ -82,8 +82,8 @@ class BasicField(Field[D, T]):
                 "label": label,
                 "description": description,
                 "shadow": shadow,
-                "widget": widget or self.default_widget,
-                "choices": data_choices,
+                "widget": str(widget or self.default_widget),
+                "choices": data_choices or None,
             }
         )
 
