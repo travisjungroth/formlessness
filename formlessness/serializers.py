@@ -7,7 +7,7 @@ from typing import Callable, Generic, Protocol
 from formlessness.types import D, JSONDict, T
 
 
-class Serializer(Generic[T, D], ABC):
+class Serializer(Generic[D, T], ABC):
     """
     Moves from the object stage to the data stage.
 
@@ -19,8 +19,8 @@ class Serializer(Generic[T, D], ABC):
 
 
 @dataclass
-class FunctionSerializer(Serializer):
-    function: Callable
+class FunctionSerializer(Serializer[D, T]):
+    function: Callable[[T], D]
 
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
@@ -29,7 +29,7 @@ class FunctionSerializer(Serializer):
         return self.function(obj)
 
 
-def serializer(f):
+def serializer(f: Callable[[T], D]) -> FunctionSerializer[D, T]:
     return FunctionSerializer(f)
 
 

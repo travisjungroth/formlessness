@@ -16,16 +16,16 @@ if TYPE_CHECKING:
     from formlessness.validators import Validator
 
 
-class Form(Parent, Converter[T, D], ABC):
+class Form(Parent, Converter[D, T], ABC):
     """
     Converts and has other converters.
     """
 
 
-class BasicForm(Form[T, D]):
+class BasicForm(Form[JSONDict, T]):
     default_serializer: Serializer
     default_deserializer: Deserializer
-    default_data_validators: tuple[Validator[D], ...] = ()
+    default_data_validators: tuple[Validator[JSONDict], ...] = ()
     default_object_validators: tuple[Validator[T], ...] = ()
 
     def __init__(
@@ -36,8 +36,8 @@ class BasicForm(Form[T, D]):
         collapsed: bool = False,
         extra_data_validators: Sequence[Validator] = (),
         extra_object_validators: Sequence[Validator] = (),
-        serializer: Serializer[T, D] = None,
-        deserializer: Deserializer[T, D] = None,
+        serializer: Serializer[D, T] = None,
+        deserializer: Deserializer[D, T] = None,
         key: str = "",
         children: Iterable[Keyed] = (),
     ):
@@ -67,7 +67,7 @@ class BasicForm(Form[T, D]):
     def object_issues(self, obj: T) -> ValidationIssueMap:
         return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
 
-    def deserialize(self, data: D) -> T:
+    def deserialize(self, data: JSONDict) -> T:
         # todo: change to build up ValidationIssueMap on errors
 
         data = {
@@ -76,7 +76,7 @@ class BasicForm(Form[T, D]):
         }
         return self.deserializer.deserialize(data)
 
-    def serialize(self, obj: T) -> D:
+    def serialize(self, obj: T) -> JSONDict:
         data: JSONDict = {}
         for child, sub_obj in self.converter_to_sub_object(obj):
             data[child.key] = child.serialize(sub_obj)

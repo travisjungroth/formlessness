@@ -8,7 +8,7 @@ from formlessness.exceptions import ValidationIssue
 from formlessness.types import D, T
 
 
-class Deserializer(Generic[T, D], ABC):
+class Deserializer(Generic[D, T], ABC):
     """
     Moves from the data stage to the object stage. Raise ValidationError if unable.
     """
@@ -18,7 +18,7 @@ class Deserializer(Generic[T, D], ABC):
 
 
 @dataclass
-class FunctionDeserializer(Deserializer, Generic[T, D]):
+class FunctionDeserializer(Deserializer[D, T]):
     function: Callable[[D], T]
     error_message: str
 
@@ -30,7 +30,7 @@ class FunctionDeserializer(Deserializer, Generic[T, D]):
 
 
 @dataclass
-class KwargsDeserializer(Deserializer[T, dict[str, Any]], Generic[T]):
+class KwargsDeserializer(Deserializer[dict[str, Any], T]):
     function: Callable[[...], T]
     error_message: str
 
@@ -42,7 +42,7 @@ class KwargsDeserializer(Deserializer[T, dict[str, Any]], Generic[T]):
 
 
 def deserializer(error_message: str):
-    def f(constructor: Callable) -> FunctionDeserializer:
+    def f(constructor: Callable[[D], T]) -> FunctionDeserializer[D, T]:
         return FunctionDeserializer(constructor, error_message)
 
     return f

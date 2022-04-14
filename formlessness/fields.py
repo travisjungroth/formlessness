@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from datetime import date
-from typing import Generic, Iterable, Sequence
+from typing import Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
 from formlessness.deserializers import Deserializer, FunctionDeserializer
@@ -25,13 +25,13 @@ from formlessness.validators import (
 from formlessness.widgets import Widget
 
 
-class Field(Converter[T, D], Displayer, Generic[T, D], ABC):
+class Field(Converter[D, T], Displayer[D], ABC):
     """
     Abstract class. For type checks.
     """
 
 
-class BasicField(Field[T, D], Generic[T, D]):
+class BasicField(Field[D, T]):
     """
     This can be more specific.
     """
@@ -53,8 +53,8 @@ class BasicField(Field[T, D], Generic[T, D]):
         required: bool = True,
         extra_data_validators: Sequence[Validator] = (),
         extra_object_validators: Sequence[Validator] = (),
-        serializer: Serializer[T, D] = None,
-        deserializer: Deserializer[T, D] = None,
+        serializer: Serializer[D, T] = None,
+        deserializer: Deserializer[D, T] = None,
         key: str = "",
     ) -> None:
         key, label = key_and_label(key, label)
@@ -128,7 +128,7 @@ class DateField(BasicField[str, date]):
     default_widget = Widget.DATE_SELECTOR
 
 
-class CommaListStrField(BasicField[list[str], str]):
+class CommaListStrField(BasicField[str, list[str]]):
     default_serializer = serializer_decorator(lambda x: ",".join(x))
     default_deserializer = FunctionDeserializer(
         lambda x: [y for y in x.split(",") if y], "Must be a string."

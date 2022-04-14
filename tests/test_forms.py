@@ -34,7 +34,7 @@ def not_sunday(day: date):
 
 
 @pytest.fixture
-def form() -> BasicForm[Film, dict]:
+def form() -> BasicForm[Film]:
     return BasicForm(
         key="Favorite Film",
         description="If you had to pick one.",
