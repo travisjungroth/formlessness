@@ -32,7 +32,6 @@ Yes, could have an optional step that takes input and the json schema and does c
 """
 
 
-# @runtime_checkable
 class Validator(ABC, Generic[T]):
     """
     A validator takes a value and returns the issues.
