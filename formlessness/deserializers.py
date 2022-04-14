@@ -42,7 +42,7 @@ class KwargsDeserializer(FunctionDeserializer[T, D]):
 
 
 class FormDeserializer(Deserializer[T, D], ABC, Generic[T, D]):
-    def deserialize(self, data: D, form: Form | None = None) -> T:
+    def deserialize(self, data: D, *, form: Form | None = None) -> T:
         return super().deserialize(data)
 
 

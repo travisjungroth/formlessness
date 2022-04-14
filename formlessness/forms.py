@@ -66,7 +66,7 @@ class BasicForm(HasDeserializer, HasSerializer, Form):
         return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
 
     def deserialize(self, data: D) -> T:
-        return self.deserializer.deserialize(data, self)
+        return self.deserializer.deserialize(data, form=self)
 
 
 def _validate_form(
