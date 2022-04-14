@@ -6,8 +6,9 @@ from typing import Generic, Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
 from formlessness.deserializers import Deserializer, FunctionDeserializer
+from formlessness.displayers import Display, Displayer, filter_display_info
 from formlessness.serializers import Serializer, serializer as serializer_decorator
-from formlessness.types import D, T
+from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 from formlessness.validators import (
     And,
@@ -21,11 +22,10 @@ from formlessness.validators import (
     is_null,
     is_str,
 )
-from formlessness.views import HasViewMaker
 from formlessness.widgets import Widget
 
 
-class Field(Converter[T, D], HasViewMaker, ABC, Generic[T, D]):
+class Field(Converter[T, D], Displayer, Generic[T, D], ABC):
     """
     Abstract class. For type checks.
     """
@@ -77,23 +77,29 @@ class BasicField(Field[T, D], Generic[T, D]):
         if not self.required:
             self.data_validators = [Or([is_null, And(self.data_validators)])]
 
-        # todo: only add truthy values
-        self.view_info = {
-            "label": label,
-            "description": description,
-            "shadow": shadow,
-            "widget": widget or self.default_widget,
-            "choices": data_choices,
-        }
+        self.display_info: JSONDict = filter_display_info(
+            {
+                "label": label,
+                "description": description,
+                "shadow": shadow,
+                "widget": widget or self.default_widget,
+                "choices": data_choices,
+            }
+        )
 
     def __str__(self):
-        return self.view_info.get("label") or self.key
+        return self.display_info.get("label") or self.key
 
     def serialize(self, obj: T) -> D:
         return self.serializer.serialize(obj)
 
     def deserialize(self, data: D) -> T:
         return self.deserializer.deserialize(data)
+
+    def display(self, data: D = None) -> Display:
+        if data is None:
+            return self.display_info
+        return self.display_info | {"value": data}
 
 
 class IntField(BasicField[int, int]):

@@ -7,7 +7,7 @@ from typing import Callable, Generic, Protocol
 from formlessness.types import D, JSONDict, T
 
 
-class Serializer(ABC, Generic[T, D]):
+class Serializer(Generic[T, D], ABC):
     """
     Moves from the object stage to the data stage.
 

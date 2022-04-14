@@ -4,23 +4,24 @@ from abc import ABC
 from typing import (
     TYPE_CHECKING,
     Any,
-    Generic,
     Iterable,
     Iterator,
     Mapping,
     Protocol,
     Sequence,
+    Union,
+    cast,
 )
 
 from formlessness.deserializers import Deserializer
+from formlessness.displayers import Displayer
 from formlessness.exceptions import ValidationIssueMap
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
 
 if TYPE_CHECKING:
+    from formlessness.displayers import Display
     from formlessness.validators import Validator
-    from formlessness.views import ViewMaker
-    from formlessness.widgets import Widget
 
 
 class Keyed(Protocol):
@@ -30,7 +31,7 @@ class Keyed(Protocol):
         return hash(self.key)
 
 
-class Converter(Keyed, Serializer, Deserializer, ABC, Generic[T, D]):
+class Converter(Keyed, Serializer[T, D], Deserializer[T, D], ABC):
     """
     Things that validate, serialize and deserialize data, like Forms and Fields.
     """
@@ -66,8 +67,9 @@ def _validate(
     )
 
 
-class Parent(Keyed, Mapping):
+class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], ABC):
     children: dict[str, Keyed]
+    display_info: Display
 
     def __getitem__(self, item: str) -> Keyed:
         return self.children[item]
@@ -100,24 +102,19 @@ class Parent(Keyed, Mapping):
     def converter_to_sub_data(self, data: JSONDict) -> Mapping[Converter, JSONData]:
         return {self.converters[k]: v for k, v in data.items()}
 
-    # todo: change to ViewInfo style
-    title: str = ""
-    description: str = ""
-    widget: Widget  # Like hidden or collapsible, maybe should be a different class than Widget
-
     @property
-    def own_stuff(self):
-        d = {
-            "title": self.title,
-            "description": self.description,
-            "widget": self.widget,
-        }
-        return {k: v for k, v in d.items() if v}
-
-    @property
-    def view_makers(self) -> Mapping[str, ViewMaker]:
+    def displayers(self) -> Mapping[str, Displayer]:
         return {
             k: child
             for k, child in self.children.items()
-            if isinstance(child, ViewMaker)
+            if isinstance(child, Displayer)
         }
+
+    def display(self, data: JSONDict = None) -> Display:
+        children_displays = {}
+        for key, child in self.displayers.items():
+            if isinstance(child, Converter):
+                children_displays[key] = cast(child, Displayer).display(data.get(key))
+            else:
+                children_displays[key] = child.display(data.get(key))
+        return children_displays

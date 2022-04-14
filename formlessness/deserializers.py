@@ -8,7 +8,7 @@ from formlessness.exceptions import ValidationIssue
 from formlessness.types import D, T
 
 
-class Deserializer(ABC, Generic[T, D]):
+class Deserializer(Generic[T, D], ABC):
     """
     Moves from the data stage to the object stage. Raise ValidationError if unable.
     """

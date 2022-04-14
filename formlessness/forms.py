@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 
 from formlessness.abstract_classes import Converter, Keyed, Parent
 from formlessness.deserializers import Deserializer
+from formlessness.displayers import filter_display_info
 from formlessness.exceptions import ValidationIssueMap
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONDict, T
@@ -15,13 +16,13 @@ if TYPE_CHECKING:
     from formlessness.validators import Validator
 
 
-class Form(Parent, Converter, ABC):
+class Form(Parent, Converter[T, D], ABC):
     """
     Converts and has other converters.
     """
 
 
-class BasicForm(Form):
+class BasicForm(Form[T, D]):
     default_serializer: Serializer
     default_deserializer: Deserializer
     default_data_validators: tuple[Validator[D], ...] = ()
@@ -50,13 +51,14 @@ class BasicForm(Form):
         self.object_validators = self.default_object_validators + tuple(
             extra_object_validators
         )
-        # todo: only add truthy values
-        self.view_info = {
-            "label": label,
-            "description": description,
-            "collapsable": collapsable,
-            "collapsed": collapsed,
-        }
+        self.display_info = filter_display_info(
+            {
+                "label": label,
+                "description": description,
+                "collapsable": collapsable,
+                "collapsed": collapsed,
+            }
+        )
         self.children = {child.key: child for child in children}
 
     def data_issues(self, data: JSONDict) -> ValidationIssueMap:
