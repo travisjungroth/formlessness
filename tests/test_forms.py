@@ -37,7 +37,7 @@ def not_sunday(day: date):
 @pytest.fixture
 def form() -> BasicForm[Film]:
     return BasicForm(
-        key="Favorite Film",
+        label="Favorite Film",
         description="If you had to pick one.",
         extra_object_validators=[green_light_before_release],
         serializer=serializer(asdict),
@@ -96,6 +96,8 @@ def test_form(form):
 
 def test_display(form):
     expected = {
+        "label": "Favorite Film",
+        "description": "If you had to pick one.",
         "children": {
             "title": {"label": "Title", "widget": "text_box", "value": "The King"},
             "release_date": {
@@ -108,7 +110,7 @@ def test_display(form):
                 "label": "Green Light Date",
                 "widget": "date_selector",
             },
-        }
+        },
     }
     display = form.display({"title": "The King", "release_date": "2021-10-09"})
     assert display == expected
