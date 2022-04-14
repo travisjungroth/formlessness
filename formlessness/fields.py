@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
+from datetime import date
 from typing import Generic, Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
@@ -17,11 +18,15 @@ from formlessness.serializers import (
 from formlessness.types import D, T
 from formlessness.utils import key_and_label
 from formlessness.validators import (
+    And,
     ChoicesValidator,
+    Or,
     Validator,
     each_item_is_str,
+    is_date,
     is_int,
     is_list,
+    is_null,
     is_str,
 )
 from formlessness.views import HasViewMaker
@@ -54,7 +59,8 @@ class BasicField(Field[T, D], Generic[T, D]):
         description: str = "",
         shadow: str = "",
         widget: Widget = None,
-        choices: Iterable[T] | None = (),
+        choices: Iterable[T] = (),
+        required: bool = True,
         extra_data_validators: Sequence[Validator] = (),
         extra_object_validators: Sequence[Validator] = (),
         serializer: Serializer[T, D] = None,
@@ -77,6 +83,10 @@ class BasicField(Field[T, D], Generic[T, D]):
         if self.choices:
             self.data_validators += (ChoicesValidator(data_choices),)
             self.object_validators += (ChoicesValidator(self.choices),)
+        self.required = required
+        if not self.required:
+            self.data_validators = [Or([is_null, And(self.data_validators)])]
+
         # todo: only add truthy values
         self.view_info = {
             "label": label,
@@ -93,9 +103,27 @@ class BasicField(Field[T, D], Generic[T, D]):
 class IntField(BasicField[int, int]):
     default_serializer = serializer_decorator(int)
     default_deserializer = FunctionDeserializer(int, "Must be an integer.")
-    default_data_validators: tuple[Validator[D], ...] = (is_int,)
-    default_object_validators: tuple[Validator[T], ...] = (is_int,)
+    default_data_validators = (is_int,)
+    default_object_validators = (is_int,)
     default_widget = Widget.TEXT_BOX
+
+
+class StrField(BasicField[str, str]):
+    default_serializer = serializer_decorator(str)
+    default_deserializer = FunctionDeserializer(str, "Must be a string.")
+    default_data_validators = (is_str,)
+    default_object_validators = (is_str,)
+    default_widget = Widget.TEXT_BOX
+
+
+class DateField(BasicField[str, date]):
+    default_serializer = serializer_decorator(lambda d: d.isoformat())
+    default_deserializer = FunctionDeserializer(
+        date.fromisoformat, "Must be a valid date of YYYY-MM-DD."
+    )
+    default_data_validators = (is_str,)
+    default_object_validators = (is_date,)
+    default_widget = Widget.DATE_SELECTOR
 
 
 class CommaListStrField(BasicField[list[str], str]):
@@ -103,6 +131,6 @@ class CommaListStrField(BasicField[list[str], str]):
     default_deserializer = FunctionDeserializer(
         lambda x: [y for y in x.split(",") if y], "Must be a string."
     )
-    default_data_validators: tuple[Validator[D], ...] = (is_str,)
-    default_object_validators: tuple[Validator[T], ...] = (is_list, each_item_is_str)
+    default_data_validators = (is_str,)
+    default_object_validators = (is_list, each_item_is_str)
     default_widget = Widget.TEXT_BOX

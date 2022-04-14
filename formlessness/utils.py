@@ -4,5 +4,8 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
     if key:
         return key, key
     if label:
-        return "".join([c for c in label.lower() if c.isalnum()]), key
+        key = "".join(
+            [c for c in label.lower().replace(" ", "_") if c.isalnum() or c == "_"]
+        )
+        return key, label
     raise ValueError("Must set key or label.")

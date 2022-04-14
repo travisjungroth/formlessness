@@ -40,22 +40,24 @@ class KwargsDeserializer(FunctionDeserializer[T, D]):
             raise ValidationIssue(self.error_message) from e
 
 
-class FormDeserializer(Deserializer[T, JSONDict]):
-    form: Form
+class FormDeserializer(Deserializer[T, D], Protocol[T, D]):
+    def deserialize(self, data: D, form: Form | None = None) -> T:
+        return super().deserialize(data)
 
-    def deserialize(self, data: JSONDict) -> T:
-        """
-        todo: change to build up ValidationIssueMap on errors
-        """
+
+@dataclass
+class BasicFormDeserializer(FormDeserializer[T, JSONDict]):
+    def deserialize(self, data: D, form: Form = None) -> T:
+        # todo: change to build up ValidationIssueMap on errors
         data = {
             child.key: child.deserialize(sub_data)
-            for child, sub_data in self.form.converter_to_sub_data(data)
+            for child, sub_data in form.converter_to_sub_data(data).items()
         }
         return super().deserialize(data)
 
 
 @dataclass
-class FormKwargsDeserializer(FormDeserializer, KwargsDeserializer):
+class FormKwargsDeserializer(BasicFormDeserializer, KwargsDeserializer):
     pass
 
 

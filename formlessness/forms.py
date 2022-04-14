@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING
 
-from formlessness.abstract_classes import Converter, Parent
+from formlessness.abstract_classes import Converter, Keyed, Parent
+from formlessness.deserializers import Deserializer, FormDeserializer, HasDeserializer
 from formlessness.exceptions import ValidationIssueMap
+from formlessness.serializers import HasSerializer, Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 
 if TYPE_CHECKING:
-    from formlessness.deserializers import Deserializer
-    from formlessness.serializers import Serializer
     from formlessness.validators import Validator
 
 
@@ -21,9 +21,9 @@ class Form(Parent, Converter, ABC):
     """
 
 
-class BasicForm(Form):
+class BasicForm(HasDeserializer, HasSerializer, Form):
     default_serializer: Serializer
-    default_deserializer: Deserializer
+    default_deserializer: FormDeserializer
     default_data_validators: tuple[Validator[D], ...] = ()
     default_object_validators: tuple[Validator[T], ...] = ()
 
@@ -38,6 +38,7 @@ class BasicForm(Form):
         serializer: Serializer[T, D] = None,
         deserializer: Deserializer[T, D] = None,
         key: str = "",
+        children: Iterable[Keyed] = (),
     ):
         key, label = key_and_label(key, label)
         self.key = key
@@ -56,12 +57,16 @@ class BasicForm(Form):
             "collapsable": collapsable,
             "collapsed": collapsed,
         }
+        self.children = {child.key: child for child in children}
 
     def data_issues(self, data: JSONDict) -> ValidationIssueMap:
         return _validate_form(super().data_issues, self.converter_to_sub_data, data)
 
     def object_issues(self, obj: T) -> ValidationIssueMap:
         return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
+
+    def deserialize(self, data: D) -> T:
+        return self.deserializer.deserialize(data, self)
 
 
 def _validate_form(

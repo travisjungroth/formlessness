@@ -2,15 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import (
-    Callable,
-    Container,
-    Generic,
-    Iterable,
-    Protocol,
-    Sequence,
-    runtime_checkable,
-)
+from datetime import date
+from typing import Any, Callable, Container, Generic, Iterable, Sequence
 
 from formlessness.exceptions import ValidationIssue
 from formlessness.types import T
@@ -39,8 +32,8 @@ Yes, could have an optional step that takes input and the json schema and does c
 """
 
 
-@runtime_checkable
-class Validator(Protocol[T]):
+# @runtime_checkable
+class Validator(ABC, Generic[T]):
     """
     A validator takes a value and returns the issues.
     """
@@ -54,7 +47,7 @@ class Validator(Protocol[T]):
         """
 
 
-def validator(message: str):
+def validator(message: str) -> Callable[[], FunctionValidator]:
     """
     Decorator to make validators from functions. Needs "wraps".
     """
@@ -63,6 +56,29 @@ def validator(message: str):
         return FunctionValidator(function, message)
 
     return f
+
+
+@dataclass
+class Or(Validator):
+    validators: Sequence[Validator]
+
+    def validate(self, value: T) -> Sequence[ValidationIssue]:
+        issue_groups = [v.validate(value) for v in self.validators]
+        if not all(issue_groups):
+            return ()
+        message_groups = []
+        for issues in issue_groups:
+            message_groups.append("\n".join(map(str, issues)))
+        message = "\nor\n".join(message_groups)
+        return [ValidationIssue(message)]
+
+
+@dataclass
+class And(Validator):
+    validators: Sequence[Validator]
+
+    def validate(self, value: T) -> Sequence[ValidationIssue]:
+        return [issue for v in self.validators for issue in v.validate(value)]
 
 
 class PredicateValidator(Validator[T], ABC, Generic[T]):
@@ -81,6 +97,16 @@ class PredicateValidator(Validator[T], ABC, Generic[T]):
 
     def __str__(self) -> str:
         return self.message
+
+
+#
+# @dataclass
+# class OrNull(Validator):
+#     validators: Sequence[Validator]
+#
+#     def validate(self, value: T) -> Sequence[ValidationIssue]:
+#         if value is not None:
+#             return [issue for v in self.validators for issue in v.validate(value)]
 
 
 @dataclass
@@ -122,6 +148,7 @@ class TypeValidator(PredicateValidator[T]):
 
 is_int = TypeValidator(int, "Must be an integer.")
 is_str = TypeValidator(str, "Must be a string.")
+is_date = TypeValidator(date, "Must be a date.")
 
 
 @dataclass
@@ -154,3 +181,8 @@ class EachItem(PredicateValidator[Iterable[T]]):
 
 each_item_is_str = EachItem(is_str)
 is_list = TypeValidator(list, "Must be a list.")
+
+
+@validator("Must not be set.")
+def is_null(value: Any) -> bool:
+    return value is None
