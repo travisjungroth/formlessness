@@ -4,7 +4,7 @@ from typing import Optional
 
 import pytest
 
-from formlessness.deserializers import FormKwargsDeserializer
+from formlessness.deserializers import KwargsDeserializer
 from formlessness.fields import DateField, StrField
 from formlessness.forms import BasicForm
 from formlessness.serializers import serializer
@@ -40,9 +40,7 @@ def form():
         description="If you had to pick one.",
         extra_object_validators=[green_light_before_release],
         serializer=serializer(asdict),
-        deserializer=FormKwargsDeserializer(
-            Film, "Can't make a Film from the given data."
-        ),
+        deserializer=KwargsDeserializer(Film, "Can't make a Film from the given data."),
         children=[
             StrField(
                 label="Title",

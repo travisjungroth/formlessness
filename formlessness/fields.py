@@ -5,16 +5,8 @@ from datetime import date
 from typing import Generic, Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
-from formlessness.deserializers import (
-    Deserializer,
-    FunctionDeserializer,
-    HasDeserializer,
-)
-from formlessness.serializers import (
-    HasSerializer,
-    Serializer,
-    serializer as serializer_decorator,
-)
+from formlessness.deserializers import Deserializer, FunctionDeserializer
+from formlessness.serializers import Serializer, serializer as serializer_decorator
 from formlessness.types import D, T
 from formlessness.utils import key_and_label
 from formlessness.validators import (
@@ -33,9 +25,7 @@ from formlessness.views import HasViewMaker
 from formlessness.widgets import Widget
 
 
-class Field(
-    Converter[T, D], HasSerializer, HasDeserializer, HasViewMaker, ABC, Generic[T, D]
-):
+class Field(Converter[T, D], HasViewMaker, ABC, Generic[T, D]):
     """
     Abstract class. For type checks.
     """
@@ -98,6 +88,12 @@ class BasicField(Field[T, D], Generic[T, D]):
 
     def __str__(self):
         return self.view_info.get("label") or self.key
+
+    def serialize(self, obj: T) -> D:
+        return self.serializer.serialize(obj)
+
+    def deserialize(self, data: D) -> T:
+        return self.deserializer.deserialize(data)
 
 
 class IntField(BasicField[int, int]):

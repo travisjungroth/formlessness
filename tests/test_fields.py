@@ -77,5 +77,5 @@ def test_choices():
     field = IntField("Label", choices=[1, 2, 3])
     assert not field.data_issues(1)
     assert field.data_issues(4)
-    assert field.data_issues("A")
-    assert field.data_issues(None)
+    assert field.data_issues("A")  # noqa
+    assert field.data_issues(None)  # noqa

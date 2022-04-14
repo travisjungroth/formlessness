@@ -5,9 +5,9 @@ from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING
 
 from formlessness.abstract_classes import Converter, Keyed, Parent
-from formlessness.deserializers import Deserializer, FormDeserializer, HasDeserializer
+from formlessness.deserializers import Deserializer
 from formlessness.exceptions import ValidationIssueMap
-from formlessness.serializers import HasSerializer, Serializer
+from formlessness.serializers import Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 
@@ -21,9 +21,9 @@ class Form(Parent, Converter, ABC):
     """
 
 
-class BasicForm(HasDeserializer, HasSerializer, Form):
+class BasicForm(Form):
     default_serializer: Serializer
-    default_deserializer: FormDeserializer
+    default_deserializer: Deserializer
     default_data_validators: tuple[Validator[D], ...] = ()
     default_object_validators: tuple[Validator[T], ...] = ()
 
@@ -66,7 +66,19 @@ class BasicForm(HasDeserializer, HasSerializer, Form):
         return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
 
     def deserialize(self, data: D) -> T:
-        return self.deserializer.deserialize(data, form=self)
+        # todo: change to build up ValidationIssueMap on errors
+
+        data = {
+            child.key: child.deserialize(sub_data)
+            for child, sub_data in self.converter_to_sub_data(data).items()
+        }
+        return self.deserializer.deserialize(data)
+
+    def serialize(self, obj: T) -> D:
+        data: JSONDict = {}
+        for child, sub_obj in self.converter_to_sub_object(obj):
+            data[child.key] = child.serialize(sub_obj)
+        return self.serializer.serialize(data)
 
 
 def _validate_form(
