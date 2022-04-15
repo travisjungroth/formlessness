@@ -120,5 +120,5 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keye
         for key, child in self.displayers.items():
             sub_data = data.get(key) if isinstance(child, Converter) else data
             children_displays[key] = child.display(sub_data, path)
-        display["sub_forms"] = children_displays
+        display["contents"] = children_displays
         return display

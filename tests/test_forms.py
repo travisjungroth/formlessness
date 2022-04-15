@@ -127,7 +127,7 @@ def test_display(form):
         "label": "Favorite Film",
         "description": "If you had to pick one.",
         "path": ["favorite_film"],
-        "sub_forms": {
+        "contents": {
             "title": {
                 "type": "field",
                 "label": "Title",
@@ -147,7 +147,7 @@ def test_display(form):
                 "label": "Optional Film Details",
                 "collapsable": True,
                 "collapsed": True,
-                "sub_forms": {
+                "contents": {
                     "green_light_date": {
                         "type": "field",
                         "label": "Green Light Date",
