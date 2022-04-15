@@ -72,6 +72,10 @@ def form() -> BasicForm[Film]:
 
 
 def test_make_object(form):
+    """
+    Form.make_object is the main interface to the whole thing,
+    to go from data to an object and do all the validation.
+    """
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
@@ -95,6 +99,8 @@ def test_issues(form):
         "release_date": "2021-10-09",
     }
     assert not form.data_issues(data)
+    obj = form.deserialize(data)
+    assert not form.object_issues(obj)
 
     data = {
         "title": "The King",
@@ -108,8 +114,10 @@ def test_issues(form):
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
+        # green light after release, should return an issue
         "green_light_date": "2022-05-05",
     }
+    # This could be checked at the data stage, but it's not in this example.
     assert not form.data_issues(data)
     obj = form.deserialize(data)
     assert form.object_issues(obj)
@@ -119,6 +127,15 @@ def test_issues(form):
         "release_date": 20211009,
     }
     assert form.data_issues(data)
+
+    data = {
+        "title": "The King",
+        "release_date": "2021-10-10",  # Sunday check
+    }
+    assert not form.data_issues(data)
+    obj = form.deserialize(data)
+    print(obj.release_date.weekday())
+    assert form.object_issues(obj)
 
 
 def test_display(form):

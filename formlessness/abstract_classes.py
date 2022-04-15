@@ -1,3 +1,6 @@
+"""
+Base classes that didn't seem to need their own module.
+"""
 from __future__ import annotations
 
 from abc import ABC
@@ -37,13 +40,12 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
 
     # Class level defaults for validators. Other validators are in addition.
     # Validators to run at the data and object state, respectively.
-    # The same validator may show up in both if the object is data, like an int.
-    data_validators: Sequence[Validator[T]] = ()
+    data_validators: Sequence[Validator[D]] = ()
     object_validators: Sequence[Validator[T]] = ()
 
     def make_object(self, data: D) -> T:
         """
-        Validation and deserialization. Raises ValidationIssueMap
+        Turn data into an object (deserialize it), raising ValidationIssueMap if needed.
         """
         self.data_issues(data).raise_if_not_empty()
         obj = self.deserialize(data)
@@ -67,6 +69,10 @@ def _validate(
 
 
 class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keyed, ABC):
+    """
+    A recursive container for form-stuff. This would be a Form or Section.
+    """
+
     children: dict[str, Keyed]
     display_info: Display
 
@@ -81,15 +87,25 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keye
 
     @property
     def converters(self) -> dict[str, Converter]:
+        """
+        The children that are Converters, with direct access to the children of non-Convert parents.
+
+        This creates a secondary tree structure (after self.children). This is a tree of Converters, ending
+        in a non-Parent (a Field). It's the tree structure for deserialization, serialization, and validation.
+        """
         converters = {}
         for key, child in self.children.items():
             if isinstance(child, Converter):
                 converters[key] = child
-            elif hasattr(child, "converters"):  # Sections
+            elif isinstance(child, Parent):
                 converters |= child.converters
         return converters
 
     def converter_to_sub_object(self, obj: T) -> Mapping[Converter, Any]:
+        """
+        Given an object, breaks it apart and maps it to the children converters.
+        Useful for validation and serialization.
+        """
         if isinstance(obj, Mapping):
             return {self.converters[k]: v for k, v in obj.items()}
         return {
@@ -99,6 +115,10 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keye
         }
 
     def converter_to_sub_data(self, data: JSONDict) -> Mapping[Converter, JSONData]:
+        """
+        Given a dictionary, breaks it apart and maps it to the children converters.
+        Useful for validation and deserialization.
+        """
         return {self.converters[k]: v for k, v in data.items()}
 
     @property

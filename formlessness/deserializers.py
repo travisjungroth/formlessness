@@ -10,17 +10,31 @@ from formlessness.types import D, T
 
 class Deserializer(Generic[D, T], ABC):
     """
-    Moves from the data stage to the object stage. Raise ValidationError if unable.
+    Moves from the data stage to the object stage. Raise ValidationIssue if unable.
     """
 
     def deserialize(self, data: D) -> T:
         return data
 
 
+def deserializer(error_message: str):
+    """
+    Decorator to turn a function into a deserializer.
+    """
+
+    def f(function: Callable[[D], T]) -> FunctionDeserializer[D, T]:
+        return FunctionDeserializer(function, error_message)
+
+    return f
+
+
 @dataclass
 class FunctionDeserializer(Deserializer[D, T]):
     function: Callable[[D], T]
     error_message: str
+
+    def __call__(self, *args, **kwargs):
+        return self.function(*args, **kwargs)
 
     def deserialize(self, data: D) -> T:
         try:
@@ -39,10 +53,3 @@ class KwargsDeserializer(Deserializer[dict[str, Any], T]):
             return self.function(**data)
         except (TypeError, ValueError, AttributeError) as e:
             raise ValidationIssue(self.error_message) from e
-
-
-def deserializer(error_message: str):
-    def f(constructor: Callable[[D], T]) -> FunctionDeserializer[D, T]:
-        return FunctionDeserializer(constructor, error_message)
-
-    return f

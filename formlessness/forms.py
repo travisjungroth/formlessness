@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 
 class Form(Parent, Converter[D, T], ABC):
     """
-    Converts and has other converters.
+    Abstract class for type hints.
     """
 
 

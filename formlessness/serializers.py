@@ -10,12 +10,17 @@ from formlessness.types import D, JSONDict, T
 class Serializer(Generic[D, T], ABC):
     """
     Moves from the object stage to the data stage.
-
-    todo: have serializers optionally return their json validators, IE type checks. In and/or out?
     """
 
     def serialize(self, obj: T) -> D:
         return obj
+
+
+def serializer(f: Callable[[T], D]) -> FunctionSerializer[D, T]:
+    """
+    Decorator to turn a function into a Serializer.
+    """
+    return FunctionSerializer(f)
 
 
 @dataclass
@@ -27,10 +32,6 @@ class FunctionSerializer(Serializer[D, T]):
 
     def serialize(self, obj: T) -> D:
         return self.function(obj)
-
-
-def serializer(f: Callable[[T], D]) -> FunctionSerializer[D, T]:
-    return FunctionSerializer(f)
 
 
 class AsDict(Protocol):

@@ -5,15 +5,17 @@ from typing import Iterable, Mapping, Sequence
 
 class ValidationIssue(Exception):
     """
-    Validators either passed or they didn't. And if they didn't, what's the message?
-
-    Keep these truthy!
+    In most cases these should just be returned instead of raised. They're exceptions for convenience.
     """
 
 
 class ValidationIssueMap(Mapping[str, Sequence[ValidationIssue]], ValidationIssue):
     """
-    When you want to raise many issues at once.
+    Building up recursive lists of validation issues, matching the serialization structure.
+    top_level_issues are things related to the form/field that created this.
+    For a Form, that would be something like two Fields can't be filled out together.
+    For a Field, that's all of its issues.
+    sub_issues are issues in that Form's contents.
     """
 
     @classmethod
@@ -47,6 +49,7 @@ class ValidationIssueMap(Mapping[str, Sequence[ValidationIssue]], ValidationIssu
         return self | ValidationIssueMap.from_issues(self.key, issues)
 
     def __getitem__(self, k: str) -> Sequence[ValidationIssue]:
+        # todo: synchronize with Display so they're either both dotstrings or both lists.
         head, _, rest = k.partition(".")
         if not head:
             return self.top_level_issues

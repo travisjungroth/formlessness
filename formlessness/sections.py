@@ -10,7 +10,7 @@ from formlessness.utils import key_and_label
 
 class Section(Parent, ABC):
     """
-    Arbitrary section. Not a Converter.
+    Arbitrary section of a form. Not a Converter.
     """
 
 

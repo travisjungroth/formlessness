@@ -33,16 +33,16 @@ class Field(Converter[D, T], Displayer[D], ABC):
 
 class BasicField(Field[D, T]):
     """
-    This can be more specific.
+    You can create a Field directly from this, or subclass to make a template.
     """
 
+    # Class-level defaults to override.
     default_serializer: Serializer
     default_deserializer: Deserializer
     default_widget: Widget
     default_data_validators: tuple[Validator[D], ...] = ()
     default_object_validators: tuple[Validator[T], ...] = ()
 
-    # noinspection PyShadowingNames
     def __init__(
         self,
         label: str = "",
@@ -51,6 +51,7 @@ class BasicField(Field[D, T]):
         widget: Widget = None,
         choices: Iterable[T] = (),
         required: bool = True,
+        # validators to add to the class-level ones
         extra_data_validators: Sequence[Validator] = (),
         extra_object_validators: Sequence[Validator] = (),
         serializer: Serializer[D, T] = None,
@@ -58,7 +59,6 @@ class BasicField(Field[D, T]):
         key: str = "",
     ) -> None:
         key, label = key_and_label(key, label)
-
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
@@ -76,6 +76,7 @@ class BasicField(Field[D, T]):
         self.required = required
         if not self.required:
             self.data_validators = [Or([is_null, And(self.data_validators)])]
+            self.object_validators = [Or([is_null, And(self.object_validators)])]
 
         self.display_info: JSONDict = filter_display_info(
             {

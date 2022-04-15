@@ -6,6 +6,10 @@ from typing import Generic
 from formlessness.types import D, JSONDict
 
 Display = JSONDict
+"""
+The Display is the representation of the Form sent to the frontend.
+It's recursive, with every component of a Form also having a Display.
+"""
 
 
 def filter_display_info(display_info: Display) -> Display:
@@ -18,5 +22,8 @@ class Displayer(Generic[D], ABC):
     """
 
     @abstractmethod
-    def display(self, data: D = None) -> Display:
-        pass
+    def display(self, data: D = None, path: list[str] = ()) -> Display:
+        """
+        data is the values that will go into a complete or partial form.
+        path is the list of keys to get to a field/form, uniquely identifying it along with its own key.
+        """
