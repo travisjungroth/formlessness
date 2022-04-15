@@ -6,6 +6,7 @@ from typing import Optional
 import pytest
 
 from formlessness.deserializers import KwargsDeserializer
+from formlessness.exceptions import ValidationIssueMap
 from formlessness.fields import DateField, StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
@@ -70,7 +71,25 @@ def form() -> BasicForm[Film]:
     )
 
 
-def test_form(form):
+def test_make_object(form):
+    data = {
+        "title": "The King",
+        "release_date": "2021-10-09",
+        "green_light_date": "2017-05-05",
+    }
+    film = Film(
+        title="The King",
+        release_date=date(2021, 10, 9),
+        green_light_date=date(2017, 5, 5),
+    )
+    obj = form.make_object(data)
+    assert obj == film
+    data["release_date"] = date(2022, 1, 1)
+    with pytest.raises(ValidationIssueMap):
+        form.make_object(data)
+
+
+def test_issues(form):
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
@@ -119,7 +138,6 @@ def test_display(form):
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": "date_selector",
-                "value": "2021-10-09",
             },
             "optional_film_details": {
                 "type": "section",
@@ -131,11 +149,12 @@ def test_display(form):
                         "type": "field",
                         "label": "Green Light Date",
                         "widget": "date_selector",
+                        "value": "2017-05-05",
                     },
                 },
             },
         },
     }
-    display = form.display({"title": "The King", "release_date": "2021-10-09"})
+    display = form.display({"title": "The King", "green_light_date": "2017-05-05"})
     assert display == expected
     assert json.dumps(display) == json.dumps(expected)
