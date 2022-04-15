@@ -97,10 +97,11 @@ class BasicField(Field[D, T]):
     def deserialize(self, data: D) -> T:
         return self.deserializer.deserialize(data)
 
-    def display(self, data: D = None) -> Display:
-        if data is None:
-            return self.display_info
-        return self.display_info | {"value": data}
+    def display(self, data: D = None, path: list[str] = ()) -> Display:
+        display = self.display_info | {"path": [*path, self.key]}
+        if data is not None:
+            display["value"] = data
+        return display
 
 
 class IntField(BasicField[int, int]):

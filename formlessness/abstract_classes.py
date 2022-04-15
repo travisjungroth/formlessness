@@ -10,7 +10,6 @@ from typing import (
     Protocol,
     Sequence,
     Union,
-    cast,
 )
 
 from formlessness.deserializers import Deserializer
@@ -67,7 +66,7 @@ def _validate(
     )
 
 
-class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], ABC):
+class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keyed, ABC):
     children: dict[str, Keyed]
     display_info: Display
 
@@ -110,13 +109,16 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], ABC)
             if isinstance(child, Displayer)
         }
 
-    def display(self, data: JSONDict | None = None) -> Display:
-        if data is None:
-            data = {}
+    def display(self, data: JSONDict = None, path: list[str] = ()) -> Display:
+        data = data or {}
+        path = path or []
+        display = self.display_info.copy()
+        if isinstance(self, Converter):
+            path += [self.key]
+            display["path"] = path
         children_displays = {}
         for key, child in self.displayers.items():
-            if isinstance(child, Converter):
-                children_displays[key] = cast(Displayer, child).display(data.get(key))
-            else:
-                children_displays[key] = child.display(data)
-        return self.display_info | {"sub_forms": children_displays}
+            sub_data = data.get(key) if isinstance(child, Converter) else data
+            children_displays[key] = child.display(sub_data, path)
+        display["sub_forms"] = children_displays
+        return display

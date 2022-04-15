@@ -126,11 +126,13 @@ def test_display(form):
         "type": "form",
         "label": "Favorite Film",
         "description": "If you had to pick one.",
+        "path": ["favorite_film"],
         "sub_forms": {
             "title": {
                 "type": "field",
                 "label": "Title",
                 "widget": "text_box",
+                "path": ["favorite_film", "title"],
                 "value": "The King",
             },
             "release_date": {
@@ -138,6 +140,7 @@ def test_display(form):
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": "date_selector",
+                "path": ["favorite_film", "release_date"],
             },
             "optional_film_details": {
                 "type": "section",
@@ -149,6 +152,7 @@ def test_display(form):
                         "type": "field",
                         "label": "Green Light Date",
                         "widget": "date_selector",
+                        "path": ["favorite_film", "green_light_date"],
                         "value": "2017-05-05",
                     },
                 },
