@@ -1,6 +1,7 @@
 import pytest
 
-from formlessness.exceptions import ValidationIssue, ValidationIssueMap
+from formlessness.deserializers import SerializationError
+from formlessness.exceptions import FormErrors
 from formlessness.fields import CommaListStrField, IntField
 
 
@@ -42,29 +43,29 @@ class TestCommaListStrField:
         return obj
 
     def test_no_data_issues(self, field, good_data):
-        assert not field.data_issues(good_data)
+        assert field.validate_data(good_data)
 
     def test_has_data_issues(self, field, bad_data: str):
-        assert field.data_issues(bad_data)
+        assert not field.validate_data(bad_data)
 
     def test_no_object_issues(self, field, good_obj):
-        assert not field.object_issues(good_obj)
+        assert field.validate_object(good_obj)
 
     def test_has_object_issues(self, field, bad_obj: list[str]):
-        assert field.object_issues(bad_obj)
+        assert not field.validate_object(bad_obj)
 
     def test_deserialize(self, field, good_data, good_obj):
         assert field.deserialize(good_data) == good_obj
 
     def test_deserialize_error(self, field, bad_data):
-        with pytest.raises(ValidationIssue):
+        with pytest.raises(SerializationError):
             field.deserialize(bad_data)  # noqa
 
     def test_make_object(self, field, good_data, good_obj):
         assert field.make_object(good_data) == good_obj
 
     def test_make_object_error(self, field, bad_data: str):
-        with pytest.raises(ValidationIssueMap):
+        with pytest.raises(FormErrors):
             field.make_object(bad_data)
 
 
@@ -75,7 +76,7 @@ def test_serialize():
 
 def test_choices():
     field = IntField("Label", choices=[1, 2, 3])
-    assert not field.data_issues(1)
-    assert field.data_issues(4)
-    assert field.data_issues("A")  # noqa
-    assert field.data_issues(None)  # noqa
+    assert field.validate_data(1)
+    assert not field.validate_data(4)
+    assert not field.validate_data("A")  # noqa
+    assert not field.validate_data(None)  # noqa

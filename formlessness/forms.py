@@ -1,19 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC
-from collections.abc import Callable, Iterable, Mapping, Sequence
-from typing import TYPE_CHECKING
+from collections.abc import Iterable, Sequence
 
 from formlessness.abstract_classes import Converter, Keyed, Parent
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import filter_display_info
-from formlessness.exceptions import ValidationIssueMap
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
-
-if TYPE_CHECKING:
-    from formlessness.validators import Validator
+from formlessness.validators import And, Validator, ValidatorMap
 
 
 class Form(Parent, Converter[D, T], ABC):
@@ -45,12 +41,12 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
-        self.data_validators = self.default_data_validators + tuple(
-            extra_data_validators
-        )
-        self.object_validators = self.default_object_validators + tuple(
-            extra_object_validators
-        )
+        self.data_validator = And(
+            [*self.default_data_validators, *extra_data_validators]
+        ).simplify()
+        self.object_validator = And(
+            [*self.default_object_validators, *extra_object_validators]
+        ).simplify()
         self.display_info = filter_display_info(
             {
                 "type": "form",
@@ -62,15 +58,20 @@ class BasicForm(Form[JSONDict, T]):
         )
         self.children = {child.key: child for child in children}
 
-    def data_issues(self, data: JSONDict) -> ValidationIssueMap:
-        return _validate_form(super().data_issues, self.converter_to_sub_data, data)
+    def validate_data(self, data: JSONDict) -> ValidatorMap:
+        sub_maps = {}
+        for child, child_data in self.converter_to_sub_data(data).items():
+            sub_maps[child.key] = child.validate_data(child_data)
+        return super().validate_data(data) & ValidatorMap(sub_maps=sub_maps)
 
-    def object_issues(self, obj: T) -> ValidationIssueMap:
-        return _validate_form(super().object_issues, self.converter_to_sub_object, obj)
+    def validate_object(self, obj: T) -> ValidatorMap:
+        sub_maps = {}
+        for child, child_data in self.converter_to_sub_object(obj).items():
+            sub_maps[child.key] = child.validate_object(child_data)
+        return super().validate_object(obj) & ValidatorMap(sub_maps=sub_maps)
 
     def deserialize(self, data: JSONDict) -> T:
-        # todo: change to build up ValidationIssueMap on errors
-
+        # Todo: build and raise ErrorMap
         data = {
             child.key: child.deserialize(sub_data)
             for child, sub_data in self.converter_to_sub_data(data).items()
@@ -82,16 +83,3 @@ class BasicForm(Form[JSONDict, T]):
         for child, sub_obj in self.converter_to_sub_object(obj):
             data[child.key] = child.serialize(sub_obj)
         return self.serializer.serialize(data)
-
-
-def _validate_form(
-    validation_method: Callable[[T], ValidationIssueMap],
-    mapping_method: Callable[[T], Mapping[Converter, T]],
-    value: T,
-) -> ValidationIssueMap:
-    issue_map = validation_method(value)
-    child_issues = []
-    for child, child_obj in mapping_method(value).items():
-        child_validation_method = getattr(child, validation_method.__name__)
-        child_issues.append(child_validation_method(child_obj))
-    return issue_map.add_issues(child_issues)

@@ -13,7 +13,6 @@ from formlessness.utils import key_and_label
 from formlessness.validators import (
     And,
     ChoicesValidator,
-    Or,
     Validator,
     each_item_is_str,
     is_date,
@@ -62,21 +61,23 @@ class BasicField(Field[D, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
-        self.data_validators = self.default_data_validators + tuple(
-            extra_data_validators
+        self.data_validator = And(
+            [*self.default_data_validators, *extra_data_validators]
         )
-        self.object_validators = self.default_object_validators + tuple(
-            extra_object_validators
+        self.object_validator = And(
+            [*self.default_object_validators, *extra_object_validators]
         )
         self.choices = tuple(choices)
         data_choices = [self.serialize(choice) for choice in self.choices]
         if self.choices:
-            self.data_validators += (ChoicesValidator(data_choices),)
-            self.object_validators += (ChoicesValidator(self.choices),)
+            self.data_validator &= ChoicesValidator(data_choices)
+            self.object_validator &= ChoicesValidator(self.choices)
         self.required = required
         if not self.required:
-            self.data_validators = [Or([is_null, And(self.data_validators)])]
-            self.object_validators = [Or([is_null, And(self.object_validators)])]
+            self.data_validator |= is_null
+            self.object_validator |= is_null
+        self.data_validator = self.data_validator.simplify()
+        self.object_validator = self.object_validator.simplify()
 
         self.display_info: JSONDict = filter_display_info(
             {

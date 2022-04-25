@@ -4,7 +4,6 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Any, Callable, Generic
 
-from formlessness.exceptions import ValidationIssue
 from formlessness.types import D, T
 
 
@@ -28,6 +27,10 @@ def deserializer(error_message: str):
     return f
 
 
+class SerializationError(Exception):
+    pass
+
+
 @dataclass
 class FunctionDeserializer(Deserializer[D, T]):
     function: Callable[[D], T]
@@ -40,7 +43,7 @@ class FunctionDeserializer(Deserializer[D, T]):
         try:
             return self.function(data)
         except (TypeError, ValueError, AttributeError) as e:
-            raise ValidationIssue(self.error_message) from e
+            raise SerializationError(self.error_message) from e
 
 
 @dataclass
@@ -52,4 +55,4 @@ class KwargsDeserializer(Deserializer[dict[str, Any], T]):
         try:
             return self.function(**data)
         except (TypeError, ValueError, AttributeError) as e:
-            raise ValidationIssue(self.error_message) from e
+            raise SerializationError(self.error_message) from e

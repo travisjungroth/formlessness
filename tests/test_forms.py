@@ -6,7 +6,7 @@ from typing import Optional
 import pytest
 
 from formlessness.deserializers import KwargsDeserializer
-from formlessness.exceptions import ValidationIssueMap
+from formlessness.exceptions import FormErrors
 from formlessness.fields import DateField, StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
@@ -89,7 +89,7 @@ def test_make_object(form):
     obj = form.make_object(data)
     assert obj == film
     data["release_date"] = date(2022, 1, 1)
-    with pytest.raises(ValidationIssueMap):
+    with pytest.raises(FormErrors):
         form.make_object(data)
 
 
@@ -98,18 +98,18 @@ def test_issues(form):
         "title": "The King",
         "release_date": "2021-10-09",
     }
-    assert not form.data_issues(data)
+    assert form.validate_data(data)
     obj = form.deserialize(data)
-    assert not form.object_issues(obj)
+    assert form.validate_object(obj)
 
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
         "green_light_date": "2017-05-05",
     }
-    assert not form.data_issues(data)
+    assert form.validate_data(data)
     obj = form.deserialize(data)
-    assert not form.object_issues(obj)
+    assert form.validate_object(obj)
 
     data = {
         "title": "The King",
@@ -118,24 +118,24 @@ def test_issues(form):
         "green_light_date": "2022-05-05",
     }
     # This could be checked at the data stage, but it's not in this example.
-    assert not form.data_issues(data)
+    assert form.validate_data(data)
     obj = form.deserialize(data)
-    assert form.object_issues(obj)
+    assert not form.validate_object(obj)
 
     data = {
         "title": "The King",
         "release_date": 20211009,
     }
-    assert form.data_issues(data)
+    assert not form.validate_data(data)
 
     data = {
         "title": "The King",
         "release_date": "2021-10-10",  # Sunday check
     }
-    assert not form.data_issues(data)
+    assert form.validate_data(data)
     obj = form.deserialize(data)
     print(obj.release_date.weekday())
-    assert form.object_issues(obj)
+    assert not form.validate_object(obj)
 
 
 def test_display(form):

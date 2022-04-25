@@ -4,26 +4,17 @@ Base classes that didn't seem to need their own module.
 from __future__ import annotations
 
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Iterable,
-    Iterator,
-    Mapping,
-    Protocol,
-    Sequence,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Iterator, Mapping, Protocol, Union
 
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import Displayer
-from formlessness.exceptions import ValidationIssueMap
+from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
+from formlessness.validators import Valid, Validator, ValidatorMap
 
 if TYPE_CHECKING:
     from formlessness.displayers import Display
-    from formlessness.validators import Validator
 
 
 class Keyed(Protocol):
@@ -40,32 +31,27 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
 
     # Class level defaults for validators. Other validators are in addition.
     # Validators to run at the data and object state, respectively.
-    data_validators: Sequence[Validator[D]] = ()
-    object_validators: Sequence[Validator[T]] = ()
+    data_validator: Validator[D] = Valid
+    object_validator: Validator[T] = Valid
 
     def make_object(self, data: D) -> T:
         """
         Turn data into an object (deserialize it), raising ValidationIssueMap if needed.
         """
-        self.data_issues(data).raise_if_not_empty()
+        validator_map = self.validate_data(data)
+        if not validator_map:
+            raise FormErrors(validator_map)
         obj = self.deserialize(data)
-        self.object_issues(obj).raise_if_not_empty()
+        validator_map = self.validate_object(obj)
+        if not validator_map:
+            raise FormErrors(validator_map)
         return obj
 
-    def data_issues(self, data: D) -> ValidationIssueMap:
-        return _validate(self.key, data, self.data_validators)
+    def validate_data(self, data: D) -> ValidatorMap:
+        return ValidatorMap(self.data_validator.validate(data))
 
-    def object_issues(self, obj: T) -> ValidationIssueMap:
-        return _validate(self.key, obj, self.object_validators)
-
-
-def _validate(
-    key: str, value: Any, validators: Iterable[Validator]
-) -> ValidationIssueMap:
-    return ValidationIssueMap(
-        key,
-        [issue for validator in validators for issue in validator.validate(value)],
-    )
+    def validate_object(self, obj: T) -> ValidatorMap:
+        return ValidatorMap(self.object_validator.validate(obj))
 
 
 class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keyed, ABC):
