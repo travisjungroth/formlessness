@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from abc import ABC
 from datetime import date
 from typing import Iterable, Sequence

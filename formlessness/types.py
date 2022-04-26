@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TypeVar, Union
 
 JSONData = Union[str, int, float, None, list["JSONData"], dict[str, "JSONData"]]

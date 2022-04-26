@@ -2,7 +2,7 @@
 The Display is the representation of the Form sent to the frontend.
 It's recursive, with every component of a Form also having a Display.
 """
-from __future__ import annotations
+
 
 from abc import ABC, abstractmethod
 from typing import Generic, Sequence
