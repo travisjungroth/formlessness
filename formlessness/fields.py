@@ -5,15 +5,10 @@ from datetime import date
 from typing import Iterable, Sequence
 
 from formlessness.abstract_classes import Converter
-from formlessness.deserializers import Deserializer, FunctionDeserializer
-from formlessness.displayers import Display, Displayer, filter_display_info
-from formlessness.serializers import Serializer, serializer as serializer_decorator
-from formlessness.types import D, JSONDict, T
-from formlessness.utils import key_and_label
-from formlessness.validators import (
+from formlessness.constraints import (
     And,
-    ChoicesValidator,
-    Validator,
+    ChoicesConstraint,
+    Constraint,
     each_item_is_str,
     is_date,
     is_int,
@@ -21,6 +16,11 @@ from formlessness.validators import (
     is_null,
     is_str,
 )
+from formlessness.deserializers import Deserializer, FunctionDeserializer
+from formlessness.displayers import Display, Displayer, filter_display_info
+from formlessness.serializers import Serializer, serializer as serializer_decorator
+from formlessness.types import D, JSONDict, T
+from formlessness.utils import key_and_label
 from formlessness.widgets import Widget
 
 
@@ -39,8 +39,8 @@ class BasicField(Field[D, T]):
     default_serializer: Serializer
     default_deserializer: Deserializer
     default_widget: Widget
-    default_data_validators: tuple[Validator[D], ...] = ()
-    default_object_validators: tuple[Validator[T], ...] = ()
+    default_data_constraints: tuple[Constraint[D], ...] = ()
+    default_object_constraints: tuple[Constraint[T], ...] = ()
 
     def __init__(
         self,
@@ -50,9 +50,9 @@ class BasicField(Field[D, T]):
         widget: Widget = None,
         choices: Iterable[T] = (),
         required: bool = True,
-        # validators to add to the class-level ones
-        extra_data_validators: Sequence[Validator] = (),
-        extra_object_validators: Sequence[Validator] = (),
+        # constraints to add to the class-level ones
+        extra_data_constraints: Sequence[Constraint] = (),
+        extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
         deserializer: Deserializer[D, T] = None,
         key: str = "",
@@ -61,23 +61,23 @@ class BasicField(Field[D, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
-        self.data_validator = And(
-            [*self.default_data_validators, *extra_data_validators]
+        self.data_constraint = And(
+            [*self.default_data_constraints, *extra_data_constraints]
         )
-        self.object_validator = And(
-            [*self.default_object_validators, *extra_object_validators]
+        self.object_constraint = And(
+            [*self.default_object_constraints, *extra_object_constraints]
         )
         self.choices = tuple(choices)
         data_choices = [self.serialize(choice) for choice in self.choices]
         if self.choices:
-            self.data_validator &= ChoicesValidator(data_choices)
-            self.object_validator &= ChoicesValidator(self.choices)
+            self.data_constraint &= ChoicesConstraint(data_choices)
+            self.object_constraint &= ChoicesConstraint(self.choices)
         self.required = required
         if not self.required:
-            self.data_validator |= is_null
-            self.object_validator |= is_null
-        self.data_validator = self.data_validator.simplify()
-        self.object_validator = self.object_validator.simplify()
+            self.data_constraint |= is_null
+            self.object_constraint |= is_null
+        self.data_constraint = self.data_constraint.simplify()
+        self.object_constraint = self.object_constraint.simplify()
 
         self.display_info: JSONDict = filter_display_info(
             {
@@ -109,16 +109,16 @@ class BasicField(Field[D, T]):
 class IntField(BasicField[int, int]):
     default_serializer = serializer_decorator(int)
     default_deserializer = FunctionDeserializer(int, "Must be an integer.")
-    default_data_validators = (is_int,)
-    default_object_validators = (is_int,)
+    default_data_constraints = (is_int,)
+    default_object_constraints = (is_int,)
     default_widget = Widget.TEXT_BOX
 
 
 class StrField(BasicField[str, str]):
     default_serializer = serializer_decorator(str)
     default_deserializer = FunctionDeserializer(str, "Must be a string.")
-    default_data_validators = (is_str,)
-    default_object_validators = (is_str,)
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_str,)
     default_widget = Widget.TEXT_BOX
 
 
@@ -127,8 +127,8 @@ class DateField(BasicField[str, date]):
     default_deserializer = FunctionDeserializer(
         date.fromisoformat, "Must be a valid date of YYYY-MM-DD."
     )
-    default_data_validators = (is_str,)
-    default_object_validators = (is_date,)
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_date,)
     default_widget = Widget.DATE_SELECTOR
 
 
@@ -137,6 +137,6 @@ class CommaListStrField(BasicField[str, list[str]]):
     default_deserializer = FunctionDeserializer(
         lambda x: [y for y in x.split(",") if y], "Must be a string."
     )
-    default_data_validators = (is_str,)
-    default_object_validators = (is_list, each_item_is_str)
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_list, each_item_is_str)
     default_widget = Widget.TEXT_BOX

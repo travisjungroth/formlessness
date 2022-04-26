@@ -6,12 +6,12 @@ from __future__ import annotations
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Iterator, Mapping, Protocol, Union
 
+from formlessness.constraints import Constraint, ConstraintMap, Valid
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import Displayer
 from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
-from formlessness.validators import Valid, Validator, ValidatorMap
 
 if TYPE_CHECKING:
     from formlessness.displayers import Display
@@ -29,29 +29,29 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     Things that validate, serialize and deserialize data, like Forms and Fields.
     """
 
-    # Class level defaults for validators. Other validators are in addition.
-    # Validators to run at the data and object state, respectively.
-    data_validator: Validator[D] = Valid
-    object_validator: Validator[T] = Valid
+    # Class level defaults for constraints. Other constraints are in addition.
+    # Constraints to run at the data and object state, respectively.
+    data_constraint: Constraint[D] = Valid
+    object_constraint: Constraint[T] = Valid
 
     def make_object(self, data: D) -> T:
         """
         Turn data into an object (deserialize it), raising ValidationIssueMap if needed.
         """
-        validator_map = self.validate_data(data)
-        if not validator_map:
-            raise FormErrors(validator_map)
+        constraint_map = self.validate_data(data)
+        if not constraint_map:
+            raise FormErrors(constraint_map)
         obj = self.deserialize(data)
-        validator_map = self.validate_object(obj)
-        if not validator_map:
-            raise FormErrors(validator_map)
+        constraint_map = self.validate_object(obj)
+        if not constraint_map:
+            raise FormErrors(constraint_map)
         return obj
 
-    def validate_data(self, data: D) -> ValidatorMap:
-        return ValidatorMap(self.data_validator.validate(data))
+    def validate_data(self, data: D) -> ConstraintMap:
+        return ConstraintMap(self.data_constraint.validate(data))
 
-    def validate_object(self, obj: T) -> ValidatorMap:
-        return ValidatorMap(self.object_validator.validate(obj))
+    def validate_object(self, obj: T) -> ConstraintMap:
+        return ConstraintMap(self.object_constraint.validate(obj))
 
 
 class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keyed, ABC):

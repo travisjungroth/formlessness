@@ -5,13 +5,13 @@ from typing import Optional
 
 import pytest
 
+from formlessness.constraints import constraint
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
 from formlessness.fields import DateField, StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
 from formlessness.serializers import serializer
-from formlessness.validators import validator
 
 
 @dataclass
@@ -21,17 +21,17 @@ class Film:
     green_light_date: Optional[date] = None
 
 
-@validator("Green light date must be before release date if set.")
+@constraint("Green light date must be before release date if set.")
 def green_light_before_release(film: Film):
     return film.green_light_date is None or film.green_light_date < film.release_date
 
 
-@validator("Must be 140 characters or less.")
+@constraint("Must be 140 characters or less.")
 def lte_140_characters(s: str):
     return len(s) <= 140
 
 
-@validator("Must not be a Sunday.")
+@constraint("Must not be a Sunday.")
 def not_sunday(day: date):
     return day.weekday() != 6
 
@@ -41,19 +41,19 @@ def form() -> BasicForm[Film]:
     return BasicForm(
         label="Favorite Film",
         description="If you had to pick one.",
-        extra_object_validators=[green_light_before_release],
+        extra_object_constraints=[green_light_before_release],
         serializer=serializer(asdict),
         deserializer=KwargsDeserializer(Film, "Can't make a Film from the given data."),
         children=[
             StrField(
                 label="Title",
-                extra_data_validators=[lte_140_characters],
-                extra_object_validators=[lte_140_characters],
+                extra_data_constraints=[lte_140_characters],
+                extra_object_constraints=[lte_140_characters],
             ),
             DateField(
                 label="Released",
                 description="Date of US release.",
-                extra_object_validators=[not_sunday],
+                extra_object_constraints=[not_sunday],
                 key="release_date",
             ),
             BasicSection(

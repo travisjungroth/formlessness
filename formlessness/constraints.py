@@ -8,40 +8,36 @@ from typing import Any, Callable, Container, Generic, Iterable, Mapping, Sequenc
 from formlessness.types import T
 
 
-class Validator(Generic[T], ABC):
-    """
-    A validator takes a value and returns the issues.
-    """
-
+class Constraint(Generic[T], ABC):
     @abstractmethod
-    def validate(self, value: T) -> Validator:
+    def validate(self, value: T) -> Constraint:
         pass
 
     def __bool__(self) -> bool:
         return False
 
-    def __and__(self, other: Validator) -> Validator:
+    def __and__(self, other: Constraint) -> Constraint:
         return And([self, other])
 
-    def __or__(self, other: Validator) -> Validator:
+    def __or__(self, other: Constraint) -> Constraint:
         return Or([self, other])
 
-    def simplify(self) -> Validator:
+    def simplify(self) -> Constraint:
         return self
 
 
-def validator(message: str) -> Callable[[], FunctionValidator]:
+def constraint(message: str) -> Callable[[], FunctionConstraint]:
     """
-    Decorator to make a Validators from a function.
+    Decorator to make a Constraints from a function.
     """
 
     def f(function):
-        return FunctionValidator(function, message)
+        return FunctionConstraint(function, message)
 
     return f
 
 
-class ValidClass(Validator[Any]):
+class ValidClass(Constraint[Any]):
     def validate(self, value: Any) -> True:
         return self
 
@@ -59,74 +55,74 @@ Valid = ValidClass()
 
 
 @dataclass
-class Or(Validator[T]):
+class Or(Constraint[T]):
     """
-    Combine multiple Validators, and one needs to pass.
+    Combine multiple Constraints, and one needs to pass.
     """
 
-    validators: Sequence[Validator]
+    constraints: Sequence[Constraint]
 
-    def validate(self, value: T) -> Validator:
-        return Or([v.validate(value) for v in self.validators]).simplify()
+    def validate(self, value: T) -> Constraint:
+        return Or([v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return "\nor\n".join(map(str, self.validators))
+        return "\nor\n".join(map(str, self.constraints))
 
     def __bool__(self):
-        return any(self.validators)
+        return any(self.constraints)
 
-    def simplify(self) -> Validator:
-        if not self.validators:
+    def simplify(self) -> Constraint:
+        if not self.constraints:
             return Valid
-        if len(self.validators) == 1:
-            return self.validators[0].simplify()
-        validators = []
-        for v in self.validators:
+        if len(self.constraints) == 1:
+            return self.constraints[0].simplify()
+        constraints = []
+        for v in self.constraints:
             v = v.simplify()
             if v is Valid:
                 return Valid
             if isinstance(v, Or):
-                validators.extend(v.validators)
+                constraints.extend(v.constraints)
             else:
-                validators.append(v)
-        return Or(validators)
+                constraints.append(v)
+        return Or(constraints)
 
 
 @dataclass
-class And(Validator[T]):
+class And(Constraint[T]):
     """
-    Combine multiple Validators together that must pass.
+    Combine multiple Constraints together that must pass.
     """
 
-    validators: Sequence[Validator]
+    constraints: Sequence[Constraint]
 
-    def validate(self, value: T) -> Validator:
-        return And([v.validate(value) for v in self.validators]).simplify()
+    def validate(self, value: T) -> Constraint:
+        return And([v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return "\nand\n".join(map(str, self.validators))
+        return "\nand\n".join(map(str, self.constraints))
 
     def __bool__(self):
-        return all(self.validators)
+        return all(self.constraints)
 
-    def simplify(self) -> Validator:
-        validators = []
-        for v in self.validators:
+    def simplify(self) -> Constraint:
+        constraints = []
+        for v in self.constraints:
             v = v.simplify()
             if v is Valid:
                 continue
             if isinstance(v, And):
-                validators.extend(v.validators)
+                constraints.extend(v.constraints)
             else:
-                validators.append(v)
-        if not validators:
+                constraints.append(v)
+        if not constraints:
             return Valid
-        if len(validators) == 1:
-            return validators[0]
-        return And(validators)
+        if len(constraints) == 1:
+            return constraints[0]
+        return And(constraints)
 
 
-class PredicateValidator(Validator[T], ABC):
+class PredicateConstraint(Constraint[T], ABC):
     """
     Implement the predicate method to return True if valid.
     """
@@ -137,7 +133,7 @@ class PredicateValidator(Validator[T], ABC):
     def predicate(self, value: T) -> bool:
         pass
 
-    def validate(self, value: T) -> Validator:
+    def validate(self, value: T) -> Constraint:
         return Valid if self.predicate(value) else self
 
     def __str__(self) -> str:
@@ -145,7 +141,7 @@ class PredicateValidator(Validator[T], ABC):
 
 
 @dataclass
-class FunctionValidator(PredicateValidator[T]):
+class FunctionConstraint(PredicateConstraint[T]):
     """
     Pass in a predicate function that takes a value and returns True if valid.
     """
@@ -155,7 +151,7 @@ class FunctionValidator(PredicateValidator[T]):
 
     def __post_init__(self):
         if not self.message:
-            self.message = f"Must pass `{self.function.__qualname__}` validator."
+            self.message = f"Must pass `{self.function.__qualname__}` constraint."
 
     def __call__(self, *args, **kwargs):
         # Preserve the function, should do wraps or something maybe
@@ -166,7 +162,7 @@ class FunctionValidator(PredicateValidator[T]):
 
 
 @dataclass
-class TypeValidator(PredicateValidator[T]):
+class TypeConstraint(PredicateConstraint[T]):
     """
     Do an isinstance check against a type.
     """
@@ -182,7 +178,7 @@ class TypeValidator(PredicateValidator[T]):
 
 
 @dataclass
-class ChoicesValidator(PredicateValidator[T]):
+class ChoicesConstraint(PredicateConstraint[T]):
     choices: Container
     message: str = "Must be a valid choice."
 
@@ -191,55 +187,55 @@ class ChoicesValidator(PredicateValidator[T]):
 
 
 @dataclass
-class EachItem(PredicateValidator[Iterable[T]]):
-    item_validator: Validator[T]
+class EachItem(PredicateConstraint[Iterable[T]]):
+    item_constraint: Constraint[T]
     message: str = ""
 
     def __post_init__(self):
-        if not isinstance(self.item_validator, Validator) and isinstance(
-            self.item_validator, Callable
+        if not isinstance(self.item_constraint, Constraint) and isinstance(
+            self.item_constraint, Callable
         ):
-            self.item_validator = FunctionValidator(self.item_validator)
+            self.item_constraint = FunctionConstraint(self.item_constraint)
         if not self.message:
-            self.message = f"Each item {str(self.item_validator).lower()}."
+            self.message = f"Each item {str(self.item_constraint).lower()}."
 
     def predicate(self, value: Iterable[T]) -> bool:
         return isinstance(value, Iterable) and all(
-            self.item_validator.validate(item) for item in value
+            self.item_constraint.validate(item) for item in value
         )
 
 
-is_int = TypeValidator(int, "Must be an integer.")
-is_str = TypeValidator(str, "Must be a string.")
-is_date = TypeValidator(date, "Must be a date.")
-is_list = TypeValidator(list, "Must be a list.")
+is_int = TypeConstraint(int, "Must be an integer.")
+is_str = TypeConstraint(str, "Must be a string.")
+is_date = TypeConstraint(date, "Must be a date.")
+is_list = TypeConstraint(list, "Must be a list.")
 each_item_is_str = EachItem(is_str)
 
 
-@validator("Must not be set.")
+@constraint("Must not be set.")
 def is_null(value: Any) -> bool:
     return value is None
 
 
-class ValidatorMap(Mapping[tuple[str, ...], Validator]):
+class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
     def __init__(
         self,
-        top_validator: Validator = Valid,
-        sub_maps: Mapping[str, ValidatorMap] = None,
+        top_constraint: Constraint = Valid,
+        sub_maps: Mapping[str, ConstraintMap] = None,
     ) -> None:
-        self.top_validator = top_validator
+        self.top_constraint = top_constraint
         self.sub_maps = sub_maps or {}
 
-    def __getitem__(self, item: Sequence[str]) -> Validator:
+    def __getitem__(self, item: Sequence[str]) -> Constraint:
         if not item:
-            return self.top_validator
+            return self.top_constraint
         try:
             return self.sub_maps[item[0]][item[1:]]
         except KeyError:
             return Valid
 
     def __iter__(self) -> Iterable[tuple[str, ...]]:
-        if self.top_validator is not Valid:
+        if self.top_constraint is not Valid:
             yield ()
         for k1, sub_map in self.sub_maps.items():
             for k2 in sub_map:
@@ -252,16 +248,16 @@ class ValidatorMap(Mapping[tuple[str, ...], Validator]):
         return all(self.values())
 
     def __and__(self, other):
-        if not isinstance(other, ValidatorMap):
+        if not isinstance(other, ConstraintMap):
             raise NotImplementedError
-        top_validator = self.top_validator & other.top_validator
+        top_constraint = self.top_constraint & other.top_constraint
         sub_maps = self.sub_maps.copy()
         for k, v in other.sub_maps.items():
             if k in sub_maps:
                 sub_maps[k] &= v
             else:
                 sub_maps[k] = v
-        return ValidatorMap(top_validator, sub_maps)
+        return ConstraintMap(top_constraint, sub_maps)
 
     def __str__(self):
         return "\n".join([f"{'.'.join(k)}: {v}" for k, v in self.items()])
