@@ -9,3 +9,7 @@ class FormErrors(Exception):
 
     def as_dict(self) -> dict[str, str]:
         return {".".join(k): str(v) for k, v in self.error_map.items()}
+
+
+class SerializationError(Exception):
+    pass

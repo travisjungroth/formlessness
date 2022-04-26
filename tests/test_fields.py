@@ -1,7 +1,6 @@
 import pytest
 
-from formlessness.deserializers import SerializationError
-from formlessness.exceptions import FormErrors
+from formlessness.exceptions import FormErrors, SerializationError
 from formlessness.fields import CommaListStrField, IntField
 
 

@@ -4,6 +4,7 @@ from abc import ABC
 from dataclasses import dataclass
 from typing import Any, Callable, Generic
 
+from formlessness.exceptions import SerializationError
 from formlessness.types import D, T
 
 
@@ -25,10 +26,6 @@ def deserializer(error_message: str):
         return FunctionDeserializer(function, error_message)
 
     return f
-
-
-class SerializationError(Exception):
-    pass
 
 
 @dataclass
