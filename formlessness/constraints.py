@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable, Container, Generic, Iterable, Mapping, Sequence
@@ -9,9 +9,11 @@ from formlessness.types import T
 
 
 class Constraint(Generic[T], ABC):
-    @abstractmethod
     def validate(self, value: T) -> Constraint:
-        pass
+        return Valid if self.satisfied_by(value) else self
+
+    def satisfied_by(self, value: T) -> bool:
+        return bool(self.validate(value))
 
     def __bool__(self) -> bool:
         return False
@@ -28,7 +30,7 @@ class Constraint(Generic[T], ABC):
 
 def constraint(message: str) -> Callable[[], FunctionConstraint]:
     """
-    Decorator to make a Constraints from a function.
+    Decorator to make a Constraint from a function.
     """
 
     def f(function):
@@ -122,26 +124,8 @@ class And(Constraint[T]):
         return And(constraints)
 
 
-class PredicateConstraint(Constraint[T], ABC):
-    """
-    Implement the predicate method to return True if valid.
-    """
-
-    message: str
-
-    @abstractmethod
-    def predicate(self, value: T) -> bool:
-        pass
-
-    def validate(self, value: T) -> Constraint:
-        return Valid if self.predicate(value) else self
-
-    def __str__(self) -> str:
-        return self.message
-
-
 @dataclass
-class FunctionConstraint(PredicateConstraint[T]):
+class FunctionConstraint(Constraint[T]):
     """
     Pass in a predicate function that takes a value and returns True if valid.
     """
@@ -157,12 +141,15 @@ class FunctionConstraint(PredicateConstraint[T]):
         # Preserve the function, should do wraps or something maybe
         return self.function(*args, **kwargs)
 
-    def predicate(self, value: T) -> bool:
+    def satisfied_by(self, value: T) -> bool:
         return self.function(value)
+
+    def __str__(self):
+        return self.message
 
 
 @dataclass
-class TypeConstraint(PredicateConstraint[T]):
+class TypeConstraint(Constraint[T]):
     """
     Do an isinstance check against a type.
     """
@@ -173,21 +160,27 @@ class TypeConstraint(PredicateConstraint[T]):
     def __post_init__(self):
         self.message = self.message.format(self.type_.__qualname__)
 
-    def predicate(self, value: T) -> bool:
+    def satisfied_by(self, value: T) -> bool:
         return isinstance(value, self.type_)
+
+    def __str__(self):
+        return self.message
 
 
 @dataclass
-class ChoicesConstraint(PredicateConstraint[T]):
+class ChoicesConstraint(Constraint[T]):
     choices: Container
     message: str = "Must be a valid choice."
 
-    def predicate(self, value: T) -> bool:
+    def satisfied_by(self, value: T) -> bool:
         return value in self.choices
+
+    def __str__(self):
+        return self.message
 
 
 @dataclass
-class EachItem(PredicateConstraint[Iterable[T]]):
+class EachItem(Constraint[Iterable[T]]):
     item_constraint: Constraint[T]
     message: str = ""
 
@@ -199,10 +192,13 @@ class EachItem(PredicateConstraint[Iterable[T]]):
         if not self.message:
             self.message = f"Each item {str(self.item_constraint).lower()}."
 
-    def predicate(self, value: Iterable[T]) -> bool:
+    def satisfied_by(self, value: Iterable[T]) -> bool:
         return isinstance(value, Iterable) and all(
             self.item_constraint.validate(item) for item in value
         )
+
+    def __str__(self):
+        return self.message
 
 
 is_int = TypeConstraint(int, "Must be an integer.")
