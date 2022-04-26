@@ -7,7 +7,7 @@ from formlessness.constraints import (
     And,
     ChoicesConstraint,
     Constraint,
-    each_item_is_str,
+    is_list_of_str,
     is_date,
     is_int,
     is_list,
@@ -142,5 +142,5 @@ class CommaListStrField(BasicField[str, list[str]]):
         lambda x: [y for y in x.split(",") if y], "Must be a string."
     )
     default_data_constraints = (is_str,)
-    default_object_constraints = (is_list, each_item_is_str)
+    default_object_constraints = (is_list_of_str,)
     default_widget = Widget.TEXT_BOX

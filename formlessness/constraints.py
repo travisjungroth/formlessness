@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, Sequence
+from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, Sequence, Set
 
 from formlessness.types import T
 
@@ -18,12 +18,16 @@ class Constraint(Generic[T], ABC):
 
     One or both of satisfied_by() and validate() must be implemented.
     """
+    requires: Iterable[Constraint] = ()
+
+    def check_requirements(self, value: T) -> bool:
+        return all(x.satisfied_by(value) for x in self.requires)
 
     def satisfied_by(self, value: T) -> bool:
         """
         Returns True iff the value satisfies this Constraint.
         """
-        return bool(self.validate(value))
+        return self.check_requirements(value) and bool(self.validate(value))
 
     def validate(self, value: T) -> Constraint:
         """
@@ -99,6 +103,7 @@ class FunctionConstraint(Constraint[T]):
 
     function: Callable[[T], bool]
     message: str = ""
+    requires: Iterable[Constraint] = ()
 
     def __post_init__(self):
         if not self.message:
@@ -109,23 +114,23 @@ class FunctionConstraint(Constraint[T]):
         return self.function(*args, **kwargs)
 
     def satisfied_by(self, value: T) -> bool:
-        return self.function(value)
+        return self.check_requirements(value) and self.function(value)
 
     def __str__(self):
         return self.message
 
 
-def constraint(message: str) -> Callable[[Callable[[T], bool]], FunctionConstraint[T]]:
+def constraint(message: str ='', requires: Iterable[Constraint]= ()) -> Callable[[Callable[[T], bool]], FunctionConstraint[T]]:
     """
     Decorator to make a Constraint from a function.
 
-    @constraint("Must be uppercase.")
+    @constraint("Must be uppercase.", requires=[is_str])
     def is_uppercase(value: str) -> bool:
         return value.isupper()
     """
 
     def f(function: Callable[[T], bool]) -> FunctionConstraint[T]:
-        return FunctionConstraint(function, message)
+        return FunctionConstraint(function, message, requires)
 
     return f
 
@@ -137,10 +142,7 @@ class TypeConstraint(Constraint[T]):
     """
 
     type_: type
-    message: str = "Must be a {}."
-
-    def __post_init__(self):
-        self.message = self.message.format(self.type_.__qualname__)
+    message: str
 
     def satisfied_by(self, value: T) -> bool:
         return isinstance(value, self.type_)
@@ -207,12 +209,13 @@ class And(Constraint[T]):
     """
 
     constraints: Sequence[Constraint]
+    message: str = ''
 
     def validate(self, value: T) -> Constraint:
         return And([v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return "\nand\n".join(map(str, self.constraints))
+        return self.message or "\nand\n".join(map(str, self.constraints))
 
     def __bool__(self):
         return all(self.constraints)
@@ -246,14 +249,19 @@ class EachItem(Constraint[Iterable[T]]):
     def __post_init__(self):
         if not self.message:
             self.message = f"Each item {str(self.item_constraint).lower()}."
+        self.requires = [is_iterable]
 
     def satisfied_by(self, value: Iterable[T]) -> bool:
-        return isinstance(value, Iterable) and all(
+        return self.check_requirements(value) and all(
             self.item_constraint.validate(item) for item in value
         )
 
     def __str__(self):
         return self.message
+
+
+def is_list_of(constraint: Constraint, message: str) -> Constraint:
+    return And([is_list, EachItem(constraint)], message=message)
 
 
 """
@@ -336,7 +344,8 @@ is_str = TypeConstraint(str, "Must be a string.")
 is_date = TypeConstraint(date, "Must be a date.")
 is_list = TypeConstraint(list, "Must be a list.")
 is_dict = TypeConstraint(dict, "Must be a dictionary.")
-each_item_is_str = EachItem(is_str)
+is_iterable = TypeConstraint(Iterable, 'Must be iterable.')
+is_list_of_str = is_list_of(is_str, 'Must be a list of strings.')
 
 
 @constraint("Must not be set.")
