@@ -17,7 +17,9 @@ class Deserializer(Generic[D, T], ABC):
         return data
 
 
-def deserializer(error_message: str):
+def deserializer(
+    error_message: str,
+) -> Callable[[Callable[[D], T]], FunctionDeserializer[D, T]]:
     """
     Decorator to turn a function into a deserializer.
     """

@@ -115,7 +115,7 @@ class FunctionConstraint(Constraint[T]):
         return self.message
 
 
-def constraint(message: str) -> Callable[[Callable[[Any], bool]], FunctionConstraint]:
+def constraint(message: str) -> Callable[[Callable[[T], bool]], FunctionConstraint[T]]:
     """
     Decorator to make a Constraint from a function.
 
@@ -124,7 +124,7 @@ def constraint(message: str) -> Callable[[Callable[[Any], bool]], FunctionConstr
         return value.isupper()
     """
 
-    def f(function):
+    def f(function: Callable[[T], bool]) -> FunctionConstraint[T]:
         return FunctionConstraint(function, message)
 
     return f
