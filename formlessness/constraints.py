@@ -7,6 +7,10 @@ from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, 
 
 from formlessness.types import T
 
+"""
+Base class
+"""
+
 
 class Constraint(Generic[T], ABC):
     def validate(self, value: T) -> Constraint:
@@ -28,15 +32,9 @@ class Constraint(Generic[T], ABC):
         return self
 
 
-def constraint(message: str) -> Callable[[], FunctionConstraint]:
-    """
-    Decorator to make a Constraint from a function.
-    """
-
-    def f(function):
-        return FunctionConstraint(function, message)
-
-    return f
+"""
+Simple Constraints
+"""
 
 
 class ValidClass(Constraint[Any]):
@@ -64,6 +62,77 @@ class ValidClass(Constraint[Any]):
 
 
 Valid: Final[ValidClass] = ValidClass()
+
+
+@dataclass
+class FunctionConstraint(Constraint[T]):
+    """
+    Pass in a predicate function that takes a value and returns True if valid.
+    """
+
+    function: Callable[[T], bool]
+    message: str = ""
+
+    def __post_init__(self):
+        if not self.message:
+            self.message = f"Must pass `{self.function.__qualname__}` constraint."
+
+    def __call__(self, *args, **kwargs):
+        # Preserve the function, should do wraps or something maybe
+        return self.function(*args, **kwargs)
+
+    def satisfied_by(self, value: T) -> bool:
+        return self.function(value)
+
+    def __str__(self):
+        return self.message
+
+
+def constraint(message: str) -> Callable[[], FunctionConstraint]:
+    """
+    Decorator to make a Constraint from a function.
+    """
+
+    def f(function):
+        return FunctionConstraint(function, message)
+
+    return f
+
+
+@dataclass
+class TypeConstraint(Constraint[T]):
+    """
+    Do an isinstance check against a type.
+    """
+
+    type_: type
+    message: str
+
+    def __post_init__(self):
+        self.message = self.message.format(self.type_.__qualname__)
+
+    def satisfied_by(self, value: T) -> bool:
+        return isinstance(value, self.type_)
+
+    def __str__(self):
+        return self.message
+
+
+@dataclass
+class ChoicesConstraint(Constraint[T]):
+    choices: Container
+    message: str = "Must be a valid choice."
+
+    def satisfied_by(self, value: T) -> bool:
+        return value in self.choices
+
+    def __str__(self):
+        return self.message
+
+
+"""
+Complex Constraints
+"""
 
 
 @dataclass
@@ -135,61 +204,6 @@ class And(Constraint[T]):
 
 
 @dataclass
-class FunctionConstraint(Constraint[T]):
-    """
-    Pass in a predicate function that takes a value and returns True if valid.
-    """
-
-    function: Callable[[T], bool]
-    message: str = ""
-
-    def __post_init__(self):
-        if not self.message:
-            self.message = f"Must pass `{self.function.__qualname__}` constraint."
-
-    def __call__(self, *args, **kwargs):
-        # Preserve the function, should do wraps or something maybe
-        return self.function(*args, **kwargs)
-
-    def satisfied_by(self, value: T) -> bool:
-        return self.function(value)
-
-    def __str__(self):
-        return self.message
-
-
-@dataclass
-class TypeConstraint(Constraint[T]):
-    """
-    Do an isinstance check against a type.
-    """
-
-    type_: type
-    message: str
-
-    def __post_init__(self):
-        self.message = self.message.format(self.type_.__qualname__)
-
-    def satisfied_by(self, value: T) -> bool:
-        return isinstance(value, self.type_)
-
-    def __str__(self):
-        return self.message
-
-
-@dataclass
-class ChoicesConstraint(Constraint[T]):
-    choices: Container
-    message: str = "Must be a valid choice."
-
-    def satisfied_by(self, value: T) -> bool:
-        return value in self.choices
-
-    def __str__(self):
-        return self.message
-
-
-@dataclass
 class EachItem(Constraint[Iterable[T]]):
     item_constraint: Constraint[T]
     message: str = ""
@@ -211,16 +225,9 @@ class EachItem(Constraint[Iterable[T]]):
         return self.message
 
 
-is_int = TypeConstraint(int, "Must be an integer.")
-is_str = TypeConstraint(str, "Must be a string.")
-is_date = TypeConstraint(date, "Must be a date.")
-is_list = TypeConstraint(list, "Must be a list.")
-each_item_is_str = EachItem(is_str)
-
-
-@constraint("Must not be set.")
-def is_null(value: Any) -> bool:
-    return value is None
+"""
+Constraint Collections
+"""
 
 
 class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
@@ -267,3 +274,20 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
 
     def __str__(self):
         return "\n".join([f"{'.'.join(k)}: {v}" for k, v in self.items()])
+
+
+"""
+Constraint instances
+"""
+
+
+is_int = TypeConstraint(int, "Must be an integer.")
+is_str = TypeConstraint(str, "Must be a string.")
+is_date = TypeConstraint(date, "Must be a date.")
+is_list = TypeConstraint(list, "Must be a list.")
+each_item_is_str = EachItem(is_str)
+
+
+@constraint("Must not be set.")
+def is_null(value: Any) -> bool:
+    return value is None
