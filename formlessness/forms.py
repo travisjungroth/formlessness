@@ -59,16 +59,20 @@ class BasicForm(Form[JSONDict, T]):
         self.children = {child.key: child for child in children}
 
     def validate_data(self, data: JSONDict) -> ConstraintMap:
-        sub_maps = {}
+        child_constraints = {}
         for child, child_data in self.converter_to_sub_data(data).items():
-            sub_maps[child.key] = child.validate_data(child_data)
-        return super().validate_data(data) & ConstraintMap(sub_maps=sub_maps)
+            child_constraints[child.key] = child.validate_data(child_data)
+        return super().validate_data(data) & ConstraintMap(
+            child_constraints=child_constraints
+        )
 
     def validate_object(self, obj: T) -> ConstraintMap:
-        sub_maps = {}
+        child_constraints = {}
         for child, child_data in self.converter_to_sub_object(obj).items():
-            sub_maps[child.key] = child.validate_object(child_data)
-        return super().validate_object(obj) & ConstraintMap(sub_maps=sub_maps)
+            child_constraints[child.key] = child.validate_object(child_data)
+        return super().validate_object(obj) & ConstraintMap(
+            child_constraints=child_constraints
+        )
 
     def deserialize(self, data: JSONDict) -> T:
         # Todo: build and raise ErrorMap

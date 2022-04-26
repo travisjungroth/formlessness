@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
 from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, Sequence
@@ -13,13 +13,32 @@ Base class
 
 
 class Constraint(Generic[T], ABC):
-    def validate(self, value: T) -> Constraint:
-        return Valid if self.satisfied_by(value) else self
+    """
+
+
+    One or both of satisfied_by() and validate() must be implemented.
+    """
 
     def satisfied_by(self, value: T) -> bool:
+        """
+        Returns True iff the value satisfies this Constraint.
+        """
         return bool(self.validate(value))
 
+    def validate(self, value: T) -> Constraint:
+        """
+        Returns the remaining Constraints that must be satisfied for this value to satisfy this Constraint.
+
+        This method tells you what's "wrong" with the provided value. If the value satisfies the Constraint, this method
+        will return a truthy Constraint. The default implementation will work for most simple Constraints, and will need
+        to be replaced for complex Constraints.
+        """
+        return Valid if self.satisfied_by(value) else self
+
     def __bool__(self) -> bool:
+        """
+        Returns True iff this Constraint is always satisfied.
+        """
         return False
 
     def __and__(self, other: Constraint) -> Constraint:
@@ -29,7 +48,14 @@ class Constraint(Generic[T], ABC):
         return Or([self, other])
 
     def simplify(self) -> Constraint:
+        """
+        Returns a functionally identical but reduced Constraint.
+        """
         return self
+
+    @abstractmethod
+    def __str__(self):
+        pass
 
 
 """
@@ -38,6 +64,10 @@ Simple Constraints
 
 
 class ValidClass(Constraint[Any]):
+    """
+    This is the canonical Constraint that is always satisfied. Equivalent to true, top, ⊤, unit, 1, etc.
+    """
+
     __singleton: ValidClass
 
     def __new__(cls):
@@ -48,17 +78,14 @@ class ValidClass(Constraint[Any]):
     def validate(self, value: Any) -> True:
         return self
 
-    def satisfied_by(self, value: T) -> bool:
+    def satisfied_by(self, value: Any) -> bool:
         return True
 
     def __bool__(self) -> bool:
         return True
 
-    def __or__(self, other):
-        return self
-
-    def __and__(self, other):
-        return other
+    def __str__(self):
+        return "Valid"
 
 
 Valid: Final[ValidClass] = ValidClass()
@@ -67,7 +94,7 @@ Valid: Final[ValidClass] = ValidClass()
 @dataclass
 class FunctionConstraint(Constraint[T]):
     """
-    Pass in a predicate function that takes a value and returns True if valid.
+    Pass in a predicate function that takes a value and returns True if satisfied.
     """
 
     function: Callable[[T], bool]
@@ -78,7 +105,7 @@ class FunctionConstraint(Constraint[T]):
             self.message = f"Must pass `{self.function.__qualname__}` constraint."
 
     def __call__(self, *args, **kwargs):
-        # Preserve the function, should do wraps or something maybe
+        # todo: preserve the function metadata, perhaps with functools.wraps.
         return self.function(*args, **kwargs)
 
     def satisfied_by(self, value: T) -> bool:
@@ -88,9 +115,13 @@ class FunctionConstraint(Constraint[T]):
         return self.message
 
 
-def constraint(message: str) -> Callable[[], FunctionConstraint]:
+def constraint(message: str) -> Callable[[Callable[[Any], bool]], FunctionConstraint]:
     """
     Decorator to make a Constraint from a function.
+
+    @constraint("Must be uppercase.")
+    def is_uppercase(value: str) -> bool:
+        return value.isupper()
     """
 
     def f(function):
@@ -106,7 +137,7 @@ class TypeConstraint(Constraint[T]):
     """
 
     type_: type
-    message: str
+    message: str = "Must be a {}."
 
     def __post_init__(self):
         self.message = self.message.format(self.type_.__qualname__)
@@ -138,7 +169,7 @@ Complex Constraints
 @dataclass
 class Or(Constraint[T]):
     """
-    Combine multiple Constraints, and one needs to pass.
+    Combine multiple Constraints, and one must be satisfied.
     """
 
     constraints: Sequence[Constraint]
@@ -172,7 +203,7 @@ class Or(Constraint[T]):
 @dataclass
 class And(Constraint[T]):
     """
-    Combine multiple Constraints together that must pass.
+    Combine multiple Constraints, and all must be satisfied.
     """
 
     constraints: Sequence[Constraint]
@@ -205,14 +236,14 @@ class And(Constraint[T]):
 
 @dataclass
 class EachItem(Constraint[Iterable[T]]):
+    """
+    Check a Constraint against all items of an Iterable.
+    """
+
     item_constraint: Constraint[T]
     message: str = ""
 
     def __post_init__(self):
-        if not isinstance(self.item_constraint, Constraint) and isinstance(
-            self.item_constraint, Callable
-        ):
-            self.item_constraint = FunctionConstraint(self.item_constraint)
         if not self.message:
             self.message = f"Each item {str(self.item_constraint).lower()}."
 
@@ -231,26 +262,41 @@ Constraint Collections
 
 
 class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
+    """
+    This is meant to be used alongside Forms.
+    The key is a path to the Form or Field. The value is the corresponding Constraint.
+    defaults to Valid on missing keys.
+
+    >>> field_constraint_map = ConstraintMap(is_int)
+    >>> form_constraint_map = ConstraintMap(is_dict, {'field_key': field_constraint_map})
+    >>> str(form_constraint_map[('field_key',)])
+    'Must be an integer.'
+    >>> str(form_constraint_map[()])
+    'Must be a dictionary.'
+    >>> str(form_constraint_map[('field_key', 'additional_key')])
+    'Valid'
+    """
+
     def __init__(
         self,
         top_constraint: Constraint = Valid,
-        sub_maps: Mapping[str, ConstraintMap] = None,
+        child_constraints: Mapping[str, ConstraintMap] = None,
     ) -> None:
-        self.top_constraint = top_constraint
-        self.sub_maps = sub_maps or {}
+        self._top_constraint = top_constraint
+        self._sub_maps = child_constraints or {}
 
     def __getitem__(self, item: Sequence[str]) -> Constraint:
         if not item:
-            return self.top_constraint
+            return self._top_constraint
         try:
-            return self.sub_maps[item[0]][item[1:]]
+            return self._sub_maps[item[0]][item[1:]]
         except KeyError:
             return Valid
 
     def __iter__(self) -> Iterable[tuple[str, ...]]:
-        if self.top_constraint is not Valid:
+        if self._top_constraint is not Valid:
             yield ()
-        for k1, sub_map in self.sub_maps.items():
+        for k1, sub_map in self._sub_maps.items():
             for k2 in sub_map:
                 yield (k1,) + k2
 
@@ -260,12 +306,15 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
     def __bool__(self):
         return all(self.values())
 
-    def __and__(self, other):
+    def __and__(self, other: ConstraintMap) -> ConstraintMap:
+        """
+        Like a dict union, but values in both are combined with & instead of replaced.
+        """
         if not isinstance(other, ConstraintMap):
             raise NotImplementedError
-        top_constraint = self.top_constraint & other.top_constraint
-        sub_maps = self.sub_maps.copy()
-        for k, v in other.sub_maps.items():
+        top_constraint = self._top_constraint & other._top_constraint
+        sub_maps = self._sub_maps.copy()
+        for k, v in other._sub_maps.items():
             if k in sub_maps:
                 sub_maps[k] &= v
             else:
@@ -285,6 +334,7 @@ is_int = TypeConstraint(int, "Must be an integer.")
 is_str = TypeConstraint(str, "Must be a string.")
 is_date = TypeConstraint(date, "Must be a date.")
 is_list = TypeConstraint(list, "Must be a list.")
+is_dict = TypeConstraint(dict, "Must be a dictionary.")
 each_item_is_str = EachItem(is_str)
 
 
