@@ -3,7 +3,17 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, Sequence, Set
+from typing import (
+    Any,
+    Callable,
+    Container,
+    Final,
+    Generic,
+    Iterable,
+    Mapping,
+    Sequence,
+    Set,
+)
 
 from formlessness.types import T
 
@@ -18,6 +28,7 @@ class Constraint(Generic[T], ABC):
 
     One or both of satisfied_by() and validate() must be implemented.
     """
+
     requires: Iterable[Constraint] = ()
 
     def check_requirements(self, value: T) -> bool:
@@ -46,7 +57,7 @@ class Constraint(Generic[T], ABC):
         return False
 
     def __and__(self, other: Constraint) -> Constraint:
-        return And([self, other])
+        return And(self, other)
 
     def __or__(self, other: Constraint) -> Constraint:
         return Or([self, other])
@@ -120,7 +131,9 @@ class FunctionConstraint(Constraint[T]):
         return self.message
 
 
-def constraint(message: str ='', requires: Iterable[Constraint]= ()) -> Callable[[Callable[[T], bool]], FunctionConstraint[T]]:
+def constraint(
+    message: str = "", requires: Iterable[Constraint] = ()
+) -> Callable[[Callable[[T], bool]], FunctionConstraint[T]]:
     """
     Decorator to make a Constraint from a function.
 
@@ -209,10 +222,14 @@ class And(Constraint[T]):
     """
 
     constraints: Sequence[Constraint]
-    message: str = ''
+    message: str = ""
+
+    def __init__(self, *constraints, message: str = ""):
+        self.constraints: Sequence[Constraint] = constraints
+        self.message = message
 
     def validate(self, value: T) -> Constraint:
-        return And([v.validate(value) for v in self.constraints]).simplify()
+        return And(*[v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
         return self.message or "\nand\n".join(map(str, self.constraints))
@@ -234,7 +251,7 @@ class And(Constraint[T]):
             return Valid
         if len(constraints) == 1:
             return constraints[0]
-        return And(constraints)
+        return And(*constraints)
 
 
 @dataclass
@@ -261,7 +278,7 @@ class EachItem(Constraint[Iterable[T]]):
 
 
 def is_list_of(constraint: Constraint, message: str) -> Constraint:
-    return And([is_list, EachItem(constraint)], message=message)
+    return And(is_list, EachItem(constraint), message=message)
 
 
 """
@@ -344,8 +361,8 @@ is_str = TypeConstraint(str, "Must be a string.")
 is_date = TypeConstraint(date, "Must be a date.")
 is_list = TypeConstraint(list, "Must be a list.")
 is_dict = TypeConstraint(dict, "Must be a dictionary.")
-is_iterable = TypeConstraint(Iterable, 'Must be iterable.')
-is_list_of_str = is_list_of(is_str, 'Must be a list of strings.')
+is_iterable = TypeConstraint(Iterable, "Must be iterable.")
+is_list_of_str = is_list_of(is_str, "Must be a list of strings.")
 
 
 @constraint("Must not be set.")

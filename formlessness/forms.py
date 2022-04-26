@@ -46,10 +46,10 @@ class BasicForm(Form[JSONDict, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.data_constraint = And(
-            [*self.default_data_constraints, *extra_data_constraints]
+            *self.default_data_constraints, *extra_data_constraints
         ).simplify()
         self.object_constraint = And(
-            [*self.default_object_constraints, *extra_object_constraints]
+            *self.default_object_constraints, *extra_object_constraints
         ).simplify()
         self.display_info = filter_display_info(
             {

@@ -66,10 +66,10 @@ class BasicField(Field[D, T]):
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
         self.data_constraint = And(
-            [*self.default_data_constraints, *extra_data_constraints]
+            *self.default_data_constraints, *extra_data_constraints
         )
         self.object_constraint = And(
-            [*self.default_object_constraints, *extra_object_constraints]
+            *self.default_object_constraints, *extra_object_constraints
         )
         self.choices = tuple(choices)
         data_choices = [self.serialize(choice) for choice in self.choices]
