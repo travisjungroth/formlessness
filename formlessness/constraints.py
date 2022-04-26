@@ -60,7 +60,7 @@ class Constraint(Generic[T], ABC):
         return And(self, other)
 
     def __or__(self, other: Constraint) -> Constraint:
-        return Or([self, other])
+        return Or(self, other)
 
     def simplify(self) -> Constraint:
         """
@@ -188,12 +188,17 @@ class Or(Constraint[T]):
     """
 
     constraints: Sequence[Constraint]
+    message: str = ''
+
+    def __init__(self, *constraints, message: str = ""):
+        self.constraints: Sequence[Constraint] = constraints
+        self.message = message
 
     def validate(self, value: T) -> Constraint:
-        return Or([v.validate(value) for v in self.constraints]).simplify()
+        return Or(*[v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return "\nor\n".join(map(str, self.constraints))
+        return self.message or "\nor\n".join(map(str, self.constraints))
 
     def __bool__(self):
         return any(self.constraints)
@@ -212,7 +217,7 @@ class Or(Constraint[T]):
                 constraints.extend(v.constraints)
             else:
                 constraints.append(v)
-        return Or(constraints)
+        return Or(*constraints)
 
 
 @dataclass
