@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 
 from formlessness.base_classes import Converter, Keyed, Parent
 from formlessness.constraints import And, Constraint, ConstraintMap
@@ -14,11 +14,15 @@ from formlessness.utils import key_and_label
 
 class Form(Parent, Converter[D, T], ABC):
     """
-    Abstract class for type hints.
+    Fields serialize objects, deserialize data, and generate their own Display.
+
+    They are different from Fields in that they're Parents i.e. they can contain Field, Forms and Sections.
+    This abstract class exists for type checking and if you want to deviate from the implementation of BasicForm.
     """
 
 
 class BasicForm(Form[JSONDict, T]):
+    # Defaults for instances of this class. Meant to be overridden by subclasses.
     default_serializer: Serializer
     default_deserializer: Deserializer
     default_data_constraints: tuple[Constraint[JSONDict], ...] = ()
@@ -26,16 +30,18 @@ class BasicForm(Form[JSONDict, T]):
 
     def __init__(
         self,
+        # Data to pass to the Display
         label: str = "",
         description: str = "",
         collapsable: bool = False,
         collapsed: bool = False,
+        # These constraints are added to the class defaults to create the two Constraints.
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
         deserializer: Deserializer[D, T] = None,
         key: str = "",
-        children: Iterable[Keyed] = (),
+        children: Sequence[Keyed] = (),
     ):
         key, label = key_and_label(key, label)
         self.key = key

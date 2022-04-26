@@ -1,6 +1,6 @@
 import pytest
 
-from formlessness.exceptions import FormErrors, SerializationError
+from formlessness.exceptions import DeserializationError, FormErrors
 from formlessness.fields import CommaListStrField, IntField
 
 
@@ -57,7 +57,7 @@ class TestCommaListStrField:
         assert field.deserialize(good_data) == good_obj
 
     def test_deserialize_error(self, field, bad_data):
-        with pytest.raises(SerializationError):
+        with pytest.raises(DeserializationError):
             field.deserialize(bad_data)  # noqa
 
     def test_make_object(self, field, good_data, good_obj):

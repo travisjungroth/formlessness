@@ -1,20 +1,14 @@
-"""
-Base classes that didn't seem to need their own module.
-"""
 from __future__ import annotations
 
 from abc import ABC
-from typing import TYPE_CHECKING, Any, Iterator, Mapping, Protocol, Union
+from typing import Any, Iterator, Mapping, Protocol, Union
 
 from formlessness.constraints import Constraint, ConstraintMap, Valid
 from formlessness.deserializers import Deserializer
-from formlessness.displayers import Displayer
+from formlessness.displayers import Display, Displayer
 from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
-
-if TYPE_CHECKING:
-    from formlessness.displayers import Display
 
 
 class Keyed(Protocol):
@@ -30,13 +24,14 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     """
 
     # Class level defaults for constraints. Other constraints are in addition.
-    # Constraints to run at the data and object state, respectively.
+    # Constraint to validate at the data and object state, respectively.
+    # This each of these is a single Constraint. Multiple Constraints are represented with constraints.And.
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
 
     def make_object(self, data: D) -> T:
         """
-        Turn data into an object (deserialize it), raising ValidationIssueMap if needed.
+        Turn data into an object (deserialize it), raising FormErrors if needed.
         """
         constraint_map = self.validate_data(data)
         if not constraint_map:

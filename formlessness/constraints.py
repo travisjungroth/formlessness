@@ -304,6 +304,7 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
         return sum(1 for _ in self)
 
     def __bool__(self):
+        """This follows the __bool__ logic of Constraints. Return True iff all Constraints are always satisfied."""
         return all(self.values())
 
     def __and__(self, other: ConstraintMap) -> ConstraintMap:

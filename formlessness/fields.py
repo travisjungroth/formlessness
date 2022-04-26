@@ -26,16 +26,19 @@ from formlessness.widgets import Widget
 
 class Field(Converter[D, T], Displayer[D], ABC):
     """
-    Abstract class. For type checks.
+    Fields serialize objects, deserialize data, and generate their own Display.
+
+    They are different from Forms in that they're not Parents i.e. they don't contain Fields, Forms or Sections.
+    This abstract class exists for type checking and if you want to deviate from the implementation of BasicField.
     """
 
 
 class BasicField(Field[D, T]):
     """
-    You can create a Field directly from this, or subclass to make a template.
+    You can create a Field directly from class, or subclass it to make a template.
     """
 
-    # Class-level defaults to override.
+    # Defaults for instances of this class. Meant to be overridden by subclasses.
     default_serializer: Serializer
     default_deserializer: Deserializer
     default_widget: Widget
@@ -44,13 +47,16 @@ class BasicField(Field[D, T]):
 
     def __init__(
         self,
+        # Data to pass to the Display
         label: str = "",
         description: str = "",
         shadow: str = "",
         widget: Widget = None,
+        # Choices are included in the Display and will add a ChoicesConstraint.
         choices: Iterable[T] = (),
+        # Adds a not_null Criteria
         required: bool = True,
-        # constraints to add to the class-level ones
+        # These constraints are added to the class defaults to create the two Constraints.
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -99,7 +105,7 @@ class BasicField(Field[D, T]):
     def deserialize(self, data: D) -> T:
         return self.deserializer.deserialize(data)
 
-    def display(self, data: D = None, path: list[str] = ()) -> Display:
+    def display(self, data: D = None, path: Sequence[str] = ()) -> Display:
         display = self.display_info | {"path": [*path, self.key]}
         if data is not None:
             display["value"] = data
