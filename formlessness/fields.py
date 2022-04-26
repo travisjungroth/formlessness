@@ -4,7 +4,7 @@ from abc import ABC
 from datetime import date
 from typing import Iterable, Sequence
 
-from formlessness.abstract_classes import Converter
+from formlessness.base_classes import Converter
 from formlessness.constraints import (
     And,
     ChoicesConstraint,

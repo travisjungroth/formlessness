@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from collections.abc import Iterable, Sequence
 
-from formlessness.abstract_classes import Converter, Keyed, Parent
+from formlessness.base_classes import Converter, Keyed, Parent
 from formlessness.constraints import And, Constraint, ConstraintMap
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import filter_display_info
