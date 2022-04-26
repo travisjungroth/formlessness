@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Callable, Container, Generic, Iterable, Mapping, Sequence
+from typing import Any, Callable, Container, Final, Generic, Iterable, Mapping, Sequence
 
 from formlessness.types import T
 
@@ -40,8 +40,18 @@ def constraint(message: str) -> Callable[[], FunctionConstraint]:
 
 
 class ValidClass(Constraint[Any]):
+    __singleton: ValidClass
+
+    def __new__(cls):
+        if not hasattr(cls, "__singleton"):
+            cls.__singleton = super().__new__(cls)
+        return cls.__singleton
+
     def validate(self, value: Any) -> True:
         return self
+
+    def satisfied_by(self, value: T) -> bool:
+        return True
 
     def __bool__(self) -> bool:
         return True
@@ -53,7 +63,7 @@ class ValidClass(Constraint[Any]):
         return other
 
 
-Valid = ValidClass()
+Valid: Final[ValidClass] = ValidClass()
 
 
 @dataclass
