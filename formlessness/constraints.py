@@ -24,21 +24,38 @@ Base class
 
 class Constraint(Generic[T], ABC):
     """
+    Constraints are rules that can be satisfied by values.
+    >>> is_int.satisfied_by(0)
+    True
 
+    Constraints can be made from other Constraints. These are complex, as opposed to simple.
+    >>> Or(is_int, is_str).satisfied_by(0.5)
+    False
 
-    One or both of satisfied_by() and validate() must be implemented.
+    Validating a Constraint tells you what's unsatisfying about the value.
+    >>> is_list_of_strings = is_list & EachItem(is_str)
+    >>> str(is_list_of_strings.validate({'1', '2'}))
+    'Must be a list.'
+
+    Constraints that are satisfied by all values are truthy. Others are falsy.
+    >>> bool(Or() and And() and Valid)
+    True
+
+    When implementing a Constraint class, one or both of satisfied_by() and validate() must be implemented.
     """
 
+    # The Constraints that must always be checked before this Constraint is checked.
+    # Use this to avoid duplicating checks, like type checks.
     requires: Iterable[Constraint] = ()
 
-    def check_requirements(self, value: T) -> bool:
+    def requirements_satisfied_by(self, value: T) -> bool:
         return all(x.satisfied_by(value) for x in self.requires)
 
     def satisfied_by(self, value: T) -> bool:
         """
         Returns True iff the value satisfies this Constraint.
         """
-        return self.check_requirements(value) and bool(self.validate(value))
+        return self.requirements_satisfied_by(value) and bool(self.validate(value))
 
     def validate(self, value: T) -> Constraint:
         """
@@ -125,7 +142,7 @@ class FunctionConstraint(Constraint[T]):
         return self.function(*args, **kwargs)
 
     def satisfied_by(self, value: T) -> bool:
-        return self.check_requirements(value) and self.function(value)
+        return self.requirements_satisfied_by(value) and self.function(value)
 
     def __str__(self):
         return self.message
@@ -212,7 +229,7 @@ class Or(Constraint[T]):
         return self.message or "\nor\n".join(map(str, self.constraints))
 
     def __bool__(self):
-        return any(self.constraints)
+        return not self.constraints or any(self.constraints)
 
     def simplify(self) -> Constraint:
         if not self.constraints:
@@ -285,7 +302,7 @@ class EachItem(Constraint[Iterable[T]]):
         self.requires = [is_iterable]
 
     def satisfied_by(self, value: Iterable[T]) -> bool:
-        return self.check_requirements(value) and all(
+        return self.requirements_satisfied_by(value) and all(
             self.item_constraint.validate(item) for item in value
         )
 
