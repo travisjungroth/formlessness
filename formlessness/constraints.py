@@ -6,13 +6,13 @@ from datetime import date
 from typing import (
     Any,
     Callable,
+    ClassVar,
     Container,
     Final,
     Generic,
     Iterable,
     Mapping,
     Sequence,
-    Set,
 )
 
 from formlessness.types import T
@@ -156,6 +156,17 @@ class TypeConstraint(Constraint[T]):
 
     type_: type
     message: str
+    _instances: ClassVar[dict[type, TypeConstraint]] = {}
+
+    def __post_init__(self):
+        self._instances[self.type_] = self
+
+    @classmethod
+    def get(cls, type_: type) -> TypeConstraint:
+        try:
+            return cls._instances[type_]
+        except KeyError:
+            return cls(type_, f"Must be of type {type_}.")
 
     def satisfied_by(self, value: T) -> bool:
         return isinstance(value, self.type_)
@@ -188,7 +199,7 @@ class Or(Constraint[T]):
     """
 
     constraints: Sequence[Constraint]
-    message: str = ''
+    message: str = ""
 
     def __init__(self, *constraints, message: str = ""):
         self.constraints: Sequence[Constraint] = constraints
@@ -282,7 +293,7 @@ class EachItem(Constraint[Iterable[T]]):
         return self.message
 
 
-def is_list_of(constraint: Constraint, message: str) -> Constraint:
+def list_of(constraint: Constraint, message: str) -> Constraint:
     return And(is_list, EachItem(constraint), message=message)
 
 
@@ -367,7 +378,8 @@ is_date = TypeConstraint(date, "Must be a date.")
 is_list = TypeConstraint(list, "Must be a list.")
 is_dict = TypeConstraint(dict, "Must be a dictionary.")
 is_iterable = TypeConstraint(Iterable, "Must be iterable.")
-is_list_of_str = is_list_of(is_str, "Must be a list of strings.")
+is_list_of_str = list_of(is_str, "Must be a list of strings.")
+is_list_of_int = list_of(is_int, "Must be a list of integers.")
 
 
 @constraint("Must not be set.")

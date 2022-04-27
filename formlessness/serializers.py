@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import Callable, Generic, Protocol
+from typing import Callable, Generic, Iterable, Protocol
 
 from formlessness.types import D, JSONDict, T
 
@@ -32,6 +32,14 @@ class FunctionSerializer(Serializer[D, T]):
 
     def serialize(self, obj: T) -> D:
         return self.function(obj)
+
+
+@dataclass
+class JoinSerializer(Serializer[str, Iterable]):
+    separator: str
+
+    def serialize(self, obj: Iterable) -> str:
+        return self.separator.join(map(str, obj))
 
 
 class AsDict(Protocol):

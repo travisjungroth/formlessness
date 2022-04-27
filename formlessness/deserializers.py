@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
+from datetime import date
 from typing import Any, Callable, Generic
 
 from formlessness.exceptions import DeserializationError
@@ -55,3 +56,29 @@ class KwargsDeserializer(Deserializer[dict[str, Any], T]):
             return self.function(**data)
         except (TypeError, ValueError, AttributeError) as e:
             raise DeserializationError(self.error_message) from e
+
+
+@dataclass
+class SplitDeserializer(Deserializer[str, T]):
+    separator: str
+    cast_items: Callable = str
+    cast_list: Callable = list
+    error_message: str = ""
+
+    def __post_init__(self):
+        if not self.error_message:
+            self.error_message = f"Must be a {self.separator} separated list of {self.cast_items.__qualname__}."
+
+    def deserialize(self, data: str) -> T:
+        try:
+            items = data.split(self.separator)
+            items = [self.cast_items(item) for item in items if item]
+            items = self.cast_list(items)
+            return items
+        except (TypeError, ValueError, AttributeError) as e:
+            raise DeserializationError(self.error_message) from e
+
+
+@deserializer("Must be a valid date of YYYY-MM-DD.")
+def date_from_iso_str(value: str):
+    return date.fromisoformat(value)

@@ -7,16 +7,23 @@ from formlessness.constraints import (
     And,
     ChoicesConstraint,
     Constraint,
-    is_list_of_str,
+    EachItem,
+    TypeConstraint,
     is_date,
     is_int,
-    is_list,
+    is_list_of_int,
+    is_list_of_str,
     is_null,
     is_str,
 )
-from formlessness.deserializers import Deserializer, FunctionDeserializer
+from formlessness.deserializers import (
+    Deserializer,
+    FunctionDeserializer,
+    SplitDeserializer,
+    date_from_iso_str,
+)
 from formlessness.displayers import Display, Displayer, filter_display_info
-from formlessness.serializers import Serializer, serializer as serializer_decorator
+from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 from formlessness.widgets import Widget
@@ -111,7 +118,7 @@ class BasicField(Field[D, T]):
 
 
 class IntField(BasicField[int, int]):
-    default_serializer = serializer_decorator(int)
+    default_serializer = FunctionSerializer(int)
     default_deserializer = FunctionDeserializer(int, "Must be an integer.")
     default_data_constraints = (is_int,)
     default_object_constraints = (is_int,)
@@ -119,7 +126,7 @@ class IntField(BasicField[int, int]):
 
 
 class StrField(BasicField[str, str]):
-    default_serializer = serializer_decorator(str)
+    default_serializer = FunctionSerializer(str)
     default_deserializer = FunctionDeserializer(str, "Must be a string.")
     default_data_constraints = (is_str,)
     default_object_constraints = (is_str,)
@@ -127,20 +134,43 @@ class StrField(BasicField[str, str]):
 
 
 class DateField(BasicField[str, date]):
-    default_serializer = serializer_decorator(lambda d: d.isoformat())
-    default_deserializer = FunctionDeserializer(
-        date.fromisoformat, "Must be a valid date of YYYY-MM-DD."
-    )
+    default_serializer = FunctionSerializer(date.isoformat)
+    default_deserializer = date_from_iso_str
     default_data_constraints = (is_str,)
     default_object_constraints = (is_date,)
     default_widget = Widget.DATE_SELECTOR
 
 
 class CommaListStrField(BasicField[str, list[str]]):
-    default_serializer = serializer_decorator(lambda x: ",".join(x))
-    default_deserializer = FunctionDeserializer(
-        lambda x: [y for y in x.split(",") if y], "Must be a string."
-    )
+    default_serializer = JoinSerializer(",")
+    default_deserializer = SplitDeserializer(",")
     default_data_constraints = (is_str,)
     default_object_constraints = (is_list_of_str,)
     default_widget = Widget.TEXT_BOX
+
+
+class CommaListIntField(BasicField[str, list[int]]):
+    default_serializer = JoinSerializer(",")
+    default_deserializer = SplitDeserializer(
+        ",", cast_items=int, error_message="Must be a list of integers."
+    )
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_list_of_int,)
+    default_widget = Widget.TEXT_BOX
+
+
+def seperated_field(
+    separator: str, items_type: type = str, iterable_type: type = list, **kwargs
+) -> BasicField:
+    d = dict(
+        serializer=JoinSerializer(separator),
+        deserializer=SplitDeserializer(separator, items_type, iterable_type),
+        extra_data_constraints=[is_str] + kwargs.pop("extra_data_constraints", []),
+        extra_object_constraints=[
+            TypeConstraint.get(iterable_type),
+            EachItem(TypeConstraint.get(items_type)),
+        ]
+        + kwargs.pop("extra_object_constraints", []),
+        widget=Widget.TEXT_BOX,
+    )
+    return BasicField(**(d | kwargs))

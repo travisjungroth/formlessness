@@ -1,13 +1,16 @@
 import pytest
 
 from formlessness.exceptions import DeserializationError, FormErrors
-from formlessness.fields import CommaListStrField, IntField
+from formlessness.fields import CommaListStrField, IntField, seperated_field
 
 
 class TestCommaListStrField:
-    @pytest.fixture(scope="session")
-    def field(self):
-        return CommaListStrField("Label")
+    @pytest.fixture(
+        scope="session",
+        params=[CommaListStrField("Label"), seperated_field(",", label="Label")],
+    )
+    def field(self, request):
+        return request.param
 
     @pytest.fixture(params=[1, None, (), {}])
     def bad_data(self, request):
