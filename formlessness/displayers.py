@@ -5,7 +5,7 @@ It's recursive, with every component of a Form also having a Display.
 
 
 from abc import ABC, abstractmethod
-from typing import Generic, Sequence
+from typing import Generic
 
 from formlessness.types import D, JSONDict
 

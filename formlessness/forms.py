@@ -5,7 +5,7 @@ from formlessness.base_classes import Converter, Keyed, Parent
 from formlessness.constraints import And, Constraint, ConstraintMap
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import filter_display_info
-from formlessness.exceptions import FormErrors, DeserializationError
+from formlessness.exceptions import DeserializationError, FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
