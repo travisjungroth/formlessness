@@ -40,7 +40,7 @@ class Field(Converter[D, T], Displayer[D], ABC):
 
 class BasicField(Field[D, T]):
     """
-    You can create a Field directly from class, or subclass it to make a template.
+    You can create a Field directly from this class, or subclass it to make a template.
     """
 
     # Defaults for instances of this class. Meant to be overridden by subclasses.
