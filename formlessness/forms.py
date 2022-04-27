@@ -5,6 +5,7 @@ from formlessness.base_classes import Converter, Keyed, Parent
 from formlessness.constraints import And, Constraint, ConstraintMap
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import filter_display_info
+from formlessness.exceptions import FormErrors, DeserializationError
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
@@ -78,13 +79,22 @@ class BasicForm(Form[JSONDict, T]):
             child_constraints=child_constraints
         )
 
-    def deserialize(self, data: JSONDict) -> T:
-        # Todo: build and raise ErrorMap
-        data = {
-            child.key: child.deserialize(sub_data)
-            for child, sub_data in self.converter_to_sub_data(data).items()
-        }
-        return self.deserializer.deserialize(data)
+    def deserialize(self, data: JSONDict, path: Sequence[str] = ()) -> T:
+        new_data = {}
+        errors = {}
+        for child, sub_data in self.converter_to_sub_data(data).items():
+            try:
+                new_data[child.key] = child.deserialize(sub_data, [*path, child.key])
+            except FormErrors as e:
+                errors |= e.issues_map
+            except DeserializationError as e:
+                errors[tuple([*path, child.key])] = e
+        if errors:
+            raise FormErrors(errors)
+        try:
+            return self.deserializer.deserialize(new_data)
+        except DeserializationError as e:
+            raise FormErrors({tuple(path): e})
 
     def serialize(self, obj: T) -> JSONDict:
         data: JSONDict = {}
