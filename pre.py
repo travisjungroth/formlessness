@@ -16,4 +16,4 @@ while exit_code:
     exit_code = subprocess.run(["pre-commit", "run", "--all-files"]).returncode
     tries += 1
 if tries > 1:
-    subprocess.run(["git", "commit", "-am", "pre-commit"])
+    subprocess.run(["git", "commit", "-am", "autocommit from pre-commit changes"])
