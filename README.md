@@ -1,6 +1,6 @@
 # Formlessness
 
->Form is formlessness, formlessness is form.  
+>Form is formlessness, formlessness is form.
 
 --_The Heart Sutra_
 
