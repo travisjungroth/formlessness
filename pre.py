@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import subprocess
 
-if subprocess.run(["git", "status", "--untracked-files=no", "--porcelain"]).stdout:
+if subprocess.run(["git", "status", "--untracked-files=no", "--porcelain"], capture_output=True).stdout:
     print("Uncomitted changes.")
     exit(1)
 
