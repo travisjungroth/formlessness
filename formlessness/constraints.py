@@ -14,6 +14,7 @@ from typing import (
     Mapping,
     Sequence,
 )
+import operator
 
 from formlessness.types import T
 
