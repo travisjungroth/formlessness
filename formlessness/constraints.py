@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
+from operator import ge, gt, le, lt
 from typing import (
     Any,
     Callable,
@@ -14,7 +15,6 @@ from typing import (
     Mapping,
     Sequence,
 )
-from operator import lt, gt, le, ge
 
 from formlessness.types import T
 
