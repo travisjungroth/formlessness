@@ -167,20 +167,20 @@ def constraint(
 
 
 @dataclass
-class TypeConstraint(Constraint[T]):
+class OfType(Constraint[T]):
     """
     Do an isinstance check against a type.
     """
 
     type_: type
     message: str
-    _instances: ClassVar[dict[type, TypeConstraint]] = {}
+    _instances: ClassVar[dict[type, OfType]] = {}
 
     def __post_init__(self):
         self._instances[self.type_] = self
 
     @classmethod
-    def get(cls, type_: type) -> TypeConstraint:
+    def get(cls, type_: type) -> OfType:
         try:
             return cls._instances[type_]
         except KeyError:
@@ -194,7 +194,7 @@ class TypeConstraint(Constraint[T]):
 
 
 @dataclass
-class ChoicesConstraint(Constraint[T]):
+class Choices(Constraint[T]):
     choices: Container
     message: str = "Must be a valid choice."
 
@@ -206,7 +206,7 @@ class ChoicesConstraint(Constraint[T]):
 
 
 @dataclass
-class ComparisonConstraint(Constraint[T]):
+class Comparison(Constraint[T]):
     operand: T
     operator: ClassVar[Callable[[T, T], bool]]
     comparison_string: ClassVar[str]
@@ -222,7 +222,7 @@ class ComparisonConstraint(Constraint[T]):
 
 
 @dataclass
-class GT(ComparisonConstraint[T]):
+class GT(Comparison[T]):
     """
     Greater Than
 
@@ -239,7 +239,7 @@ class GT(ComparisonConstraint[T]):
 
 
 @dataclass
-class GE(ComparisonConstraint[T]):
+class GE(Comparison[T]):
     """
     Greater Than Or Equal To
     """
@@ -249,7 +249,7 @@ class GE(ComparisonConstraint[T]):
 
 
 @dataclass
-class LT(ComparisonConstraint[T]):
+class LT(Comparison[T]):
     """
     Less Than
     """
@@ -259,7 +259,7 @@ class LT(ComparisonConstraint[T]):
 
 
 @dataclass
-class LE(ComparisonConstraint[T]):
+class LE(Comparison[T]):
     """
     Less Than Or Equal To
     """
@@ -453,12 +453,12 @@ Constraint instances
 """
 
 
-is_int = TypeConstraint(int, "Must be an integer.")
-is_str = TypeConstraint(str, "Must be a string.")
-is_date = TypeConstraint(date, "Must be a date.")
-is_list = TypeConstraint(list, "Must be a list.")
-is_dict = TypeConstraint(dict, "Must be a dictionary.")
-is_iterable = TypeConstraint(Iterable, "Must be iterable.")
+is_int = OfType(int, "Must be an integer.")
+is_str = OfType(str, "Must be a string.")
+is_date = OfType(date, "Must be a date.")
+is_list = OfType(list, "Must be a list.")
+is_dict = OfType(dict, "Must be a dictionary.")
+is_iterable = OfType(Iterable, "Must be iterable.")
 is_list_of_str = list_of(is_str, "Must be a list of strings.")
 is_list_of_int = list_of(is_int, "Must be a list of integers.")
 
