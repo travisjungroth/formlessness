@@ -1,5 +1,5 @@
 from __future__ import annotations
-import operator
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import date
@@ -217,7 +217,7 @@ class ComparisonConstraint(Constraint[T]):
             return False
 
     def __str__(self):
-        return f'Must be {self.comparison_string} {self.operand}.'
+        return f"Must be {self.comparison_string} {self.operand}."
 
 
 @dataclass
@@ -232,8 +232,9 @@ class GT(ComparisonConstraint[T]):
     >>> GT(0).satisfied_by('1')
     False
     """
+
     operator: Callable[[T, T], bool] = operator.gt
-    comparison_string: str = 'greater than'
+    comparison_string: str = "greater than"
 
 
 @dataclass
@@ -241,8 +242,9 @@ class GE(ComparisonConstraint[T]):
     """
     Greater Than Or Equal To
     """
+
     operator: Callable[[T, T], bool] = operator.ge
-    comparison_string: str = 'greater than or equal to'
+    comparison_string: str = "greater than or equal to"
 
 
 @dataclass
@@ -250,8 +252,9 @@ class LT(ComparisonConstraint[T]):
     """
     Less Than
     """
+
     operator: Callable[[T, T], bool] = operator.lt
-    comparison_string: str = 'less than'
+    comparison_string: str = "less than"
 
 
 @dataclass
@@ -259,8 +262,9 @@ class LE(ComparisonConstraint[T]):
     """
     Less Than Or Equal To
     """
+
     operator: Callable[[T, T], bool] = operator.le
-    comparison_string: str = 'less than or equal to'
+    comparison_string: str = "less than or equal to"
 
 
 """
