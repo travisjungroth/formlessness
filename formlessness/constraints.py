@@ -14,6 +14,7 @@ from typing import (
     Mapping,
     Sequence,
 )
+from operator import lt, gt, le, ge
 
 from formlessness.types import T
 
@@ -233,7 +234,7 @@ class GT(ComparisonConstraint[T]):
     False
     """
 
-    operator: Callable[[T, T], bool] = operator.gt
+    operator: Callable[[T, T], bool] = gt
     comparison_string: str = "greater than"
 
 
@@ -243,7 +244,7 @@ class GE(ComparisonConstraint[T]):
     Greater Than Or Equal To
     """
 
-    operator: Callable[[T, T], bool] = operator.ge
+    operator: Callable[[T, T], bool] = ge
     comparison_string: str = "greater than or equal to"
 
 
@@ -253,7 +254,7 @@ class LT(ComparisonConstraint[T]):
     Less Than
     """
 
-    operator: Callable[[T, T], bool] = operator.lt
+    operator: Callable[[T, T], bool] = lt
     comparison_string: str = "less than"
 
 
@@ -263,7 +264,7 @@ class LE(ComparisonConstraint[T]):
     Less Than Or Equal To
     """
 
-    operator: Callable[[T, T], bool] = operator.le
+    operator: Callable[[T, T], bool] = le
     comparison_string: str = "less than or equal to"
 
 
