@@ -5,10 +5,10 @@ from typing import Iterable, Sequence
 from formlessness.base_classes import Converter
 from formlessness.constraints import (
     And,
-    ChoicesConstraint,
+    Choices,
     Constraint,
     EachItem,
-    TypeConstraint,
+    OfType,
     is_date,
     is_int,
     is_list_of_int,
@@ -57,7 +57,7 @@ class BasicField(Field[D, T]):
         description: str = "",
         shadow: str = "",
         widget: Widget = None,
-        # Choices are included in the Display and will add a ChoicesConstraint.
+        # Choices are included in the Display and will add a Choices.
         choices: Iterable[T] = (),
         # Adds a not_null Criteria
         required: bool = True,
@@ -81,8 +81,8 @@ class BasicField(Field[D, T]):
         self.choices = tuple(choices)
         data_choices = [self.serialize(choice) for choice in self.choices]
         if self.choices:
-            self.data_constraint &= ChoicesConstraint(data_choices)
-            self.object_constraint &= ChoicesConstraint(self.choices)
+            self.data_constraint &= Choices(data_choices)
+            self.object_constraint &= Choices(self.choices)
         self.required = required
         if not self.required:
             self.data_constraint |= is_null
@@ -167,8 +167,8 @@ def seperated_field(
         deserializer=SplitDeserializer(separator, items_type, iterable_type),
         extra_data_constraints=[is_str] + kwargs.pop("extra_data_constraints", []),
         extra_object_constraints=[
-            TypeConstraint.get(iterable_type),
-            EachItem(TypeConstraint.get(items_type)),
+            OfType.get(iterable_type),
+            EachItem(OfType.get(items_type)),
         ]
         + kwargs.pop("extra_object_constraints", []),
         widget=Widget.TEXT_BOX,
