@@ -148,7 +148,7 @@ def test_display(form):
             "title": {
                 "type": "field",
                 "label": "Title",
-                "widget": {"type": "text"} ,
+                "widget": {"type": "text"},
                 "path": ["title"],
                 "value": "The King",
             },
