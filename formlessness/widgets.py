@@ -1,11 +1,9 @@
-from enum import Enum
+from typing import TypedDict, Final
 
 
-class Widget(str, Enum):
-    """Text area, multi select, etc."""
+class Widget(TypedDict):
+    type: str
 
-    TEXT_BOX = "text_box"
-    DATE_SELECTOR = "date_selector"
 
-    def __str__(self):
-        return self.value
+text: Final[Widget] = Widget(type='text')
+date_picker: Final[Widget] = Widget(type='date_picker')
