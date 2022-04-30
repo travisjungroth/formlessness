@@ -148,7 +148,7 @@ def test_display(form):
             "title": {
                 "type": "field",
                 "label": "Title",
-                "widget": "text_box",
+                "widget": {"type": "text"},
                 "path": ["title"],
                 "value": "The King",
             },
@@ -156,7 +156,7 @@ def test_display(form):
                 "type": "field",
                 "label": "Released",
                 "description": "Date of US release.",
-                "widget": "date_selector",
+                "widget": {"type": "date_picker"},
                 "path": ["release_date"],
             },
             "optional_film_details": {
@@ -168,7 +168,7 @@ def test_display(form):
                     "green_light_date": {
                         "type": "field",
                         "label": "Green Light Date",
-                        "widget": "date_selector",
+                        "widget": {"type": "date_picker"},
                         "path": ["green_light_date"],
                         "value": "2017-05-05",
                     },
