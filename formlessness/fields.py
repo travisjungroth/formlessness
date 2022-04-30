@@ -26,7 +26,7 @@ from formlessness.displayers import Display, Displayer, filter_display_info
 from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
-from formlessness.widgets import Widget
+from formlessness.widgets import Widget, date_picker, text
 
 
 class Field(Converter[D, T], Displayer[D], ABC):
@@ -96,7 +96,7 @@ class BasicField(Field[D, T]):
                 "label": label,
                 "description": description,
                 "shadow": shadow,
-                "widget": str(widget or self.default_widget),
+                "widget": widget or self.default_widget,
                 "choices": data_choices or None,
             }
         )
@@ -122,7 +122,7 @@ class IntField(BasicField[int, int]):
     default_deserializer = FunctionDeserializer(int, "Must be an integer.")
     default_data_constraints = (is_int,)
     default_object_constraints = (is_int,)
-    default_widget = Widget.TEXT_BOX
+    default_widget = text
 
 
 class StrField(BasicField[str, str]):
@@ -130,7 +130,7 @@ class StrField(BasicField[str, str]):
     default_deserializer = FunctionDeserializer(str, "Must be a string.")
     default_data_constraints = (is_str,)
     default_object_constraints = (is_str,)
-    default_widget = Widget.TEXT_BOX
+    default_widget = text
 
 
 class DateField(BasicField[str, date]):
@@ -138,7 +138,7 @@ class DateField(BasicField[str, date]):
     default_deserializer = date_from_iso_str
     default_data_constraints = (is_str,)
     default_object_constraints = (is_date,)
-    default_widget = Widget.DATE_SELECTOR
+    default_widget = date_picker
 
 
 class CommaListStrField(BasicField[str, list[str]]):
@@ -146,7 +146,7 @@ class CommaListStrField(BasicField[str, list[str]]):
     default_deserializer = SplitDeserializer(",")
     default_data_constraints = (is_str,)
     default_object_constraints = (is_list_of_str,)
-    default_widget = Widget.TEXT_BOX
+    default_widget = text
 
 
 class CommaListIntField(BasicField[str, list[int]]):
@@ -156,7 +156,7 @@ class CommaListIntField(BasicField[str, list[int]]):
     )
     default_data_constraints = (is_str,)
     default_object_constraints = (is_list_of_int,)
-    default_widget = Widget.TEXT_BOX
+    default_widget = text
 
 
 def seperated_field(
@@ -171,6 +171,6 @@ def seperated_field(
             EachItem(OfType.get(items_type)),
         ]
         + kwargs.pop("extra_object_constraints", []),
-        widget=Widget.TEXT_BOX,
+        widget=text,
     )
     return BasicField(**(d | kwargs))
