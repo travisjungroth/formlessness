@@ -1,5 +1,4 @@
 class A:
 
-
     # whitespace
     pass
