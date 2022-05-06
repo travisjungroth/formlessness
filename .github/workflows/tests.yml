@@ -27,7 +27,7 @@ jobs:
         path: .local/bin/poetry
         key: poetry-${{ hashFiles('setup-poetry.py') }}
     - name: Install Poetry
-      run: ./setup-poetry.py
+      run: python3 setup-poetry.py
     - run: poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v3
