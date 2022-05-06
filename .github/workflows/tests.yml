@@ -10,9 +10,6 @@ jobs:
   unit_tests:
     runs-on: ubuntu-latest
 
-    env:
-      POETRY_HOME: ~/poetry_home
-
     strategy:
       matrix:
         python-version: ['3.9', '3.10']
@@ -23,16 +20,11 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Download setup-poetry.py
-      run: curl -sSL https://install.python-poetry.org > setup-poetry.py
-    - name: Load cached Poetry installation
-      uses: actions/cache@v3
-      with:
-        path: ~/poetry_home
-        key: poetry-${{ hashFiles('setup-poetry.py') }}
+        cache: 'pip'
     - name: Install Poetry
-      run: python3 setup-poetry.py
-    - run: poetry config virtualenvs.in-project true
+      run: |
+        pip install poetry
+        poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v3
       with:
