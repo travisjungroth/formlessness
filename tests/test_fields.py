@@ -4,6 +4,10 @@ from formlessness.exceptions import DeserializationError, FormErrors
 from formlessness.fields import CommaListStrField, IntField, seperated_field
 
 
+def test_fail():
+    assert False
+
+
 class TestCommaListStrField:
     @pytest.fixture(
         scope="session",
