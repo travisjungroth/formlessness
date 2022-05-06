@@ -21,10 +21,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
-    - name: Install Poetry
-      run: |
-        pip install poetry
-        poetry config virtualenvs.in-project true
+        cache-dependency-path: '.github/requirements.txt'
+    - name: Configure poetry
+      run: poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v3
       with:
