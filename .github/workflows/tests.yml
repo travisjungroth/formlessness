@@ -23,7 +23,6 @@ jobs:
         cache: 'pip'
     - name: Install Poetry
       run: |
-        pip install poetry
         poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v3
