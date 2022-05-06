@@ -1,4 +1,4 @@
-[![Tests](https://github.com/travisjungroth/formlessness/actions/workflows/tests.yml/badge.svg)](https://github.com/travisjungroth/formlessness/actions/workflows/tests.yml)
+[![Tests](https://github.com/travisjungroth/formlessness/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/travisjungroth/formlessness/actions/workflows/tests.yml)
 ![License](https://img.shields.io/github/license/travisjungroth/formlessness?color=blue)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
