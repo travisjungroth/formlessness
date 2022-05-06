@@ -27,7 +27,7 @@ jobs:
     - name: Install Poetry
       uses: snok/install-poetry@v1
     - run: ls ~/.local/bin
-    - run: echo "${{ hashFiles('**/local/bin/poetry') }}"
+    - run: echo "${{ hashFiles('**/.local/bin/poetry') }}"
     - run: poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v2
