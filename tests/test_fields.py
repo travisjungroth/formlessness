@@ -5,7 +5,7 @@ from formlessness.fields import CommaListStrField, IntField, seperated_field
 
 
 def test_fail():
-    assert False
+    raise AssertionError
 
 
 class TestCommaListStrField:
