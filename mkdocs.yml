@@ -1,0 +1,6 @@
+site_name: "Formlessness"
+theme:
+  name: "material"
+plugins:
+- search
+- mkdocstrings
