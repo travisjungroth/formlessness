@@ -38,5 +38,5 @@ jobs:
       with:
         path: .venv
         key: venv-${{ matrix.python-version }}
-    - run: poetry_home/bin/poetry install --no-interaction
-    - run: poetry_home/bin/poetry run pytest
+    - run: /home/runner/poetry_home/bin/poetry install --no-interaction
+    - run: /home/runner/poetry_home/bin/poetry run pytest
