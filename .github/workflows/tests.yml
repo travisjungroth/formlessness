@@ -30,14 +30,13 @@ jobs:
       with:
         path: /home/runner/poetry_home
         key: poetry-${{ hashFiles('setup-poetry.py') }}
-    - run: export PATH="$POETRY_HOME/bin:$PATH"
     - name: Install Poetry
       run: python3 setup-poetry.py
-    - run: poetry config virtualenvs.in-project true
+    - run: poetry_home/bin/poetry config virtualenvs.in-project true
     - name: Load cached virtual environment
       uses: actions/cache@v3
       with:
         path: .venv
         key: venv-${{ matrix.python-version }}
-    - run: poetry install --no-interaction
-    - run: poetry run pytest
+    - run: poetry_home/bin/poetry install --no-interaction
+    - run: poetry_home/bin/poetry run pytest
