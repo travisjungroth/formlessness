@@ -23,7 +23,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.local/bin/poetry
-        key: ${{  hashFiles('~/.local/bin/poetry')  }}
+        key: poetry-${{  hashFiles('~/.local/bin/poetry')  }}
     - name: Install Poetry
       uses: snok/install-poetry@v1
     - name: Install dependencies
