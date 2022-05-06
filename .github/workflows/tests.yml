@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      POETRY_HOME: ~/poetry_home
+      POETRY_HOME: /home/runner/poetry_home
 
     strategy:
       matrix:
@@ -28,7 +28,7 @@ jobs:
     - name: Load cached Poetry installation
       uses: actions/cache@v3
       with:
-        path: ~/poetry_home
+        path: /home/runner/poetry_home
         key: poetry-${{ hashFiles('setup-poetry.py') }}
     - run: export PATH="$POETRY_HOME/bin:$PATH"
     - name: Install Poetry
