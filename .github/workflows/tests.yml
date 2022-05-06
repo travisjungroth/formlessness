@@ -37,7 +37,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: .venv
-        key: poetry-lock-${{ matrix.python-version }}-${{ hashFiles(poetry.lock) }}
+        key: poetry-lock-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
         restore-keys: |
           - poetry.lock-${{ matrix.python-version }}-
     - run: /home/runner/poetry_home/bin/poetry install --no-interaction
