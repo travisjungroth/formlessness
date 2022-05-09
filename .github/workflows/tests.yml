@@ -41,4 +41,4 @@ jobs:
         restore-keys: |
           - poetry.lock-${{ matrix.python-version }}-
     - run: /home/runner/poetry_home/bin/poetry install --no-interaction
-    - run: /home/runner/poetry_home/bin/poetry run pytest
+    - run: /home/runner/poetry_home/bin/poetry run pytest --doctest-modules
