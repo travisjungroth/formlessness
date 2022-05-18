@@ -1,5 +1,5 @@
 from abc import ABC
-from datetime import date
+from datetime import date, datetime, time
 from typing import Iterable, Sequence
 
 from formlessness.base_classes import Converter
@@ -14,13 +14,13 @@ from formlessness.constraints import (
     is_list_of_int,
     is_list_of_str,
     is_null,
-    is_str,
+    is_str, is_float, is_datetime, is_time,
 )
 from formlessness.deserializers import (
     Deserializer,
     FunctionDeserializer,
     SplitDeserializer,
-    date_from_iso_str,
+    date_from_iso_str, datetime_from_iso_str, time_from_iso_str,
 )
 from formlessness.displayers import Display, Displayer, filter_display_info
 from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer
@@ -125,7 +125,12 @@ class IntField(BasicField[int, int]):
     default_widget = text
 
 
-# TODO: Add FloatField
+class FloatField(BasicField[float, float]):
+    default_serializer = FunctionSerializer(float)
+    default_deserializer = FunctionDeserializer(float, "Must be a float.")
+    default_data_constraints = (is_float,)
+    default_object_constraints = (is_float,)
+    default_widget = text
 
 
 class StrField(BasicField[str, str]):
@@ -144,8 +149,22 @@ class DateField(BasicField[str, date]):
     default_widget = date_picker
 
 
-# TODO: Add DateTimeField
-# TODO: Add TimeField
+class DateTimeField(BasicField[str, datetime]):
+    default_serializer = FunctionSerializer(datetime.isoformat)
+    default_deserializer = datetime_from_iso_str
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_datetime,)
+    default_widget = date_picker
+
+
+class TimeField(BasicField[str, time]):
+    default_serializer = FunctionSerializer(time.isoformat)
+    default_deserializer = time_from_iso_str
+    default_data_constraints = (is_str,)
+    default_object_constraints = (is_time,)
+    default_widget = date_picker
+
+
 # TODO: Add BoolField
 # TODO: Add JSONField
 
