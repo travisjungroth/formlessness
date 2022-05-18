@@ -28,4 +28,4 @@ Clone repo.
 
 Running tests
 
-  pytest --doctest-modules
+    pytest --doctest-modules
