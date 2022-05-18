@@ -1,7 +1,14 @@
+from datetime import date
+
 import pytest
 
 from formlessness.exceptions import DeserializationError, FormErrors
-from formlessness.fields import CommaListStrField, IntField, seperated_field
+from formlessness.fields import (
+    CommaListStrField,
+    DateTimeField,
+    IntField,
+    seperated_field,
+)
 
 
 class TestCommaListStrField:
@@ -82,3 +89,9 @@ def test_choices():
     assert not field.validate_data(4)
     assert not field.validate_data("A")  # noqa
     assert not field.validate_data(None)  # noqa
+
+
+def test_datetime_field():
+    field = DateTimeField("Label")
+    assert field.validate_data("2022-05-18T09:50:40.787030")
+    assert not field.validate_object(date.today())

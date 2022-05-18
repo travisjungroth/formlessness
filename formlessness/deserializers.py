@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, time
 from typing import Any, Callable, Generic
 
 from formlessness.exceptions import DeserializationError
@@ -84,5 +84,11 @@ def date_from_iso_str(value: str) -> date:
     return date.fromisoformat(value)
 
 
-# TODO: add datetime_from_iso_str
-# TODO: add time_from_iso_str
+@deserializer("Must be a valid datetime of YYYY-MM-DD HH:MM:SS.mmmmmm+zz:zz")
+def datetime_from_iso_str(value: str) -> datetime:
+    return datetime.fromisoformat(value)
+
+
+@deserializer("Must be a valid time of HH:MM:SS.mmmmmm+zz:zz.")
+def time_from_iso_str(value: str) -> time:
+    return time.fromisoformat(value)
