@@ -15,3 +15,17 @@ Formlessness is a Python library for handling the backend work of web forms. It 
  * Easier dynamic generation of everything form related.
  * Simple representation of complex validation logic.
  * High extendability.
+
+## Development Setup
+
+Clone repo.
+
+[Install poetry](https://python-poetry.org/docs/master/#installing-with-the-official-installer).
+
+[Activate virtual environment](https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment).
+
+[Install dependencies](https://python-poetry.org/docs/basic-usage/#installing-dependencies).
+
+Running tests
+
+    pytest --doctest-modules
