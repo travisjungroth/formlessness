@@ -1,3 +1,5 @@
+from datetime import date
+
 import pytest
 
 from formlessness.exceptions import DeserializationError, FormErrors
@@ -85,5 +87,4 @@ def test_choices():
 
     field = DateTimeField("Label")
     assert field.validate_data("2022-05-18T09:50:40.787030")
-    x = field.validate_data("20220518T09:50:40.787030")
-    assert not x
+    assert not field.validate_object(date.today())
