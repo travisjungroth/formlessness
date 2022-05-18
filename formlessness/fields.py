@@ -10,17 +10,22 @@ from formlessness.constraints import (
     EachItem,
     OfType,
     is_date,
+    is_datetime,
+    is_float,
     is_int,
     is_list_of_int,
     is_list_of_str,
     is_null,
-    is_str, is_float, is_datetime, is_time,
+    is_str,
+    is_time,
 )
 from formlessness.deserializers import (
     Deserializer,
     FunctionDeserializer,
     SplitDeserializer,
-    date_from_iso_str, datetime_from_iso_str, time_from_iso_str,
+    date_from_iso_str,
+    datetime_from_iso_str,
+    time_from_iso_str,
 )
 from formlessness.displayers import Display, Displayer, filter_display_info
 from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer

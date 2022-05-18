@@ -3,7 +3,12 @@ from datetime import date
 import pytest
 
 from formlessness.exceptions import DeserializationError, FormErrors
-from formlessness.fields import CommaListStrField, IntField, seperated_field, DateTimeField
+from formlessness.fields import (
+    CommaListStrField,
+    DateTimeField,
+    IntField,
+    seperated_field,
+)
 
 
 class TestCommaListStrField:
