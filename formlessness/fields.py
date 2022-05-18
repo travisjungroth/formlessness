@@ -28,7 +28,7 @@ from formlessness.deserializers import (
     time_from_iso_str,
 )
 from formlessness.displayers import Display, Displayer, filter_display_info
-from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer
+from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer, isoformat
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 from formlessness.widgets import Widget, date_picker, text
@@ -147,7 +147,7 @@ class StrField(BasicField[str, str]):
 
 
 class DateField(BasicField[str, date]):
-    default_serializer = FunctionSerializer(date.isoformat)
+    default_serializer = isoformat
     default_deserializer = date_from_iso_str
     default_data_constraints = (is_str,)
     default_object_constraints = (is_date,)
@@ -155,7 +155,7 @@ class DateField(BasicField[str, date]):
 
 
 class DateTimeField(BasicField[str, datetime]):
-    default_serializer = FunctionSerializer(datetime.isoformat)
+    default_serializer = isoformat
     default_deserializer = datetime_from_iso_str
     default_data_constraints = (is_str,)
     default_object_constraints = (is_datetime,)
@@ -163,7 +163,7 @@ class DateTimeField(BasicField[str, datetime]):
 
 
 class TimeField(BasicField[str, time]):
-    default_serializer = FunctionSerializer(time.isoformat)
+    default_serializer = isoformat
     default_deserializer = time_from_iso_str
     default_data_constraints = (is_str,)
     default_object_constraints = (is_time,)
