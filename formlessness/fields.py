@@ -125,6 +125,9 @@ class IntField(BasicField[int, int]):
     default_widget = text
 
 
+# TODO: Add FloatField
+
+
 class StrField(BasicField[str, str]):
     default_serializer = FunctionSerializer(str)
     default_deserializer = FunctionDeserializer(str, "Must be a string.")
@@ -139,6 +142,12 @@ class DateField(BasicField[str, date]):
     default_data_constraints = (is_str,)
     default_object_constraints = (is_date,)
     default_widget = date_picker
+
+
+# TODO: Add DateTimeField
+# TODO: Add TimeField
+# TODO: Add BoolField
+# TODO: Add JSONField
 
 
 class CommaListStrField(BasicField[str, list[str]]):

@@ -205,6 +205,9 @@ class Choices(Constraint[T]):
         return self.message
 
 
+# TODO: Add Between. Use inclusive start and stop.
+
+
 @dataclass
 class Comparison(Constraint[T]):
     operand: T
@@ -267,6 +270,9 @@ class LE(Comparison[T]):
     operator: Callable[[T, T], bool] = le
     comparison_string: str = "less than or equal to"
 
+
+# TODO: Add Not Equal (NEQ)
+# TODO: Add Regexp
 
 """
 Complex Constraints
@@ -349,6 +355,10 @@ class And(Constraint[T]):
         if len(constraints) == 1:
             return constraints[0]
         return And(*constraints)
+
+
+# TODO: Add Not
+# TODO: Add Implies, maybe called If or Conditional https://en.wikipedia.org/wiki/Material_conditional
 
 
 @dataclass
@@ -454,8 +464,11 @@ Constraint instances
 
 
 is_int = OfType(int, "Must be an integer.")
+# TODO: Add float
 is_str = OfType(str, "Must be a string.")
 is_date = OfType(date, "Must be a date.")
+# TODO: Add datetime
+# TODO: Add time
 is_list = OfType(list, "Must be a list.")
 is_dict = OfType(dict, "Must be a dictionary.")
 is_iterable = OfType(Iterable, "Must be iterable.")

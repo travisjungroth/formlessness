@@ -50,3 +50,6 @@ class AsDict(Protocol):
 @serializer
 def as_dict(obj: AsDict) -> JSONDict:
     return obj.as_dict()
+
+
+# TODO: Add iso Serializer that covers date, dateime and time
