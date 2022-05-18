@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, time
 from operator import ge, gt, le, lt
 from typing import (
     Any,
@@ -464,11 +464,11 @@ Constraint instances
 
 
 is_int = OfType(int, "Must be an integer.")
-# TODO: Add float
+is_float = OfType(float, "Must be a float.")
 is_str = OfType(str, "Must be a string.")
 is_date = OfType(date, "Must be a date.")
-# TODO: Add datetime
-# TODO: Add time
+is_datetime = OfType(datetime, "Must be a datetime.")
+is_time = OfType(time, "Must be a time.")
 is_list = OfType(list, "Must be a list.")
 is_dict = OfType(dict, "Must be a dictionary.")
 is_iterable = OfType(Iterable, "Must be iterable.")
