@@ -56,7 +56,7 @@ class AsDict(Protocol):
         pass
 
 
-as_dict: MethodSerializer[JSONDict, AsDict] = MethodSerializer('as_dict')
+as_dict: MethodSerializer[JSONDict, AsDict] = MethodSerializer("as_dict")
 
 
 class ISOFormat(Protocol):
@@ -64,4 +64,4 @@ class ISOFormat(Protocol):
         pass
 
 
-isoformat: MethodSerializer[str, ISOFormat] = MethodSerializer('isoformat')
+isoformat: MethodSerializer[str, ISOFormat] = MethodSerializer("isoformat")

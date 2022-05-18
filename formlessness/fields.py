@@ -28,7 +28,12 @@ from formlessness.deserializers import (
     time_from_iso_str,
 )
 from formlessness.displayers import Display, Displayer, filter_display_info
-from formlessness.serializers import FunctionSerializer, JoinSerializer, Serializer, isoformat
+from formlessness.serializers import (
+    FunctionSerializer,
+    JoinSerializer,
+    Serializer,
+    isoformat,
+)
 from formlessness.types import D, JSONDict, T
 from formlessness.utils import key_and_label
 from formlessness.widgets import Widget, date_picker, text
