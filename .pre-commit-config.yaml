@@ -9,7 +9,7 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
   - repo: https://github.com/Zac-HD/shed
-    rev: 0.9.5
+    rev: 0.9.7
     hooks:
       - id: shed
         args: [--refactor, --py39-plus]
