@@ -80,5 +80,5 @@ class SplitDeserializer(Deserializer[str, T]):
 
 
 @deserializer("Must be a valid date of YYYY-MM-DD.")
-def date_from_iso_str(value: str):
+def date_from_iso_str(value: str) -> date:
     return date.fromisoformat(value)
