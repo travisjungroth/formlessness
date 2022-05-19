@@ -1,9 +1,9 @@
 name: Update Dependencies
 
 on:
+  workflow_dispatch:
   schedule:
     - cron:  '0 6 1 * *' # at 06:00 on the first day of every month
-  workflow_dispatch: # enables manual trigger
 
 jobs:
   update_dependencies:
@@ -35,4 +35,5 @@ jobs:
             commit-message: Update dependencies
             title: Update dependencies
             branch: update-dependencies
+            body: ''
             delete-branch: true
