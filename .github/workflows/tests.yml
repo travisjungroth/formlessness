@@ -10,9 +10,6 @@ jobs:
   unit_tests:
     runs-on: ubuntu-latest
 
-    env:
-      POETRY_HOME: /home/runner/poetry_home
-
     strategy:
       matrix:
         python-version: ['3.9', '3.10']
@@ -23,22 +20,26 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Download setup-poetry.py
-      run: curl -sSL https://install.python-poetry.org > setup-poetry.py
-    - name: Load cached Poetry installation
+    - name: Load cached local for Poetry
+      id: cached-poetry-install
       uses: actions/cache@v3
       with:
-        path: /home/runner/poetry_home
-        key: poetry-${{ hashFiles('setup-poetry.py') }}
+        path: ~/.local
+        key: local-${{ runner.os }}-${{ hashFiles('.github/workflows/tests.yml') }}
     - name: Install Poetry
-      run: python3 setup-poetry.py
-    - run: /home/runner/poetry_home/bin/poetry config virtualenvs.in-project true
+      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
+      uses: snok/install-poetry@v1
+      with:
+        virtualenvs-create: false
     - name: Load cached virtual environment
+      id: cached-venv
       uses: actions/cache@v3
       with:
         path: .venv
         key: poetry-lock-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
         restore-keys: |
           - poetry.lock-${{ matrix.python-version }}-
-    - run: /home/runner/poetry_home/bin/poetry install --no-interaction
-    - run: /home/runner/poetry_home/bin/poetry run pytest --doctest-modules
+    - name: Install packages
+      if: steps.cached-venv.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction
+    - run: poetry run pytest --doctest-modules
