@@ -42,14 +42,26 @@ class JoinSerializer(Serializer[str, Iterable]):
         return self.separator.join(map(str, obj))
 
 
+@dataclass
+class MethodSerializer(Serializer[D, T]):
+    method_name: str
+
+    def serialize(self, obj: T) -> D:
+        method = getattr(obj, self.method_name)
+        return method()
+
+
 class AsDict(Protocol):
     def as_dict(self) -> JSONDict:
         pass
 
 
-@serializer
-def as_dict(obj: AsDict) -> JSONDict:
-    return obj.as_dict()
+as_dict: MethodSerializer[JSONDict, AsDict] = MethodSerializer("as_dict")
 
 
-# TODO: Add iso Serializer that covers date, dateime and time
+class ISOFormat(Protocol):
+    def isoformat(self) -> str:
+        pass
+
+
+isoformat: MethodSerializer[str, ISOFormat] = MethodSerializer("isoformat")
