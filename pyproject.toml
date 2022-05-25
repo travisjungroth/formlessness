@@ -11,6 +11,7 @@ python = "^3.9"
 pytest = "^7.1.2"
 black = "^22.3.0"
 pre-commit = "^2.19.0"
+doit = "^0.36.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
