@@ -37,4 +37,6 @@ def _shed(files):
     files = [f for f in files if f[-3:] in (".py", ".md")]
     return {"actions": [f"shed {' '.join(files)} --py39-plus"], "file_dep": files}
 
-def xyz(): pass
+
+def xyz():
+    pass
