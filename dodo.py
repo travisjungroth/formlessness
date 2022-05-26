@@ -1,12 +1,10 @@
 import subprocess
 
-DOIT_CONFIG = {
-    'default_tasks': ['format', 'test']
-}
+DOIT_CONFIG = {"default_tasks": ["format", "test"]}
 
 
 def task_format():
-    return _shed(_changed_files('main'))
+    return _shed(_changed_files("main"))
 
 
 def task_format_all():
