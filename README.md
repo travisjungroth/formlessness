@@ -16,16 +16,29 @@ Formlessness is a Python library for handling the backend work of web forms. It 
  * Simple representation of complex validation logic.
  * High extendability.
 
-## Development Setup
+## Development
 
-Clone repo.
+### Poetry
 
-[Install poetry](https://python-poetry.org/docs/master/#installing-with-the-official-installer).
+#### Installing Poetry
 
-[Activate virtual environment](https://python-poetry.org/docs/basic-usage/#activating-the-virtual-environment).
+If you're on MacOS with brew:
 
-[Install dependencies](https://python-poetry.org/docs/basic-usage/#installing-dependencies).
+    brew install poetry
 
-Running tests
+Otherwise, follow the [installation docs](https://python-poetry.org/docs/master/#installing-with-the-official-installer).
 
-    pytest --doctest-modules
+#### Installing Dev Dependencies
+
+    poetry install
+
+### Testing
+To run the same tests as the CI:
+    
+    doit test
+
+For anything custom, use `pytest`.
+
+### Formatting
+
+    doit format

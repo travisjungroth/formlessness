@@ -3,3 +3,4 @@
 .pytest_cache
 .tox
 */__pycache__
+.doit.db
