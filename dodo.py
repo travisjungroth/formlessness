@@ -1,5 +1,9 @@
 import subprocess
 
+DOIT_CONFIG = {
+    'default_tasks': ['format', 'test']
+}
+
 
 def task_format():
     return _shed(_changed_files('main'))
