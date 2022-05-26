@@ -39,4 +39,4 @@ jobs:
     - name: Install packages
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
-    - run: poetry run pytest --doctest-modules
+    - run: poetry run doit test
