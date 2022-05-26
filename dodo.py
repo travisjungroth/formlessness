@@ -25,12 +25,11 @@ def task_test():
 
 
 def _changed_files(ref: str):
-    out = subprocess.run(
+    return subprocess.run(
         ["git", "diff", ref, "--name-only", "--diff-filter=d"],
         capture_output=True,
         text=True,
-    ).stdout
-    return out.splitlines()
+    ).stdout.splitlines()
 
 
 def _shed(files):
