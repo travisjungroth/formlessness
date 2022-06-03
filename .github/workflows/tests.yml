@@ -37,7 +37,7 @@ jobs:
         path: .venv
         key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install packages
-      if: steps.cached-venv.outputs.cache-hit == 'false'
+      if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
     - run: poetry run doit test
 
@@ -66,7 +66,7 @@ jobs:
         path: .venv
         key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install packages
-      if: steps.cached-venv.outputs.cache-hit == 'false'
+      if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
     - run: poetry run doit format_all
     - uses: stefanzweifel/git-auto-commit-action@v4
