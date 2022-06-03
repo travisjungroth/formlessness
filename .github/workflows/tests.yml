@@ -26,7 +26,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.local
-        key: local-${{ runner.os }}-${{ hashFiles('.github/workflows/tests.yml') }}
+        key: local-${{ steps.setup-python.outputs.python-version }}
     - name: Install Poetry
       if: steps.cached-poetry-install.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
@@ -35,7 +35,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: .venv
-        key: poetry.lock-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install packages
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
@@ -55,7 +55,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.local
-        key: local-${{ runner.os }}-${{ hashFiles('.github/workflows/tests.yml') }}
+        key: local-${{ steps.setup-python.outputs.python-version }}
     - name: Install Poetry
       if: steps.cached-poetry-install.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
@@ -64,7 +64,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: .venv
-        key: poetry.lock-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install packages
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
