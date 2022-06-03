@@ -40,6 +40,9 @@ jobs:
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
     - run: poetry run doit test
+    - name: Codecov
+      uses: codecov/codecov-action@v3.1.0
+
 
   format:
     runs-on: ubuntu-latest
