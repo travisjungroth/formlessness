@@ -31,4 +31,4 @@ jobs:
       - name: Install packages
         if: steps.cached-venv.outputs.cache-hit != 'true'
         run: poetry install --no-interaction
-      - run: mkdocs gh-deploy --force
+      - run: poetry run mkdocs gh-deploy --force
