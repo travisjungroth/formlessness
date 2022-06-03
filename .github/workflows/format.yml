@@ -33,6 +33,6 @@ jobs:
     - name: Install packages
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
-    - run: poetry run doit format
+    - run: poetry run doit format_all
     - uses: stefanzweifel/git-auto-commit-action@v4
       if: ${{ failure() }}
