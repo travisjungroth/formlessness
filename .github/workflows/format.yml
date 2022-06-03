@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
     - name: Set up Python
       uses: actions/setup-python@v3
     - name: Load cached local for Poetry
