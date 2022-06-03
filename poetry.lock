@@ -118,6 +118,17 @@ python-dateutil = ">=2.8.1"
 dev = ["twine", "markdown", "flake8", "wheel"]
 
 [[package]]
+name = "griffe"
+version = "0.19.3"
+description = "Signatures for entire Python programs. Extract the structure, the frame, the skeleton of your project, to generate API documentation or find breaking changes in your API."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.extras]
+async = ["aiofiles (>=0.7,<1.0)"]
+
+[[package]]
 name = "importlib-metadata"
 version = "4.11.4"
 description = "Read metadata from Python packages"
@@ -288,12 +299,25 @@ Markdown = ">=3.3"
 MarkupSafe = ">=1.1"
 mkdocs = ">=1.2"
 mkdocs-autorefs = ">=0.3.1"
+mkdocstrings-python = {version = ">=0.5.2", optional = true, markers = "extra == \"python\""}
 pymdown-extensions = ">=6.3"
 
 [package.extras]
 crystal = ["mkdocstrings-crystal (>=0.3.4)"]
 python = ["mkdocstrings-python (>=0.5.2)"]
 python-legacy = ["mkdocstrings-python-legacy (>=0.2.1)"]
+
+[[package]]
+name = "mkdocstrings-python"
+version = "0.7.0"
+description = "A Python handler for mkdocstrings."
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+griffe = ">=0.11.1"
+mkdocstrings = ">=0.19"
 
 [[package]]
 name = "mypy-extensions"
@@ -540,7 +564,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "421c3ee734c738c549882def5da51c0b0ad7878c48fdbffc271ed09c596e30fb"
+content-hash = "10686c1060957bd54dbd4ff2c39f6063113d6f59036b74d4e7a10fbe35503053"
 
 [metadata.files]
 atomicwrites = [
@@ -602,6 +626,10 @@ doit = [
 ghp-import = [
     {file = "ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343"},
     {file = "ghp_import-2.1.0-py3-none-any.whl", hash = "sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619"},
+]
+griffe = [
+    {file = "griffe-0.19.3-py3-none-any.whl", hash = "sha256:348422f0e303ff3b76d6b35a96fa9c90dddcbe175506171fda78e8e5cf8c4246"},
+    {file = "griffe-0.19.3.tar.gz", hash = "sha256:3a51e53bc58c45d38d6d7b4509b41b153b506de3df99767e6f891c75d91706a5"},
 ]
 importlib-metadata = [
     {file = "importlib_metadata-4.11.4-py3-none-any.whl", hash = "sha256:c58c8eb8a762858f49e18436ff552e83914778e50e9d2f1660535ffb364552ec"},
@@ -714,6 +742,10 @@ mkdocs-material-extensions = [
 mkdocstrings = [
     {file = "mkdocstrings-0.19.0-py3-none-any.whl", hash = "sha256:3217d510d385c961f69385a670b2677e68e07b5fea4a504d86bf54c006c87c7d"},
     {file = "mkdocstrings-0.19.0.tar.gz", hash = "sha256:efa34a67bad11229d532d89f6836a8a215937548623b64f3698a1df62e01cc3e"},
+]
+mkdocstrings-python = [
+    {file = "mkdocstrings-python-0.7.0.tar.gz", hash = "sha256:e54c67890e8bb7dc4604360c8ef5dd214b23b6924de7706f461e3c998d4ea061"},
+    {file = "mkdocstrings_python-0.7.0-py3-none-any.whl", hash = "sha256:6964bd92f106766e771ac6cd5bc02643a960602b4d921b95362e31d491e9a6db"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
