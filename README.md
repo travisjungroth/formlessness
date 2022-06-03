@@ -42,3 +42,7 @@ For anything custom, use `pytest`.
 ### Formatting
 
     doit format
+
+### Run docs locally
+
+    mkdocs serve
