@@ -37,7 +37,7 @@ jobs:
         path: .venv
         key: poetry.lock-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
     - name: Install packages
-      if: steps.cached-venv.outputs.cache-hit != 'true'
+      if: steps.cached-venv.outputs.cache-hit == 'false'
       run: poetry install --no-interaction
     - run: poetry run doit test
 
@@ -55,7 +55,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.local
-        key: local-${{ runner.os }}-${{ hashFiles('.github/workflows/tests.yml') }}
+        key: local-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.toml') }}
     - name: Install Poetry
       if: steps.cached-poetry-install.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
@@ -64,9 +64,9 @@ jobs:
       uses: actions/cache@v3
       with:
         path: .venv
-        key: poetry.lock-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
     - name: Install packages
-      if: steps.cached-venv.outputs.cache-hit != 'true'
+      if: steps.cached-venv.outputs.cache-hit == 'false'
       run: poetry install --no-interaction
     - run: poetry run doit format_all
     - uses: stefanzweifel/git-auto-commit-action@v4
