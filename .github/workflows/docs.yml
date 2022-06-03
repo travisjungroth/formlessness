@@ -18,7 +18,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.local
-          key: local-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('poetry.toml') }}
+          key: local-${{ steps.setup-python.outputs.python-version }}
       - name: Install Poetry
         if: steps.cached-poetry-install.outputs.cache-hit != 'true'
         uses: snok/install-poetry@v1
@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install packages
         if: steps.cached-venv.outputs.cache-hit == 'false'
         run: poetry install --no-interaction
