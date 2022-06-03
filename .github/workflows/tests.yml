@@ -17,6 +17,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
     - name: Load cached local for Poetry
       id: cached-poetry-install
       uses: actions/cache@v3
@@ -26,11 +30,15 @@ jobs:
     - name: Install Poetry
       if: steps.cached-poetry-install.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Load cached virtual environment
+      id: cached-venv
+      uses: actions/cache@v3
       with:
-        python-version: ${{ matrix.python-version }}
-        cache: poetry
+        path: .venv
+        key: poetry.lock-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+    - name: Install packages
+      if: steps.cached-venv.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction
     - run: poetry run doit test
 
   format:
@@ -40,6 +48,8 @@ jobs:
     - uses: actions/checkout@v2
       with:
         ref: ${{ github.head_ref }}
+    - name: Set up Python
+      uses: actions/setup-python@v3
     - name: Load cached local for Poetry
       id: cached-poetry-install
       uses: actions/cache@v3
@@ -49,10 +59,15 @@ jobs:
     - name: Install Poetry
       if: steps.cached-poetry-install.outputs.cache-hit != 'true'
       uses: snok/install-poetry@v1
-    - name: Set up Python
-      uses: actions/setup-python@v3
+    - name: Load cached virtual environment
+      id: cached-venv
+      uses: actions/cache@v3
       with:
-        cache: poetry
+        path: .venv
+        key: poetry.lock-${{ hashFiles('poetry.lock') }}
+    - name: Install packages
+      if: steps.cached-venv.outputs.cache-hit != 'true'
+      run: poetry install --no-interaction
     - run: poetry run doit format_all
     - uses: stefanzweifel/git-auto-commit-action@v4
     - name: Fail if changes
