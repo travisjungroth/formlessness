@@ -9,7 +9,6 @@ from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
 
 
-
 class Keyed(Protocol):
     key: str
 
