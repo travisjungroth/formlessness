@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  unit_tests:
+  format:
     runs-on: ubuntu-latest
 
     steps:
