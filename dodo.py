@@ -20,7 +20,8 @@ def task_format_last():
 
 def task_test():
     return {
-        "actions": ["pytest --doctest-modules --cov=./ --cov-report=xml"],
+        "actions": ["pytest --doctest-modules  --cov --cov-report=xml"],
+        "verbosity": 2,
     }
 
 
