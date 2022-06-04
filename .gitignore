@@ -6,3 +6,4 @@
 .doit.db
 .coverage
 coverage.xml
+dist
