@@ -49,6 +49,7 @@ class FunctionDeserializer(Deserializer[D, T]):
 @dataclass
 class KwargsDeserializer(Deserializer[dict[str, Any], T]):
     function: Callable[[...], T]
+
     error_message: str
 
     def deserialize(self, data: dict[str, Any]) -> T:
