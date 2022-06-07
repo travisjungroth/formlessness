@@ -170,7 +170,6 @@ def test_display(form):
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
                         "object_path": ["green_light_date"],
-                        "value": "2017-05-05",
                     },
                 },
             },
