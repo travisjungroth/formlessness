@@ -120,11 +120,8 @@ class BasicField(Field[D, T]):
     def deserialize(self, data: D, path: Sequence[str] = ()) -> T:
         return self.deserializer.deserialize(data)
 
-    def display(self, data: D = None, path: list[str] = []) -> Display:
-        display = self.display_info | {"object_path": path}
-        if data is not None:
-            display["value"] = data
-        return display
+    def display(self, path: list[str] = None) -> Display:
+        return self.display_info | {"object_path": path or []}
 
 
 class IntField(BasicField[int, int]):
