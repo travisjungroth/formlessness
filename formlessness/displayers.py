@@ -25,8 +25,8 @@ class Displayer(Generic[D], ABC):
     """
 
     @abstractmethod
-    def display(self, data: D = None, path: list[str] = ()) -> Display:
+    def display(self, data: D = None, object_path: list[str] = ()) -> Display:
         """
         data is the values that will go into a complete or partial form.
-        path is the sequence of keys to get to this Form/Field. Along with its key, creates a unique identity.
+        object_path is the sequence of keys to get to this Form/Field. Along with its key, creates a unique identity.
         """
