@@ -150,7 +150,6 @@ def test_display(form):
                 "label": "Title",
                 "widget": {"type": "text"},
                 "object_path": ["title"],
-                "value": "The King",
             },
             "release_date": {
                 "type": "field",
@@ -175,6 +174,6 @@ def test_display(form):
             },
         },
     }
-    display = form.display({"title": "The King", "green_light_date": "2017-05-05"})
+    display = form.display()
     assert display == expected
     assert json.dumps(display) == json.dumps(expected)
