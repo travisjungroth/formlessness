@@ -7,6 +7,7 @@ from formlessness.displayers import Display, Displayer
 from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D, JSONData, JSONDict, T
+from formlessness.utils import attrs_to_path
 
 
 class Keyed(Protocol):
@@ -112,11 +113,13 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keye
         object_path = object_path or []
         display = self.display_info.copy()
         if isinstance(self, Converter):
-            display["object_path"] = object_path
-        display["contents"] = {}
+            display["objectPath"] = attrs_to_path(object_path)
+        display["contents"] = []
         for key, child in self.displayers.items():
             child_object_path = object_path.copy()
             if isinstance(child, Converter):
-                child_object_path.append(key)
-            display["contents"][key] = child.display(child_object_path)
+                child_display = child.display(data.get(key), object_path + [key])
+            else:
+                child_display = child.display(data, object_path)
+            display["contents"].append(child_display)
         return display

@@ -1,4 +1,3 @@
-import json
 from dataclasses import asdict, dataclass
 from datetime import date
 from typing import Optional
@@ -143,37 +142,36 @@ def test_display(form):
         "type": "form",
         "label": "Favorite Film",
         "description": "If you had to pick one.",
-        "object_path": [],
-        "contents": {
-            "title": {
+        "objectPath": "$",
+        "contents": [
+            {
                 "type": "field",
                 "label": "Title",
                 "widget": {"type": "text"},
-                "object_path": ["title"],
+                "objectPath": "$.title",
             },
-            "release_date": {
+            {
                 "type": "field",
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": {"type": "date_picker"},
-                "object_path": ["release_date"],
+                "objectPath": "$.release_date",
             },
-            "optional_film_details": {
+            {
                 "type": "section",
                 "label": "Optional Film Details",
                 "collapsable": True,
                 "collapsed": True,
-                "contents": {
-                    "green_light_date": {
+                "contents": [
+                    {
                         "type": "field",
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
-                        "object_path": ["green_light_date"],
+                        "objectPath": "$.green_light_date",
                     },
-                },
+                ],
             },
-        },
+        ],
     }
     display = form.display()
     assert display == expected
-    assert json.dumps(display) == json.dumps(expected)
