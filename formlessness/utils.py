@@ -24,8 +24,3 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
         )
         return key, label
     raise ValueError("Must set key or label.")
-
-
-def attrs_to_path(attrs: Iterable) -> str:
-    """Turn a list of attributes into a JSON Path"""
-    return f"${''.join(f'.{attr}' for attr in attrs)}"
