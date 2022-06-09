@@ -143,7 +143,7 @@ def test_display(form):
         "type": "form",
         "label": "Favorite Film",
         "description": "If you had to pick one.",
-        "objectPath": '$',
+        "objectPath": "$",
         "contents": {
             "title": {
                 "type": "field",
