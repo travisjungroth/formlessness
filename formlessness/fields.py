@@ -35,7 +35,7 @@ from formlessness.serializers import (
     isoformat,
 )
 from formlessness.types import D, JSONDict, T
-from formlessness.utils import key_and_label
+from formlessness.utils import attrs_to_path, key_and_label
 from formlessness.widgets import Widget, date_picker, text
 
 
@@ -120,8 +120,8 @@ class BasicField(Field[D, T]):
     def deserialize(self, data: D, path: Sequence[str] = ()) -> T:
         return self.deserializer.deserialize(data)
 
-    def display(self, data: D = None, path: list[str] = []) -> Display:
-        display = self.display_info | {"objectPath": path}
+    def display(self, data: D = None, object_path: Iterable[str] = ()) -> Display:
+        display = self.display_info | {"objectPath": attrs_to_path(object_path)}
         if data is not None:
             display["value"] = data
         return display
