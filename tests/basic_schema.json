@@ -1,13 +1,16 @@
 {
   "type": "object",
   "properties": {
+    "type": {
+      "const": "form"
+    },
     "label": {
       "type": "string"
     },
     "description": {
       "type": "string"
     },
-    "object_path": {
+    "objectPath": {
       "type": "string"
     },
     "collapsable": {
@@ -23,25 +26,29 @@
         },
         {
           "$ref": "#/definitions/field"
+        },
+        {
+          "$ref": "#/definitions/section"
         }
       ]
     }
   },
   "required": [
-    "object_path",
+    "objectPath",
     "contents"
   ],
   "definitions": {
     "field": {
       "type": "object",
       "properties": {
+        "const": "field",
         "label": {
           "type": "string"
         },
         "description": {
           "type": "string"
         },
-        "object_path": {
+        "objectPath": {
           "type": "string"
         },
         "widget": {
@@ -57,9 +64,48 @@
         }
       },
       "required": [
-        "object_path",
+        "objectPath",
         "widget"
       ]
+    },
+    "section": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "section"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "objectPath": {
+          "type": "string"
+        },
+        "collapsable": {
+          "type": "boolean"
+        },
+        "collapsed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "contents"
+      ],
+      "contents": {
+        "anyOf": [
+          {
+            "$ref": "#"
+          },
+          {
+            "$ref": "#/definitions/field"
+          },
+          {
+            "$ref": "#/definitions/section"
+          }
+        ]
+      }
     }
   }
 }
