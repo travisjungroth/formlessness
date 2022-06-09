@@ -1,7 +1,9 @@
+import json
 from dataclasses import asdict, dataclass
 from datetime import date
 from typing import Optional
 
+import jsonschema
 import pytest
 
 from formlessness.constraints import constraint
@@ -175,3 +177,9 @@ def test_display(form):
     }
     display = form.display()
     assert display == expected
+
+
+def test_display_json(form):
+    with open("basic_schema.json") as f:
+        schema = json.load(f)
+    jsonschema.validate(form.display(), schema)

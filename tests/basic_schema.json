@@ -20,17 +20,20 @@
       "type": "boolean"
     },
     "contents": {
-      "anyOf": [
-        {
-          "$ref": "#"
-        },
-        {
-          "$ref": "#/definitions/field"
-        },
-        {
-          "$ref": "#/definitions/section"
-        }
-      ]
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#"
+          },
+          {
+            "$ref": "#/definitions/field"
+          },
+          {
+            "$ref": "#/definitions/section"
+          }
+        ]
+      }
     }
   },
   "required": [
@@ -41,7 +44,9 @@
     "field": {
       "type": "object",
       "properties": {
-        "const": "field",
+        "type": {
+          "const": "field"
+        },
         "label": {
           "type": "string"
         },
@@ -56,7 +61,7 @@
           "properties": {
             "type": {
               "enum": [
-                "string",
+                "text",
                 "date_picker"
               ]
             }
@@ -94,17 +99,20 @@
         "contents"
       ],
       "contents": {
-        "anyOf": [
-          {
-            "$ref": "#"
-          },
-          {
-            "$ref": "#/definitions/field"
-          },
-          {
-            "$ref": "#/definitions/section"
-          }
-        ]
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#"
+            },
+            {
+              "$ref": "#/definitions/field"
+            },
+            {
+              "$ref": "#/definitions/section"
+            }
+          ]
+        }
       }
     }
   }
