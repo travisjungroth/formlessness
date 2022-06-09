@@ -180,6 +180,6 @@ def test_display(form):
 
 
 def test_display_json(form):
-    with open("basic_schema.json") as f:
+    with open("tests/basic_schema.json") as f:
         schema = json.load(f)
     jsonschema.validate(form.display(), schema)
