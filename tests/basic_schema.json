@@ -1,0 +1,122 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "form"
+    },
+    "label": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "objectPath": {
+      "type": "string"
+    },
+    "collapsable": {
+      "type": "boolean"
+    },
+    "collapsed": {
+      "type": "boolean"
+    },
+    "contents": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "$ref": "#"
+          },
+          {
+            "$ref": "#/definitions/field"
+          },
+          {
+            "$ref": "#/definitions/section"
+          }
+        ]
+      }
+    }
+  },
+  "required": [
+    "type",
+    "objectPath",
+    "contents"
+  ],
+  "definitions": {
+    "field": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "field"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "objectPath": {
+          "type": "string"
+        },
+        "widget": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "text",
+                "date_picker"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "type",
+        "objectPath",
+        "widget"
+      ]
+    },
+    "section": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "section"
+        },
+        "label": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "objectPath": {
+          "type": "string"
+        },
+        "collapsable": {
+          "type": "boolean"
+        },
+        "collapsed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "type",
+        "contents"
+      ],
+      "contents": {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "#"
+            },
+            {
+              "$ref": "#/definitions/field"
+            },
+            {
+              "$ref": "#/definitions/section"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
