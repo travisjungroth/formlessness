@@ -42,7 +42,7 @@ For anything custom, use `pytest`.
 
 ### Formatting
 
-    doit format
+    pre-commit run -a
 
 ### Run docs locally
 
