@@ -27,5 +27,5 @@ class Displayer(Generic[D], ABC):
     @abstractmethod
     def display(self, object_path: str = "") -> Display:
         """
-        object_path is the JSON Path to the relevant part of the Converter (Form/Field).
+        object_path is the JSON Pointer to the relevant part of the Converter (Form/Field).
         """
