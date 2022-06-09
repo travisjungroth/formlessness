@@ -144,20 +144,20 @@ def test_display(form):
         "type": "form",
         "label": "Favorite Film",
         "description": "If you had to pick one.",
-        "objectPath": "$",
+        "objectPath": "",
         "contents": [
             {
                 "type": "field",
                 "label": "Title",
                 "widget": {"type": "text"},
-                "objectPath": "$.title",
+                "objectPath": "/title",
             },
             {
                 "type": "field",
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": {"type": "date_picker"},
-                "objectPath": "$.release_date",
+                "objectPath": "/release_date",
             },
             {
                 "type": "section",
@@ -169,7 +169,7 @@ def test_display(form):
                         "type": "field",
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
-                        "objectPath": "$.green_light_date",
+                        "objectPath": "/green_light_date",
                     },
                 ],
             },
@@ -182,4 +182,6 @@ def test_display(form):
 def test_display_json(form):
     with open("tests/basic_schema.json") as f:
         schema = json.load(f)
-    jsonschema.validate(form.display(), schema)
+    jsonschema.validate(
+        form.display(), schema, format_checker=jsonschema.draft7_format_checker
+    )
