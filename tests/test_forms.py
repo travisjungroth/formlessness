@@ -1,4 +1,3 @@
-import json
 from dataclasses import asdict, dataclass
 from datetime import date
 from typing import Optional
@@ -178,4 +177,3 @@ def test_display(form):
     }
     display = form.display({"title": "The King", "green_light_date": "2017-05-05"})
     assert display == expected
-    assert json.dumps(display) == json.dumps(expected)
