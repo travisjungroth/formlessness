@@ -149,7 +149,6 @@ def test_display(form):
                 "label": "Title",
                 "widget": {"type": "text"},
                 "objectPath": "$.title",
-                "value": "The King",
             },
             {
                 "type": "field",
@@ -169,11 +168,10 @@ def test_display(form):
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
                         "objectPath": "$.green_light_date",
-                        "value": "2017-05-05",
                     },
                 ],
             },
         ],
     }
-    display = form.display({"title": "The King", "green_light_date": "2017-05-05"})
+    display = form.display()
     assert display == expected
