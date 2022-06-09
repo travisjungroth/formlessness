@@ -108,14 +108,14 @@ class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keye
             if isinstance(child, Displayer)
         }
 
-    def display(self, object_path: str = "$") -> Display:
+    def display(self, object_path: str = "") -> Display:
         display = self.display_info.copy()
         if isinstance(self, Converter):
             display["objectPath"] = object_path
         display["contents"] = []
         for key, child in self.displayers.items():
             child_path = (
-                f"{object_path}.{key}" if isinstance(child, Converter) else object_path
+                f"{object_path}/{key}" if isinstance(child, Converter) else object_path
             )
             display["contents"].append(child.display(child_path))
         return display

@@ -11,7 +11,8 @@
       "type": "string"
     },
     "objectPath": {
-      "type": "string"
+      "type": "string",
+      "format": "json-pointer"
     },
     "collapsable": {
       "type": "boolean"
@@ -55,7 +56,8 @@
           "type": "string"
         },
         "objectPath": {
-          "type": "string"
+          "type": "string",
+          "format": "json-pointer"
         },
         "widget": {
           "type": "object",
@@ -85,9 +87,6 @@
           "type": "string"
         },
         "description": {
-          "type": "string"
-        },
-        "objectPath": {
           "type": "string"
         },
         "collapsable": {
