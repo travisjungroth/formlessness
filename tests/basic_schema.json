@@ -61,15 +61,18 @@
           "format": "json-pointer"
         },
         "widget": {
-          "type": "object",
-          "properties": {
-            "type": {
-              "enum": [
-                "text",
-                "date_picker"
-              ]
+          "anyOf": [
+            {
+              "const": {
+                "type": "text"
+              }
+            },
+            {
+              "const": {
+                "type": "date_picker"
+              }
             }
-          }
+          ]
         }
       },
       "required": [
