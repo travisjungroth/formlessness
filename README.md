@@ -35,7 +35,7 @@ Otherwise, follow the [installation docs](https://python-poetry.org/docs/master/
 
 ### Testing
 To run the same tests as the CI:
-    
+
     doit test
 
 For anything custom, use `pytest`.
