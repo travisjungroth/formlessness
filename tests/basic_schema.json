@@ -16,10 +16,12 @@
       "format": "json-pointer"
     },
     "collapsable": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     "collapsed": {
-      "type": "boolean"
+      "type": "boolean",
+      "default": false
     },
     "contents": {
       "type": "array",
@@ -94,10 +96,12 @@
           "type": "string"
         },
         "collapsable": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         },
         "collapsed": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": false
         }
       },
       "required": [
