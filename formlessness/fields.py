@@ -120,7 +120,7 @@ class BasicField(Field[D, T]):
     def deserialize(self, data: D, path: Sequence[str] = ()) -> T:
         return self.deserializer.deserialize(data)
 
-    def display(self, data: D = None, object_path: Iterable[str] = ()) -> Display:
+    def display(self, object_path: Iterable[str] = ()) -> Display:
         return self.display_info | {"objectPath": attrs_to_path(object_path)}
 
 
