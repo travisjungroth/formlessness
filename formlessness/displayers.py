@@ -25,7 +25,7 @@ class Displayer(Generic[D], ABC):
     """
 
     @abstractmethod
-    def display(self, object_path: list[str] = ()) -> Display:
+    def display(self, object_path: str = "$") -> Display:
         """
-        object_path is the sequence of keys to get to this Form/Field. Along with its key, creates a unique identity.
+        object_path is the JSON Path to the relevant part of the Converter (Form/Field).
         """
