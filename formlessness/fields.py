@@ -121,7 +121,7 @@ class BasicField(Field[D, T]):
         return self.deserializer.deserialize(data)
 
     def display(self, data: D = None, path: list[str] = []) -> Display:
-        display = self.display_info | {"object_path": path}
+        display = self.display_info | {"objectPath": path}
         if data is not None:
             display["value"] = data
         return display
