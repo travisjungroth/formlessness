@@ -144,37 +144,37 @@ def test_display(form):
         "label": "Favorite Film",
         "description": "If you had to pick one.",
         "objectPath": "$",
-        "contents": {
-            "title": {
+        "contents": [
+            {
                 "type": "field",
                 "label": "Title",
                 "widget": {"type": "text"},
                 "objectPath": "$.title",
                 "value": "The King",
             },
-            "release_date": {
+            {
                 "type": "field",
                 "label": "Released",
                 "description": "Date of US release.",
                 "widget": {"type": "date_picker"},
                 "objectPath": "$.release_date",
             },
-            "optional_film_details": {
+            {
                 "type": "section",
                 "label": "Optional Film Details",
                 "collapsable": True,
                 "collapsed": True,
-                "contents": {
-                    "green_light_date": {
+                "contents": [
+                    {
                         "type": "field",
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
                         "objectPath": "$.green_light_date",
                         "value": "2017-05-05",
                     },
-                },
+                ],
             },
-        },
+        ],
     }
     display = form.display({"title": "The King", "green_light_date": "2017-05-05"})
     assert display == expected
