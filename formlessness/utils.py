@@ -1,3 +1,8 @@
+from collections.abc import Mapping
+
+from formlessness.displayers import Display
+
+
 def key_and_label(key: str, label: str) -> tuple[str, str]:
     """
     If one of key or label is missing, generate it from the other.
@@ -21,3 +26,10 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
         )
         return key, label
     raise ValueError("Must set key or label.")
+
+
+def remove_null_values(display_info: Mapping) -> dict:
+    """
+    Helper to remove null values.
+    """
+    return {k: v for k, v in display_info.items() if v is not None}

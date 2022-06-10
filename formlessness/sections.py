@@ -4,8 +4,7 @@ from typing import Optional
 
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.displayers import filter_display_info
-from formlessness.utils import key_and_label
+from formlessness.utils import key_and_label, remove_null_values
 
 
 class Section(Parent, ABC):
@@ -26,7 +25,7 @@ class BasicSection(Section):
     ):
         key, label = key_and_label(key, label)
         self.key = key
-        self.display_info = filter_display_info(
+        self.display_info = remove_null_values(
             {
                 "type": "section",
                 "label": label,

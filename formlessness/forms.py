@@ -9,14 +9,13 @@ from formlessness.constraints import And
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.deserializers import Deserializer
-from formlessness.displayers import filter_display_info
 from formlessness.exceptions import DeserializationError
 from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label
+from formlessness.utils import key_and_label, remove_null_values
 
 
 class Form(Parent, Converter[D, T], ABC):
@@ -60,7 +59,7 @@ class BasicForm(Form[JSONDict, T]):
         self.object_constraint = And(
             *self.default_object_constraints, *extra_object_constraints
         ).simplify()
-        self.display_info = filter_display_info(
+        self.display_info = remove_null_values(
             {
                 "type": "form",
                 "label": label,

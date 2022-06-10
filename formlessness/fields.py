@@ -29,7 +29,6 @@ from formlessness.deserializers import datetime_from_iso_str
 from formlessness.deserializers import time_from_iso_str
 from formlessness.displayers import Display
 from formlessness.displayers import Displayer
-from formlessness.displayers import filter_display_info
 from formlessness.serializers import FunctionSerializer
 from formlessness.serializers import JoinSerializer
 from formlessness.serializers import Serializer
@@ -37,7 +36,7 @@ from formlessness.serializers import isoformat
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label
+from formlessness.utils import key_and_label, remove_null_values
 from formlessness.widgets import Widget
 from formlessness.widgets import date_picker
 from formlessness.widgets import text
@@ -103,7 +102,7 @@ class BasicField(Field[D, T]):
             self.object_constraint |= is_null
         self.data_constraint = self.data_constraint.simplify()
         self.object_constraint = self.object_constraint.simplify()
-        self.display_info: JSONDict = filter_display_info(
+        self.display_info: JSONDict = remove_null_values(
             {
                 "type": "field",
                 "label": label,
