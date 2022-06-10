@@ -39,6 +39,6 @@ jobs:
     - name: Install packages
       if: steps.cached-venv.outputs.cache-hit != 'true'
       run: poetry install --no-interaction
-    - run: poetry run pytest --cov --cov-report=xml
+    - run: poetry run coverage xml -m pytest
     - name: Codecov
       uses: codecov/codecov-action@v3.1.0
