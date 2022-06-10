@@ -178,10 +178,10 @@ def test_display(form):
                         "objectPath": "/green_light_date",
                     },
                     {
-                        "label": "Director",
-                        "objectPath": "/director",
                         "type": "field",
+                        "label": "Director",
                         "widget": {"type": "text"},
+                        "objectPath": "/director",
                     },
                 ],
             },
