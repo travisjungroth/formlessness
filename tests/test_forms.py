@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from dataclasses import asdict
 from dataclasses import dataclass
@@ -21,7 +23,16 @@ from formlessness.serializers import serializer
 class Film:
     title: str
     release_date: date
+    distributor: str
     green_light_date: Optional[date] = None
+    director: Optional[str] = None
+    location: Optional[Location] = None
+
+
+@dataclass
+class Location:
+    city: str
+    country: str
 
 
 @constraint("Green light date must be before release date if set.")
@@ -68,8 +79,19 @@ def form() -> BasicForm[Film]:
                         label="Green Light Date",
                         required=False,
                     ),
+                    StrField(
+                        label="Director",
+                        required=False,
+                    ),
+                    BasicForm(
+                        label="Location",
+                        serializer=serializer(asdict),
+                        deserializer=KwargsDeserializer(Location),
+                        children=[StrField(label="City"), StrField(label="Country")],
+                    ),
                 ],
             ),
+            StrField(label="Distributor"),
         ],
     )
 
@@ -83,11 +105,15 @@ def test_make_object(form):
         "title": "The King",
         "release_date": "2021-10-09",
         "green_light_date": "2017-05-05",
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     film = Film(
         title="The King",
         release_date=date(2021, 10, 9),
         green_light_date=date(2017, 5, 5),
+        location=Location("Eastcheap", "England"),
+        distributor="Netflix",
     )
     obj = form.make_object(data)
     assert obj == film
@@ -100,6 +126,8 @@ def test_issues(form):
     data = {
         "title": "The King",
         "release_date": "2021-10-09",
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     assert form.validate_data(data)
     obj = form.deserialize(data)
@@ -109,6 +137,8 @@ def test_issues(form):
         "title": "The King",
         "release_date": "2021-10-09",
         "green_light_date": "2017-05-05",
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     assert form.validate_data(data)
     obj = form.deserialize(data)
@@ -119,6 +149,8 @@ def test_issues(form):
         "release_date": "2021-10-09",
         # green light after release, should return an issue
         "green_light_date": "2022-05-05",
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     # This could be checked at the data stage, but it's not in this example.
     assert form.validate_data(data)
@@ -128,12 +160,16 @@ def test_issues(form):
     data = {
         "title": "The King",
         "release_date": 20211009,
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     assert not form.validate_data(data)
 
     data = {
         "title": "The King",
         "release_date": "2021-10-10",  # Sunday check
+        "location": {"city": "Eastcheap", "country": "England"},
+        "distributor": "Netflix",
     }
     assert form.validate_data(data)
     obj = form.deserialize(data)
@@ -173,7 +209,38 @@ def test_display(form):
                         "widget": {"type": "date_picker"},
                         "objectPath": "/green_light_date",
                     },
+                    {
+                        "type": "field",
+                        "label": "Director",
+                        "widget": {"type": "text"},
+                        "objectPath": "/director",
+                    },
+                    {
+                        "label": "Location",
+                        "objectPath": "/location",
+                        "type": "form",
+                        "contents": [
+                            {
+                                "label": "City",
+                                "objectPath": "/location/city",
+                                "type": "field",
+                                "widget": {"type": "text"},
+                            },
+                            {
+                                "label": "Country",
+                                "objectPath": "/location/country",
+                                "type": "field",
+                                "widget": {"type": "text"},
+                            },
+                        ],
+                    },
                 ],
+            },
+            {
+                "label": "Distributor",
+                "objectPath": "/distributor",
+                "type": "field",
+                "widget": {"type": "text"},
             },
         ],
     }

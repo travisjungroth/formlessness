@@ -57,7 +57,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         return ConstraintMap(self.object_constraint.validate(obj))
 
 
-class Parent(Displayer[JSONDict], Mapping[str, Union["Parent", Converter]], Keyed, ABC):
+class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]], ABC):
     """
     A recursive container for form-stuff. This would be a Form or Section.
     """
