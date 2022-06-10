@@ -1,7 +1,5 @@
 from collections.abc import Mapping
 
-from formlessness.displayers import Display
-
 
 def key_and_label(key: str, label: str) -> tuple[str, str]:
     """
@@ -28,8 +26,5 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
     raise ValueError("Must set key or label.")
 
 
-def remove_null_values(display_info: Mapping) -> dict:
-    """
-    Helper to remove null values.
-    """
-    return {k: v for k, v in display_info.items() if v is not None}
+def remove_null_values(mapping: Mapping) -> dict:
+    return {k: v for k, v in mapping.items() if v is not None}
