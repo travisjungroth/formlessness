@@ -27,3 +27,7 @@ addopts = "--cov-config=pyproject.toml --doctest-modules"
 [tool.coverage.run]
 branch = true
 source = ["formlessness"]
+
+[tool.isort]
+profile = "black"
+py_version = "auto"
