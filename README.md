@@ -2,6 +2,8 @@
 ![License](https://img.shields.io/github/license/travisjungroth/formlessness?color=blue)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![codecov](https://codecov.io/gh/travisjungroth/formlessness/branch/main/graph/badge.svg?token=2XR660JGGF)](https://codecov.io/gh/travisjungroth/formlessness)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/travisjungroth/formlessness/main.svg)](https://results.pre-commit.ci/latest/github/travisjungroth/formlessness/main)
+
 
 # Formlessness
 
