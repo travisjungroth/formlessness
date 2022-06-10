@@ -43,6 +43,8 @@
   "required": [
     "type",
     "objectPath",
+    "collapsable",
+    "collapsed",
     "contents"
   ],
   "definitions": {
@@ -106,6 +108,8 @@
       },
       "required": [
         "type",
+        "collapsable",
+        "collapsed",
         "contents"
       ],
       "contents": {
