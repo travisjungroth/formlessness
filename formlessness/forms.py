@@ -1,5 +1,6 @@
 from abc import ABC
 from collections.abc import Sequence
+from typing import Optional
 
 from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
@@ -37,8 +38,8 @@ class BasicForm(Form[JSONDict, T]):
     def __init__(
         self,
         # Data to pass to the Display
-        label: str = "",
-        description: str = "",
+        label: Optional[str] = None,
+        description: Optional[str] = None,
         collapsable: bool = False,
         collapsed: bool = False,
         # These constraints are added to the class defaults to create the two Constraints.

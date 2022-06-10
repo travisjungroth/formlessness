@@ -16,9 +16,9 @@ Display = JSONDict
 
 def filter_display_info(display_info: Display) -> Display:
     """
-    Helper to remove falsy values.
+    Helper to remove null values.
     """
-    return {k: v for k, v in display_info.items() if v}
+    return {k: v for k, v in display_info.items() if v is not None}
 
 
 class Displayer(Generic[D], ABC):

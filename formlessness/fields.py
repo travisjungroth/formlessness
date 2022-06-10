@@ -2,7 +2,7 @@ from abc import ABC
 from datetime import date
 from datetime import datetime
 from datetime import time
-from typing import Iterable
+from typing import Iterable, Optional
 from typing import Sequence
 
 from formlessness.base_classes import Converter
@@ -66,8 +66,8 @@ class BasicField(Field[D, T]):
     def __init__(
         self,
         # Data to pass to the Display
-        label: str = "",
-        description: str = "",
+        label: Optional[str] = None,
+        description: Optional[str] = None,
         shadow: str = "",
         widget: Widget = None,
         # Choices are included in the Display and will add a Choices.
@@ -102,15 +102,12 @@ class BasicField(Field[D, T]):
             self.object_constraint |= is_null
         self.data_constraint = self.data_constraint.simplify()
         self.object_constraint = self.object_constraint.simplify()
-
         self.display_info: JSONDict = filter_display_info(
             {
                 "type": "field",
                 "label": label,
                 "description": description,
-                "shadow": shadow,
                 "widget": widget or self.default_widget,
-                "choices": data_choices or None,
             }
         )
 

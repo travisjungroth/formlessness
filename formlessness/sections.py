@@ -1,5 +1,6 @@
 from abc import ABC
 from collections.abc import Iterable
+from typing import Optional
 
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
@@ -16,8 +17,8 @@ class Section(Parent, ABC):
 class BasicSection(Section):
     def __init__(
         self,
-        label: str = "",
-        description: str = "",
+        label: Optional[str] = None,
+        description: Optional[str] = None,
         collapsable: bool = False,
         collapsed: bool = False,
         key: str = "",
