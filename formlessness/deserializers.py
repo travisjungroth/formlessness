@@ -54,7 +54,7 @@ class FunctionDeserializer(Deserializer[D, T]):
 @dataclass
 class KwargsDeserializer(Deserializer[dict[str, Any], T]):
     function: Callable[[...], T]
-    error_message: str
+    error_message: str = "Failed to deserialize."
 
     def deserialize(self, data: dict[str, Any]) -> T:
         try:
