@@ -6,7 +6,6 @@ authors = ["Travis Jungroth <jungroth@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-pytest-cov = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -16,17 +15,19 @@ mkdocs-material = "^8.3.3"
 coverage = {extras = ["toml"], version = "^6.4.1"}
 pre-commit = "^2.19.0"
 jsonschema = "^4.6.0"
+pytest-cov = "^3.0.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
-addopts = "--cov-config=pyproject.toml --doctest-modules"
+addopts = "--doctest-modules"
 
 [tool.coverage.run]
 branch = true
-source = ["formlessness"]
+source_pkgs = ["formlessness"]
+source = ["tests"]
 
 [tool.isort]
 profile = "black"
