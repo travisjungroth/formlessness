@@ -1,42 +1,45 @@
 from abc import ABC
-from datetime import date, datetime, time
-from typing import Iterable, Sequence
+from datetime import date
+from datetime import datetime
+from datetime import time
+from typing import Iterable
+from typing import Sequence
 
 from formlessness.base_classes import Converter
-from formlessness.constraints import (
-    And,
-    Choices,
-    Constraint,
-    EachItem,
-    OfType,
-    is_date,
-    is_datetime,
-    is_float,
-    is_int,
-    is_list_of_int,
-    is_list_of_str,
-    is_null,
-    is_str,
-    is_time,
-)
-from formlessness.deserializers import (
-    Deserializer,
-    FunctionDeserializer,
-    SplitDeserializer,
-    date_from_iso_str,
-    datetime_from_iso_str,
-    time_from_iso_str,
-)
-from formlessness.displayers import Display, Displayer, filter_display_info
-from formlessness.serializers import (
-    FunctionSerializer,
-    JoinSerializer,
-    Serializer,
-    isoformat,
-)
-from formlessness.types import D, JSONDict, T
+from formlessness.constraints import And
+from formlessness.constraints import Choices
+from formlessness.constraints import Constraint
+from formlessness.constraints import EachItem
+from formlessness.constraints import OfType
+from formlessness.constraints import is_date
+from formlessness.constraints import is_datetime
+from formlessness.constraints import is_float
+from formlessness.constraints import is_int
+from formlessness.constraints import is_list_of_int
+from formlessness.constraints import is_list_of_str
+from formlessness.constraints import is_null
+from formlessness.constraints import is_str
+from formlessness.constraints import is_time
+from formlessness.deserializers import Deserializer
+from formlessness.deserializers import FunctionDeserializer
+from formlessness.deserializers import SplitDeserializer
+from formlessness.deserializers import date_from_iso_str
+from formlessness.deserializers import datetime_from_iso_str
+from formlessness.deserializers import time_from_iso_str
+from formlessness.displayers import Display
+from formlessness.displayers import Displayer
+from formlessness.displayers import filter_display_info
+from formlessness.serializers import FunctionSerializer
+from formlessness.serializers import JoinSerializer
+from formlessness.serializers import Serializer
+from formlessness.serializers import isoformat
+from formlessness.types import D
+from formlessness.types import JSONDict
+from formlessness.types import T
 from formlessness.utils import key_and_label
-from formlessness.widgets import Widget, date_picker, text
+from formlessness.widgets import Widget
+from formlessness.widgets import date_picker
+from formlessness.widgets import text
 
 
 class Field(Converter[D, T], Displayer[D], ABC):

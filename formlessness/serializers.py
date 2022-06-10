@@ -2,9 +2,14 @@ from __future__ import annotations
 
 from abc import ABC
 from dataclasses import dataclass
-from typing import Callable, Generic, Iterable, Protocol
+from typing import Callable
+from typing import Generic
+from typing import Iterable
+from typing import Protocol
 
-from formlessness.types import D, JSONDict, T
+from formlessness.types import D
+from formlessness.types import JSONDict
+from formlessness.types import T
 
 
 class Serializer(Generic[D, T], ABC):

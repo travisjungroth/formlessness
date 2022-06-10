@@ -3,7 +3,6 @@
 .pytest_cache
 .tox
 **/__pycache__
-.doit.db
 .coverage
 coverage.xml
 dist

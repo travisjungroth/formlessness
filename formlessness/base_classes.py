@@ -1,12 +1,22 @@
 from abc import ABC
-from typing import Any, Iterator, Mapping, Protocol, Union
+from typing import Any
+from typing import Iterator
+from typing import Mapping
+from typing import Protocol
+from typing import Union
 
-from formlessness.constraints import Constraint, ConstraintMap, Valid
+from formlessness.constraints import Constraint
+from formlessness.constraints import ConstraintMap
+from formlessness.constraints import Valid
 from formlessness.deserializers import Deserializer
-from formlessness.displayers import Display, Displayer
+from formlessness.displayers import Display
+from formlessness.displayers import Displayer
 from formlessness.exceptions import FormErrors
 from formlessness.serializers import Serializer
-from formlessness.types import D, JSONData, JSONDict, T
+from formlessness.types import D
+from formlessness.types import JSONData
+from formlessness.types import JSONDict
+from formlessness.types import T
 
 
 class Keyed(Protocol):

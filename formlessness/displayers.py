@@ -4,10 +4,12 @@ It's recursive, with every component of a Form also having a Display.
 """
 
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from typing import Generic
 
-from formlessness.types import D, JSONDict
+from formlessness.types import D
+from formlessness.types import JSONDict
 
 Display = JSONDict
 
