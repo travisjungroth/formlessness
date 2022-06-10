@@ -36,7 +36,8 @@ from formlessness.serializers import isoformat
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label, remove_null_values
+from formlessness.utils import key_and_label
+from formlessness.utils import remove_null_values
 from formlessness.widgets import Widget
 from formlessness.widgets import date_picker
 from formlessness.widgets import text

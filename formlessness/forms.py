@@ -15,7 +15,8 @@ from formlessness.serializers import Serializer
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label, remove_null_values
+from formlessness.utils import key_and_label
+from formlessness.utils import remove_null_values
 
 
 class Form(Parent, Converter[D, T], ABC):

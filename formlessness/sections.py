@@ -4,7 +4,8 @@ from typing import Optional
 
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.utils import key_and_label, remove_null_values
+from formlessness.utils import key_and_label
+from formlessness.utils import remove_null_values
 
 
 class Section(Parent, ABC):
