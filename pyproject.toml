@@ -31,3 +31,4 @@ source = ["formlessness"]
 [tool.isort]
 profile = "black"
 py_version = "auto"
+force_single_line = true

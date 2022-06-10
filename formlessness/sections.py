@@ -1,7 +1,8 @@
 from abc import ABC
 from collections.abc import Iterable
 
-from formlessness.base_classes import Keyed, Parent
+from formlessness.base_classes import Keyed
+from formlessness.base_classes import Parent
 from formlessness.displayers import filter_display_info
 from formlessness.utils import key_and_label
 

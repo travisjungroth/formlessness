@@ -1,4 +1,5 @@
-from typing import TypeVar, Union
+from typing import TypeVar
+from typing import Union
 
 JSONData = Union[str, int, float, list["JSONData"], dict[str, "JSONData"], None]
 JSONDict = dict[str, JSONData]

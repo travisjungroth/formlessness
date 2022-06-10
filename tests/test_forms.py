@@ -1,5 +1,6 @@
 import json
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
+from dataclasses import dataclass
 from datetime import date
 from typing import Optional
 
@@ -9,7 +10,8 @@ import pytest
 from formlessness.constraints import constraint
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
-from formlessness.fields import DateField, StrField
+from formlessness.fields import DateField
+from formlessness.fields import StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
 from formlessness.serializers import serializer
