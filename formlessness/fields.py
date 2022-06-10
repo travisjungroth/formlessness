@@ -2,7 +2,8 @@ from abc import ABC
 from datetime import date
 from datetime import datetime
 from datetime import time
-from typing import Iterable, Optional
+from typing import Iterable
+from typing import Optional
 from typing import Sequence
 
 from formlessness.base_classes import Converter
