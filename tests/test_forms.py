@@ -68,6 +68,10 @@ def form() -> BasicForm[Film]:
                         label="Green Light Date",
                         required=False,
                     ),
+                    StrField(
+                        label="Director",
+                        required=False,
+                    ),
                 ],
             ),
         ],
@@ -172,6 +176,12 @@ def test_display(form):
                         "label": "Green Light Date",
                         "widget": {"type": "date_picker"},
                         "objectPath": "/green_light_date",
+                    },
+                    {
+                        "label": "Director",
+                        "objectPath": "/director",
+                        "type": "field",
+                        "widget": {"type": "text"},
                     },
                 ],
             },
