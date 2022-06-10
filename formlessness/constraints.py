@@ -1,20 +1,24 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
-from datetime import date, datetime, time
-from operator import ge, gt, le, lt
-from typing import (
-    Any,
-    Callable,
-    ClassVar,
-    Container,
-    Final,
-    Generic,
-    Iterable,
-    Mapping,
-    Sequence,
-)
+from datetime import date
+from datetime import datetime
+from datetime import time
+from operator import ge
+from operator import gt
+from operator import le
+from operator import lt
+from typing import Any
+from typing import Callable
+from typing import ClassVar
+from typing import Container
+from typing import Final
+from typing import Generic
+from typing import Iterable
+from typing import Mapping
+from typing import Sequence
 
 from formlessness.types import T
 
