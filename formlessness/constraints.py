@@ -100,9 +100,6 @@ class Constraint(Generic[T], ABC):
     def json_schema(self) -> Optional[JSONDict]:
         return None
 
-    def supports_json_schema(self) -> bool:
-        return self.json_schema() is not None
-
 
 """
 Simple Constraints
@@ -379,6 +376,14 @@ class And(Constraint[T]):
         if len(constraints) == 1:
             return constraints[0]
         return And(*constraints)
+
+    def json_schema(self) -> Optional[JSONDict]:
+        schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
+        if not schemas:
+            return {}
+        if len(self.constraints) == 1:
+            return schemas[0]
+        return {'allOf': schemas}
 
 
 # TODO: Add Not
