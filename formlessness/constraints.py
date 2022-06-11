@@ -304,6 +304,7 @@ class GT(Comparison[T]):
     >>> GT(0).satisfied_by('1')
     False
     """
+
     operator: Callable[[T, T], bool] = gt
 
     comparison_string: str = "greater than"
