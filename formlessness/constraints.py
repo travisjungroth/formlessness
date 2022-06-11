@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
+from dataclasses import replace
 from datetime import date
 from datetime import datetime
 from datetime import time
