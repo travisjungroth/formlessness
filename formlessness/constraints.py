@@ -477,16 +477,16 @@ Constraint instances
 """
 
 
+is_null = OfType(type(None), "Must not be set.", "null")
 is_int = OfType(int, "Must be an integer.", "integer")
 is_float = OfType(float, "Must be a float.", "number")
 is_str = OfType(str, "Must be a string.", "string")
-is_date = OfType(date, "Must be a date.")
-is_datetime = OfType(datetime, "Must be a datetime.")
-is_time = OfType(time, "Must be a time.")
+is_bool = OfType(bool, "Must be a boolean.", "boolean")
 is_list = OfType(list, "Must be a list.", "array")
 is_dict = OfType(dict, "Must be a dictionary.", "object")
-is_null = OfType(type(None), "Must not be set.", "null")
-is_bool = OfType(bool, "Must be a boolean.", "boolean")
+is_datetime = OfType(datetime, "Must be a datetime.")
+is_date = OfType(date, "Must be a date.")
+is_time = OfType(time, "Must be a time.")
 is_iterable = OfType(Iterable, "Must be iterable.")
 is_list_of_str = list_of(is_str, "Must be a list of strings.")
 is_list_of_int = list_of(is_int, "Must be a list of integers.")
