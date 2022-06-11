@@ -63,8 +63,10 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         }
 
     def _data_schema(self) -> JSONDict:
-        schema = self.data_constraint.json_schema()
-        return schema if schema is not None else {}
+        schema = self.data_constraint.json_schema() or {}
+        if self.default is not MISSING:
+            schema['default'] = self.default
+        return schema
 
 
 class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]], ABC):

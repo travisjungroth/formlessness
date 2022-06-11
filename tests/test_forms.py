@@ -294,7 +294,7 @@ def test_data_schema(form):
         "$schema": "http://json-schema.org/draft-07/schema#",
         "properties": {
             "director": {"anyOf": [{"type": "string"}, {"type": "null"}]},
-            "distributor": {"type": "string"},
+            "distributor": {"default": "Netflix", "type": "string"},
             "green_light_date": {"anyOf": [{"type": "string"}, {"type": "null"}]},
             "location": {
                 "properties": {
