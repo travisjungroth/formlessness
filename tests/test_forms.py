@@ -282,7 +282,28 @@ def test_data_schema_against_form_data(form, form_data):
     validate_json(form_data, schema)
 
 
-@pytest.mark.skip()
 def test_data_schema(form):
     schema = form.data_schema()
-    expected = {}
+    expected = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "properties": {
+            "director": {},
+            "distributor": {"type": "string"},
+            "green_light_date": {},
+            "location": {
+                "properties": {
+                    "city": {"type": "string"},
+                    "country": {"type": "string"},
+                },
+                "required": ["city", "country"],
+                "type": "object",
+                "unevaluatedProperties": False,
+            },
+            "release_date": {"type": "string"},
+            "title": {"allOf": [{"type": "string"}]},
+        },
+        "required": ["title", "release_date", "distributor"],
+        "type": "object",
+        "unevaluatedProperties": False,
+    }
+    assert schema == expected
