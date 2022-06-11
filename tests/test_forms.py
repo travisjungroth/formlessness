@@ -59,7 +59,6 @@ def form() -> BasicForm[Film]:
         label="Favorite Film",
         description="If you had to pick one.",
         extra_object_constraints=[green_light_before_release],
-        serializer=serializer(asdict),
         deserializer=KwargsDeserializer(Film, "Can't make a Film from the given data."),
         children=[
             StrField(
@@ -90,8 +89,8 @@ def form() -> BasicForm[Film]:
                     ),
                     BasicForm(
                         label="Location",
-                        serializer=serializer(asdict),
                         deserializer=KwargsDeserializer(Location),
+                        default=Location("San Francisco", "USA"),
                         nullable=True,
                         children=[StrField(label="City"), StrField(label="Country")],
                     ),
@@ -301,6 +300,7 @@ def test_data_schema(form):
                     "city": {"type": "string"},
                     "country": {"type": "string"},
                 },
+                "default": {"city": "San Francisco", "country": "USA"},
                 "required": ["city", "country"],
                 "type": "object",
                 "unevaluatedProperties": False,

@@ -37,6 +37,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     object_constraint: Constraint[T] = Valid
     required: bool = True
     default: Union[T, object] = MISSING
+    default_data: Union[D, object] = MISSING
 
     def make_object(self, data: D) -> T:
         """
@@ -65,7 +66,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     def _data_schema(self) -> JSONDict:
         schema = self.data_constraint.json_schema() or {}
         if self.default is not MISSING:
-            schema["default"] = self.default
+            schema["default"] = self.default_data
         return schema
 
 
