@@ -114,6 +114,10 @@ class BasicForm(Form[JSONDict, T]):
         return {
             "type": "object",
             "properties": {k: {} for k, v in self.converters.items()},
-            "required": [k for k, converter in self.converters.items() if not converter.data_is_valid(None)],
+            "required": [
+                k
+                for k, converter in self.converters.items()
+                if not converter.data_is_valid(None)
+            ],
             "unevaluatedProperties": False,
         }

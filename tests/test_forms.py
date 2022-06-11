@@ -10,7 +10,8 @@ from typing import Optional
 import jsonschema
 import pytest
 
-from formlessness.constraints import constraint, is_str
+from formlessness.constraints import constraint
+from formlessness.constraints import is_str
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
 from formlessness.fields import DateField
