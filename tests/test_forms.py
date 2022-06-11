@@ -148,7 +148,6 @@ def test_issues(form):
     }
     assert form.validate_data(data)
     obj = form.deserialize(data)
-    print(form.validate_object(obj))
     assert form.validate_object(obj)
 
     data = {

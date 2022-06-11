@@ -110,8 +110,6 @@ class BasicField(Field[D, T]):
         else:
             self.data_constraint &= not_null
             self.object_constraint &= not_null
-        self.data_constraint = self.data_constraint.simplify()
-        self.object_constraint = self.object_constraint.simplify()
         self.display_info: JSONDict = remove_null_values(
             {
                 "type": "field",
