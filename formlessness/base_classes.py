@@ -55,7 +55,6 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         return ConstraintMap(self.object_constraint.validate(obj))
 
     def data_schema(self) -> JSONDict:
-        """Experimental and would break with Not"""
         return self._data_schema() | {
             "$schema": "http://json-schema.org/draft-07/schema#",
         }
