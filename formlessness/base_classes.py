@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import Any
+from typing import Any, Type
 from typing import Iterator
 from typing import Mapping
 from typing import Protocol
@@ -17,6 +17,7 @@ from formlessness.types import D
 from formlessness.types import JSONData
 from formlessness.types import JSONDict
 from formlessness.types import T
+from formlessness.utils import MISSING
 
 
 class Keyed(Protocol):
@@ -34,6 +35,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
     required: bool = True
+    default: Union[T, object] = MISSING
 
     def make_object(self, data: D) -> T:
         """
@@ -110,12 +112,14 @@ class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]
             if hasattr(obj, attr)
         }
 
-    def converter_to_sub_data(self, data: JSONDict) -> Mapping[Converter, JSONData]:
+    def converter_to_sub_data(
+        self, data: JSONDict
+    ) -> Mapping[Converter, Union[JSONData, object]]:
         """
         Given a dictionary, breaks it apart and maps it to the children converters.
         Useful for validation and deserialization.
         """
-        return {self.converters[k]: v for k, v in data.items()}
+        return {v: data.get(k, MISSING) for k, v in self.converters.items()}
 
     @property
     def displayers(self) -> Mapping[str, Displayer]:

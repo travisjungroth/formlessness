@@ -75,7 +75,7 @@ class Constraint(Generic[T], ABC):
         will return a truthy Constraint. The default implementation will work for most simple Constraints, and will need
         to be replaced for complex Constraints.
         """
-        return Valid if self.satisfied_by(value) else self
+        return Valid if self.satisfied_by(value) else self.simplify()
 
     def __bool__(self) -> bool:
         """
@@ -84,10 +84,10 @@ class Constraint(Generic[T], ABC):
         return False
 
     def __and__(self, other: Constraint) -> Constraint:
-        return And(self, other)
+        return And(self, other).simplify()
 
     def __or__(self, other: Constraint) -> Constraint:
-        return Or(self, other)
+        return Or(self, other).simplify()
 
     def __invert__(self) -> Constraint:
         return Not(self)
@@ -367,7 +367,8 @@ class Or(Constraint[T]):
         return Or(*[v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return self.message or "\nor\n".join(map(str, self.constraints))
+        sep = "\nor\n"
+        return self.message or f'({sep.join(map(str, self.constraints))})'
 
     def __bool__(self):
         return not self.constraints or any(self.constraints)
@@ -429,7 +430,8 @@ class And(Constraint[T]):
         return And(*[v.validate(value) for v in self.constraints]).simplify()
 
     def __str__(self):
-        return self.message or "\nand\n".join(map(str, self.constraints))
+        sep = "\nand\n"
+        return self.message or f'({sep.join(map(str, self.constraints))})'
 
     def __bool__(self):
         return all(self.constraints)
@@ -541,6 +543,8 @@ def list_of(constraint: Constraint, message: str) -> Constraint:
     return And(is_list, EachItem(constraint), message=message)
 
 
+
+
 """
 Constraint Collections
 """
@@ -608,7 +612,7 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
         return ConstraintMap(top_constraint, sub_maps)
 
     def __str__(self):
-        return "\n".join([f"{'.'.join(k)}: {v}" for k, v in self.items()])
+        return "\n\n".join([f"{'.'.join(k)}: {v}" for k, v in self.items()])
 
 
 """
@@ -634,3 +638,18 @@ is_list_of_int = list_of(is_int, "Must be a list of integers.")
 @constraint("Must be set.")
 def not_null(value: Any) -> bool:
     return value is not None
+
+
+@dataclass
+class HasKeys(Constraint):
+    keys: list[str]
+    requires: ClassVar = [is_dict]
+
+    def validate(self, value: T) -> Constraint:
+        missing_keys = [k for k in self.keys if k not in value]
+        if not missing_keys:
+            return Valid
+        return HasKeys(missing_keys)
+
+    def __str__(self):
+        return f"Must set {', '.join(self.keys)}"

@@ -1,11 +1,11 @@
 from abc import ABC
 from collections.abc import Sequence
-from typing import Optional
+from typing import Optional, Union, Type
 
 from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.constraints import And
+from formlessness.constraints import And, HasKeys
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.constraints import is_null
@@ -17,7 +17,7 @@ from formlessness.serializers import Serializer
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label
+from formlessness.utils import key_and_label, MISSING
 from formlessness.utils import remove_null_values
 
 
@@ -43,7 +43,9 @@ class BasicForm(Form[JSONDict, T]):
         description: Optional[str] = None,
         collapsable: bool = False,
         collapsed: bool = False,
+        default: Union[T, object] = MISSING,
         required: bool = True,
+        nullable: bool = False,
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -55,15 +57,24 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
+        self.default = default
+        self.default_data = (
+            MISSING if self.default is MISSING else self.serialize(self.default)
+        )
         self.required = required
-        if self.required:
-            self.data_constraint &= not_null
-            self.object_constraint &= not_null
-        else:
+        self.nullable = nullable
+        if self.nullable:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
+        else:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+
+        self.children = {child.key: child for child in children}
         self.data_constraint = And(
-            *self.default_data_constraints, *extra_data_constraints
+            *self.default_data_constraints,
+            *extra_data_constraints,
+            HasKeys(self.required_keys())
         ).simplify()
         self.object_constraint = And(
             *self.default_object_constraints, *extra_object_constraints
@@ -77,11 +88,12 @@ class BasicForm(Form[JSONDict, T]):
                 "collapsed": collapsed,
             }
         )
-        self.children = {child.key: child for child in children}
 
     def validate_data(self, data: JSONDict) -> ConstraintMap:
         child_constraints = {}
         for child, child_data in self.converter_to_sub_data(data).items():
+            if child_data is MISSING:
+                continue
             child_constraints[child.key] = child.validate_data(child_data)
         return super().validate_data(data) & ConstraintMap(
             child_constraints=child_constraints
@@ -99,6 +111,11 @@ class BasicForm(Form[JSONDict, T]):
         new_data = {}
         errors = {}
         for child, sub_data in self.converter_to_sub_data(data).items():
+            if sub_data is MISSING:
+                if child.default is MISSING:
+                    continue
+                new_data[child.key] = child.default
+                continue
             try:
                 new_data[child.key] = child.deserialize(sub_data, [*path, child.key])
             except FormErrors as e:
@@ -122,8 +139,9 @@ class BasicForm(Form[JSONDict, T]):
         return {
             "type": "object",
             "properties": {k: v._data_schema() for k, v in self.converters.items()},
-            "required": [
-                k for k, converter in self.converters.items() if converter.required
-            ],
+            "required": self.required_keys(),
             "unevaluatedProperties": False,
         }
+
+    def required_keys(self) -> list[str]:
+        return [k for k, converter in self.converters.items() if converter.required]
