@@ -97,8 +97,11 @@ class Constraint(Generic[T], ABC):
     def __str__(self):
         pass
 
-    def json_schema(self) -> JSONDict:
-        return {}
+    def json_schema(self) -> Optional[JSONDict]:
+        return None
+
+    def supports_json_schema(self) -> bool:
+        return self.json_schema() is not None
 
 
 """
@@ -129,6 +132,9 @@ class ValidClass(Constraint[Any]):
 
     def __str__(self):
         return "Valid"
+
+    def json_schema(self) -> JSONDict:
+        return {}
 
 
 Valid: Final[ValidClass] = ValidClass()
@@ -203,8 +209,8 @@ class OfType(Constraint[T]):
     def __str__(self):
         return self.message
 
-    def json_schema(self) -> JSONData:
-        return {"type": self.json_type} if self.json_type else {}
+    def json_schema(self) -> Optional[JSONData]:
+        return {"type": self.json_type} if self.json_type else None
 
 
 @dataclass
@@ -330,6 +336,10 @@ class Or(Constraint[T]):
             else:
                 constraints.append(v)
         return Or(*constraints)
+
+    def json_schema(self) -> Optional[JSONDict]:
+        if not self.constraints:
+            return
 
 
 @dataclass
