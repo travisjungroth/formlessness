@@ -177,10 +177,6 @@ class TimeField(BasicField[str, time]):
     default_widget = date_picker
 
 
-# TODO: Add BoolField
-# TODO: Add JSONField
-
-
 class CommaListStrField(BasicField[str, list[str]]):
     default_serializer = JoinSerializer(",")
     default_deserializer = SplitDeserializer(",")
