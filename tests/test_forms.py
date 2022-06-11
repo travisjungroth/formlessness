@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import date
 from functools import partial
@@ -18,7 +17,6 @@ from formlessness.fields import DateField
 from formlessness.fields import StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
-from formlessness.serializers import serializer
 from formlessness.types import JSONDict
 
 

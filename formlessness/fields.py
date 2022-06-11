@@ -5,7 +5,6 @@ from datetime import time
 from typing import Iterable
 from typing import Optional
 from typing import Sequence
-from typing import Type
 from typing import Union
 
 from formlessness.base_classes import Converter

@@ -3,7 +3,6 @@ from typing import Any
 from typing import Iterator
 from typing import Mapping
 from typing import Protocol
-from typing import Type
 from typing import Union
 
 from formlessness.constraints import Constraint
