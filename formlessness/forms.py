@@ -144,7 +144,7 @@ class BasicForm(Form[JSONDict, T]):
             "properties": {k: v._data_schema() for k, v in self.converters.items()},
             "required": self.required_keys(),
             "unevaluatedProperties": False,
-        }
+        } | super()._data_schema()
 
     def required_keys(self) -> list[str]:
         return [k for k, converter in self.converters.items() if converter.required]
