@@ -368,7 +368,7 @@ class Or(Constraint[T]):
 
     def __str__(self):
         sep = "\nor\n"
-        return self.message or f'({sep.join(map(str, self.constraints))})'
+        return self.message or f"({sep.join(map(str, self.constraints))})"
 
     def __bool__(self):
         return not self.constraints or any(self.constraints)
@@ -431,7 +431,7 @@ class And(Constraint[T]):
 
     def __str__(self):
         sep = "\nand\n"
-        return self.message or f'({sep.join(map(str, self.constraints))})'
+        return self.message or f"({sep.join(map(str, self.constraints))})"
 
     def __bool__(self):
         return all(self.constraints)
@@ -541,8 +541,6 @@ class EachItem(Constraint[Iterable[T]]):
 
 def list_of(constraint: Constraint, message: str) -> Constraint:
     return And(is_list, EachItem(constraint), message=message)
-
-
 
 
 """

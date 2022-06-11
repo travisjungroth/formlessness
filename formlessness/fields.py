@@ -2,9 +2,11 @@ from abc import ABC
 from datetime import date
 from datetime import datetime
 from datetime import time
-from typing import Iterable, Union, Type
+from typing import Iterable
 from typing import Optional
 from typing import Sequence
+from typing import Type
+from typing import Union
 
 from formlessness.base_classes import Converter
 from formlessness.constraints import And
@@ -37,7 +39,8 @@ from formlessness.serializers import isoformat
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
-from formlessness.utils import key_and_label, MISSING
+from formlessness.utils import MISSING
+from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 from formlessness.widgets import Widget
 from formlessness.widgets import date_picker
@@ -85,7 +88,9 @@ class BasicField(Field[D, T]):
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
         self.default = default
-        self.default_data = MISSING if self.default is MISSING else self.serialize(self.default)
+        self.default_data = (
+            MISSING if self.default is MISSING else self.serialize(self.default)
+        )
         self.data_constraint = And(
             *self.default_data_constraints, *extra_data_constraints
         )
