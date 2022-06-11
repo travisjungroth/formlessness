@@ -32,8 +32,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     """
 
     # Class level defaults for constraints. Other constraints are in addition.
-    # Constraint to validate at the data and object state, respectively.
-    # This each of these is a single Constraint. Multiple Constraints are represented with constraints.And.
+    # Multiple Constraints are represented with And.
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
 
