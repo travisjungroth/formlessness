@@ -10,7 +10,7 @@ from typing import Optional
 import jsonschema
 import pytest
 
-from formlessness.constraints import constraint
+from formlessness.constraints import constraint, is_str
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
 from formlessness.fields import DateField
@@ -42,7 +42,7 @@ def green_light_before_release(film: Film):
     return film.green_light_date is None or film.green_light_date < film.release_date
 
 
-@constraint("Must be 140 characters or less.")
+@constraint("Must be 140 characters or less.", requires=[is_str])
 def lte_140_characters(s: str):
     return len(s) <= 140
 
