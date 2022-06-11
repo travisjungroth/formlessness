@@ -1,8 +1,9 @@
 repos:
-  - repo: https://github.com/myint/autoflake
-    rev: v1.4
+-   repo: https://github.com/fsouza/autoflake8
+    rev: v0.3.2
     hooks:
-      - id: autoflake
+    - id: autoflake8
+    args: ["--in-place"]
   - repo: https://github.com/PyCQA/isort
     rev: 5.10.1
     hooks:
