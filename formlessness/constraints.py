@@ -396,7 +396,7 @@ class And(Constraint[T]):
     message: str = ""
     simplified: bool = False
 
-    def __init__(self, *constraints, message: str = "", simplified: bool=False):
+    def __init__(self, *constraints, message: str = "", simplified: bool = False):
         self.constraints: Sequence[Constraint] = constraints
         self.message = message
         self.simplified = simplified
