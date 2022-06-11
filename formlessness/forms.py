@@ -55,6 +55,7 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
+        self.required = required
         if self.required:
             self.data_constraint &= not_null
             self.object_constraint &= not_null
