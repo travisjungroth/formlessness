@@ -337,8 +337,6 @@ class Or(Constraint[T]):
     def json_schema(self) -> Optional[JSONDict]:
         schemas = []
         for c in self.constraints:
-            if c is is_null:
-                continue
             schema = c.json_schema()
             if schema is None:
                 return None
@@ -516,3 +514,8 @@ is_time = OfType(time, "Must be a time.")
 is_iterable = OfType(Iterable, "Must be iterable.")
 is_list_of_str = list_of(is_str, "Must be a list of strings.")
 is_list_of_int = list_of(is_int, "Must be a list of integers.")
+
+
+@constraint("Must be set.")
+def not_null(value: Any) -> bool:
+    return value is not None

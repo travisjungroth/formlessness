@@ -5,7 +5,7 @@ from typing import Optional
 from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.constraints import And
+from formlessness.constraints import And, not_null
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.constraints import is_null
@@ -54,8 +54,10 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
-        self.required = required
-        if not self.required:
+        if self.required:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+        else:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
         self.data_constraint = And(

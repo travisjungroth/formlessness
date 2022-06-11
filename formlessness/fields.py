@@ -7,7 +7,7 @@ from typing import Optional
 from typing import Sequence
 
 from formlessness.base_classes import Converter
-from formlessness.constraints import And
+from formlessness.constraints import And, not_null
 from formlessness.constraints import Choices
 from formlessness.constraints import Constraint
 from formlessness.constraints import EachItem
@@ -93,7 +93,10 @@ class BasicField(Field[D, T]):
             self.data_constraint &= Choices(data_choices)
             self.object_constraint &= Choices(self.choices)
         self.required = required
-        if not self.required:
+        if self.required:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+        else:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
         self.data_constraint = self.data_constraint.simplify()
