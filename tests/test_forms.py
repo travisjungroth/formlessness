@@ -302,7 +302,7 @@ def test_data_schema(form):
             "release_date": {"type": "string"},
             "title": {"type": "string"},
         },
-        "required": ["title", "release_date", "distributor"],
+        "required": ["title", "release_date", "location", "distributor"],
         "type": "object",
         "unevaluatedProperties": False,
     }
