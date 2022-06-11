@@ -383,7 +383,7 @@ class And(Constraint[T]):
             return {}
         if len(self.constraints) == 1:
             return schemas[0]
-        return {'allOf': schemas}
+        return {"allOf": schemas}
 
 
 # TODO: Add Not
