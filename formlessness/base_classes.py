@@ -53,8 +53,14 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     def validate_data(self, data: D) -> ConstraintMap:
         return ConstraintMap(self.data_constraint.validate(data))
 
+    def data_is_valid(self, data: D) -> bool:
+        return bool(self.data_constraint.validate(data))
+
     def validate_object(self, obj: T) -> ConstraintMap:
         return ConstraintMap(self.object_constraint.validate(obj))
+
+    def object_is_valid(self, obj: T) -> bool:
+        return bool(self.data_constraint.validate(obj))
 
     def data_schema(self) -> JSONDict:
         return self._data_schema() | {
