@@ -10,7 +10,7 @@ from operator import ge
 from operator import gt
 from operator import le
 from operator import lt
-from typing import Any
+from typing import Any, Optional
 from typing import Callable
 from typing import ClassVar
 from typing import Container
@@ -20,7 +20,7 @@ from typing import Iterable
 from typing import Mapping
 from typing import Sequence
 
-from formlessness.types import T
+from formlessness.types import T, JSONData, JSONDict
 
 """
 Base class
@@ -93,6 +93,9 @@ class Constraint(Generic[T], ABC):
     @abstractmethod
     def __str__(self):
         pass
+
+    def json_schema(self) -> JSONDict:
+        return {}
 
 
 """
@@ -178,6 +181,7 @@ class OfType(Constraint[T]):
 
     type_: type
     message: str
+    json_type: Optional[str] = None
     _instances: ClassVar[dict[type, OfType]] = {}
 
     def __post_init__(self):
@@ -195,6 +199,9 @@ class OfType(Constraint[T]):
 
     def __str__(self):
         return self.message
+
+    def json_schema(self) -> JSONData:
+        return {'type': self.json_type} if self.json_type else {}
 
 
 @dataclass
@@ -467,19 +474,16 @@ Constraint instances
 """
 
 
-is_int = OfType(int, "Must be an integer.")
-is_float = OfType(float, "Must be a float.")
-is_str = OfType(str, "Must be a string.")
+is_int = OfType(int, "Must be an integer.", 'integer')
+is_float = OfType(float, "Must be a float.", 'number')
+is_str = OfType(str, "Must be a string.", 'string')
 is_date = OfType(date, "Must be a date.")
 is_datetime = OfType(datetime, "Must be a datetime.")
 is_time = OfType(time, "Must be a time.")
-is_list = OfType(list, "Must be a list.")
-is_dict = OfType(dict, "Must be a dictionary.")
+is_list = OfType(list, "Must be a list.", "array")
+is_dict = OfType(dict, "Must be a dictionary.", 'object')
+is_null = OfType(type(None), "Must not be set.", "null")
+is_bool = OfType(bool, "Must be a boolean.", "boolean")
 is_iterable = OfType(Iterable, "Must be iterable.")
 is_list_of_str = list_of(is_str, "Must be a list of strings.")
 is_list_of_int = list_of(is_int, "Must be a list of integers.")
-
-
-@constraint("Must not be set.")
-def is_null(value: Any) -> bool:
-    return value is None
