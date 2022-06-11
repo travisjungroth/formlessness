@@ -3,6 +3,7 @@ from __future__ import annotations
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
+from dataclasses import replace
 from datetime import date
 from datetime import datetime
 from datetime import time
@@ -55,6 +56,7 @@ class Constraint(Generic[T], ABC):
     # The Constraints that must always be checked before this Constraint is checked.
     # Use this to avoid duplicating checks, like type checks.
     requires: Iterable[Constraint] = ()
+    simplified: True
 
     def requirements_satisfied_by(self, value: T) -> bool:
         return all(x.satisfied_by(value) for x in self.requires)
@@ -87,6 +89,9 @@ class Constraint(Generic[T], ABC):
     def __or__(self, other: Constraint) -> Constraint:
         return Or(self, other)
 
+    def __invert__(self) -> Constraint:
+        return Not(self)
+
     def simplify(self) -> Constraint:
         """
         Returns a functionally identical but reduced Constraint.
@@ -108,7 +113,8 @@ Simple Constraints
 
 class ValidClass(Constraint[Any]):
     """
-    This is the canonical Constraint that is always satisfied. Equivalent to true, top, ⊤, unit, 1, etc.
+    This is the canonical Constraint that is always satisfied.
+    Equivalent to true, top, ⊤, 1, etc.
     """
 
     __singleton: ValidClass
@@ -118,7 +124,7 @@ class ValidClass(Constraint[Any]):
             cls.__singleton = super().__new__(cls)
         return cls.__singleton
 
-    def validate(self, value: Any) -> True:
+    def validate(self, value: Any) -> ValidClass:
         return self
 
     def satisfied_by(self, value: Any) -> bool:
@@ -127,7 +133,13 @@ class ValidClass(Constraint[Any]):
     def __bool__(self) -> bool:
         return True
 
-    def __str__(self):
+    def __invert__(self) -> InvalidClass:
+        return Invalid
+
+    def __repr__(self):
+        return "Valid"
+
+    def __str__(self) -> str:
         return "Valid"
 
     def json_schema(self) -> JSONDict:
@@ -135,6 +147,41 @@ class ValidClass(Constraint[Any]):
 
 
 Valid: Final[ValidClass] = ValidClass()
+
+
+class InvalidClass(Constraint[Any]):
+    """
+    This is the canonical Constraint that is never satisfied.
+    Equivalent to false, bottom, ⊥, 0, etc.
+    """
+
+    __singleton: InvalidClass
+
+    def __new__(cls):
+        if not hasattr(cls, "__singleton"):
+            cls.__singleton = super().__new__(cls)
+        return cls.__singleton
+
+    def validate(self, value: Any) -> InvalidClass:
+        return self
+
+    def satisfied_by(self, value: Any) -> bool:
+        return False
+
+    def __invert__(self) -> ValidClass:
+        return Valid
+
+    def __repr__(self):
+        return "Invalid"
+
+    def __str__(self):
+        return "Invalid"
+
+    def json_schema(self) -> JSONDict:
+        return {"not": {}}
+
+
+Invalid: Final[InvalidClass] = InvalidClass()
 
 
 @dataclass
@@ -240,9 +287,13 @@ class Comparison(Constraint[T]):
     def __str__(self):
         return f"Must be {self.comparison_string} {self.operand}."
 
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}({self.operand})"
 
-@dataclass
+
+@dataclass(repr=False)
 class GT(Comparison[T]):
+
     """
     Greater Than
 
@@ -255,10 +306,11 @@ class GT(Comparison[T]):
     """
 
     operator: Callable[[T, T], bool] = gt
+
     comparison_string: str = "greater than"
 
 
-@dataclass
+@dataclass(repr=False)
 class GE(Comparison[T]):
     """
     Greater Than Or Equal To
@@ -268,7 +320,7 @@ class GE(Comparison[T]):
     comparison_string: str = "greater than or equal to"
 
 
-@dataclass
+@dataclass(repr=False)
 class LT(Comparison[T]):
     """
     Less Than
@@ -278,7 +330,7 @@ class LT(Comparison[T]):
     comparison_string: str = "less than"
 
 
-@dataclass
+@dataclass(repr=False)
 class LE(Comparison[T]):
     """
     Less Than Or Equal To
@@ -304,10 +356,12 @@ class Or(Constraint[T]):
 
     constraints: Sequence[Constraint]
     message: str = ""
+    simplified: bool = False
 
-    def __init__(self, *constraints, message: str = ""):
+    def __init__(self, *constraints, message: str = "", simplified: bool = False):
         self.constraints: Sequence[Constraint] = constraints
         self.message = message
+        self.simplified = simplified
 
     def validate(self, value: T) -> Constraint:
         return Or(*[v.validate(value) for v in self.constraints]).simplify()
@@ -319,6 +373,14 @@ class Or(Constraint[T]):
         return not self.constraints or any(self.constraints)
 
     def simplify(self) -> Constraint:
+        """
+        >>> Or(Valid).simplify()
+        Valid
+        >>> Or(GT(1)).simplify()
+        GT(1)
+        """
+        if self.simplified:
+            return self
         if not self.constraints:
             return Valid
         if len(self.constraints) == 1:
@@ -332,7 +394,7 @@ class Or(Constraint[T]):
                 constraints.extend(v.constraints)
             else:
                 constraints.append(v)
-        return Or(*constraints)
+        return Or(*constraints, simplified=True)
 
     def json_schema(self) -> Optional[JSONDict]:
         schemas = []
@@ -356,10 +418,12 @@ class And(Constraint[T]):
 
     constraints: Sequence[Constraint]
     message: str = ""
+    simplified: bool = False
 
-    def __init__(self, *constraints, message: str = ""):
+    def __init__(self, *constraints, message: str = "", simplified: bool = False):
         self.constraints: Sequence[Constraint] = constraints
         self.message = message
+        self.simplified = simplified
 
     def validate(self, value: T) -> Constraint:
         return And(*[v.validate(value) for v in self.constraints]).simplify()
@@ -371,6 +435,8 @@ class And(Constraint[T]):
         return all(self.constraints)
 
     def simplify(self) -> Constraint:
+        if self.simplified:
+            return self
         constraints = []
         for v in self.constraints:
             v = v.simplify()
@@ -384,7 +450,7 @@ class And(Constraint[T]):
             return Valid
         if len(constraints) == 1:
             return constraints[0]
-        return And(*constraints)
+        return And(*constraints, simplified=True)
 
     def json_schema(self) -> Optional[JSONDict]:
         schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
@@ -395,8 +461,57 @@ class And(Constraint[T]):
         return {"allOf": schemas}
 
 
-# TODO: Add Not
-# TODO: Add Implies, maybe called If or Conditional https://en.wikipedia.org/wiki/Material_conditional
+@dataclass
+class Not(Constraint[T]):
+    constraint: Constraint
+    message: str = ""
+    simplified: bool = False
+
+    def satisfied_by(self, value: T) -> bool:
+        """
+        >>> Not(is_str).satisfied_by(1)
+        True
+        >>> Not(is_str).satisfied_by('A')
+        False
+        """
+        return not self.constraint.satisfied_by(value)
+
+    def __str__(self):
+        return self.message or f"Not ({self.constraint})"
+
+    def __bool__(self) -> bool:
+        """
+        >>> bool(Not(Valid))
+        False
+        >>> bool(Not(Invalid))
+        True
+        """
+        return not self.constraint
+
+    def __invert__(self) -> Constraint:
+        return self.constraint
+
+    def simplify(self) -> Constraint:
+        """
+        >>> Not(Valid).simplify()
+        Invalid
+        >>> str(Not(Not(is_str)).simplify())
+        'Must be a string.'
+        >>> Not(Not(And())).simplify()
+        Valid
+        >>> str(Not(is_str).simplify().simplify())
+        'Not (Must be a string.)'
+        """
+        if self.simplified:
+            return self
+        inverted = ~self.constraint
+        if isinstance(inverted, Not):
+            return replace(self, constraint=self.constraint.simplify(), simplified=True)
+        return ~self.constraint.simplify()
+
+
+# TODO: Add Implies, maybe called If or Conditional
+#  https://en.wikipedia.org/wiki/Material_conditional
 
 
 @dataclass
