@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from datetime import datetime
 from datetime import time
@@ -88,6 +88,9 @@ class Constraint(Generic[T], ABC):
     def __or__(self, other: Constraint) -> Constraint:
         return Or(self, other)
 
+    def __invert__(self) -> Constraint:
+        return Not(self)
+
     def simplify(self) -> Constraint:
         """
         Returns a functionally identical but reduced Constraint.
@@ -129,6 +132,12 @@ class ValidClass(Constraint[Any]):
     def __bool__(self) -> bool:
         return True
 
+    def __invert__(self) -> InvalidClass:
+        return Invalid
+
+    def __repr__(self):
+        return "Valid"
+
     def __str__(self) -> str:
         return "Valid"
 
@@ -160,6 +169,12 @@ class InvalidClass(Constraint[Any]):
 
     def __bool__(self) -> bool:
         return False
+
+    def __invert__(self) -> ValidClass:
+        return Valid
+
+    def __repr__(self):
+        return "Invalid"
 
     def __str__(self):
         return "Invalid"
@@ -437,8 +452,49 @@ class And(Constraint[T]):
         return {"allOf": schemas}
 
 
-# TODO: Add Not
-# TODO: Add Implies, maybe called If or Conditional https://en.wikipedia.org/wiki/Material_conditional
+@dataclass
+class Not(Constraint[T]):
+    constraint: Constraint
+    message: str = ""
+    simplified: bool = False
+
+    def satisfied_by(self, value: T) -> bool:
+        """
+        >>> Not(is_str).satisfied_by(1)
+        True
+        >>> Not(is_str).satisfied_by('A')
+        False
+        """
+        return not self.constraint.satisfied_by(value)
+
+    def __str__(self):
+        return self.message or f"Not ({self.constraint})"
+
+    def __bool__(self) -> bool:
+        return not self.constraint
+
+    def __invert__(self) -> Constraint:
+        return self.constraint
+
+    def simplify(self) -> Constraint:
+        """
+        >>> Not(Valid).simplify()
+        Invalid
+        >>> str(Not(Not(is_str)).simplify())
+        'Must be a string.'
+        >>> Not(Not(And())).simplify()
+        Valid
+        """
+        if self.simplified:
+            return self
+        inverted = ~self.constraint
+        if isinstance(inverted, Not):
+            return replace(self, constraint=self.constraint.simplify(), simplified=True)
+        return ~self.constraint.simplify()
+
+
+# TODO: Add Implies, maybe called If or Conditional
+#  https://en.wikipedia.org/wiki/Material_conditional
 
 
 @dataclass
