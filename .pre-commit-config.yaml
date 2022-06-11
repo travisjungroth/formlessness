@@ -1,5 +1,5 @@
 repos:
--   repo: https://github.com/fsouza/autoflake8
+  - repo: https://github.com/fsouza/autoflake8
     rev: v0.3.2
     hooks:
       - id: autoflake8
