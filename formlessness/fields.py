@@ -7,7 +7,7 @@ from typing import Optional
 from typing import Sequence
 
 from formlessness.base_classes import Converter
-from formlessness.constraints import And, not_null
+from formlessness.constraints import And
 from formlessness.constraints import Choices
 from formlessness.constraints import Constraint
 from formlessness.constraints import EachItem
@@ -21,6 +21,7 @@ from formlessness.constraints import is_list_of_str
 from formlessness.constraints import is_null
 from formlessness.constraints import is_str
 from formlessness.constraints import is_time
+from formlessness.constraints import not_null
 from formlessness.deserializers import Deserializer
 from formlessness.deserializers import FunctionDeserializer
 from formlessness.deserializers import SplitDeserializer
