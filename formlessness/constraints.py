@@ -198,8 +198,6 @@ class FunctionConstraint(Constraint[T]):
         if not self.message:
             self.message = f"Must pass `{self.function.__qualname__}` constraint."
 
-
-
     def __call__(self, *args, **kwargs):
         return self.function(*args, **kwargs)
 
