@@ -5,7 +5,7 @@ from typing import Optional
 from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.constraints import And
+from formlessness.constraints import And, is_null
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.deserializers import Deserializer
@@ -37,12 +37,11 @@ class BasicForm(Form[JSONDict, T]):
 
     def __init__(
         self,
-        # Data to pass to the Display
         label: Optional[str] = None,
         description: Optional[str] = None,
         collapsable: bool = False,
         collapsed: bool = False,
-        # These constraints are added to the class defaults to create the two Constraints.
+        required: bool = True,
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -54,6 +53,10 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
+        self.required = required
+        if not self.required:
+            self.data_constraint |= is_null
+            self.object_constraint |= is_null
         self.data_constraint = And(
             *self.default_data_constraints, *extra_data_constraints
         ).simplify()

@@ -36,6 +36,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     # This each of these is a single Constraint. Multiple Constraints are represented with constraints.And.
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
+    required: bool = True
 
     def make_object(self, data: D) -> T:
         """
