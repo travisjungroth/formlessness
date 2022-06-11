@@ -55,6 +55,7 @@ class Constraint(Generic[T], ABC):
     # The Constraints that must always be checked before this Constraint is checked.
     # Use this to avoid duplicating checks, like type checks.
     requires: Iterable[Constraint] = ()
+    simplified: True
 
     def requirements_satisfied_by(self, value: T) -> bool:
         return all(x.satisfied_by(value) for x in self.requires)
@@ -337,10 +338,12 @@ class Or(Constraint[T]):
 
     constraints: Sequence[Constraint]
     message: str = ""
+    simplified: bool = False
 
-    def __init__(self, *constraints, message: str = ""):
+    def __init__(self, *constraints, message: str = "", simplified: bool = False):
         self.constraints: Sequence[Constraint] = constraints
         self.message = message
+        self.simplified = simplified
 
     def validate(self, value: T) -> Constraint:
         return Or(*[v.validate(value) for v in self.constraints]).simplify()
@@ -352,6 +355,8 @@ class Or(Constraint[T]):
         return not self.constraints or any(self.constraints)
 
     def simplify(self) -> Constraint:
+        if self.simplified:
+            return self
         if not self.constraints:
             return Valid
         if len(self.constraints) == 1:
@@ -365,7 +370,7 @@ class Or(Constraint[T]):
                 constraints.extend(v.constraints)
             else:
                 constraints.append(v)
-        return Or(*constraints)
+        return Or(*constraints, simplified=True)
 
     def json_schema(self) -> Optional[JSONDict]:
         schemas = []
@@ -389,10 +394,12 @@ class And(Constraint[T]):
 
     constraints: Sequence[Constraint]
     message: str = ""
+    simplified: bool = False
 
-    def __init__(self, *constraints, message: str = ""):
+    def __init__(self, *constraints, message: str = "", simplified: bool=False):
         self.constraints: Sequence[Constraint] = constraints
         self.message = message
+        self.simplified = simplified
 
     def validate(self, value: T) -> Constraint:
         return And(*[v.validate(value) for v in self.constraints]).simplify()
@@ -404,6 +411,8 @@ class And(Constraint[T]):
         return all(self.constraints)
 
     def simplify(self) -> Constraint:
+        if self.simplified:
+            return self
         constraints = []
         for v in self.constraints:
             v = v.simplify()
@@ -417,7 +426,7 @@ class And(Constraint[T]):
             return Valid
         if len(constraints) == 1:
             return constraints[0]
-        return And(*constraints)
+        return And(*constraints, simplified=True)
 
     def json_schema(self) -> Optional[JSONDict]:
         schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
