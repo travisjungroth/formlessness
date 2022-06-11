@@ -287,9 +287,9 @@ def test_data_schema(form):
     expected = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "properties": {
-            "director": {},
+            "director": {"type": "string"},
             "distributor": {"type": "string"},
-            "green_light_date": {},
+            "green_light_date": {"type": "string"},
             "location": {
                 "properties": {
                     "city": {"type": "string"},
@@ -300,7 +300,7 @@ def test_data_schema(form):
                 "unevaluatedProperties": False,
             },
             "release_date": {"type": "string"},
-            "title": {"allOf": [{"type": "string"}]},
+            "title": {"type": "string"},
         },
         "required": ["title", "release_date", "distributor"],
         "type": "object",

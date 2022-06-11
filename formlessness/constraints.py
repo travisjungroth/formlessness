@@ -335,9 +335,19 @@ class Or(Constraint[T]):
         return Or(*constraints)
 
     def json_schema(self) -> Optional[JSONDict]:
-        if not self.constraints:
-            return
-
+        schemas = []
+        for c in self.constraints:
+            if c is is_null:
+                continue
+            schema = c.json_schema()
+            if schema is None:
+                return None
+            schemas.append(schema)
+        if not schemas:
+            return {}
+        if len(schemas) == 1:
+            return schemas[0]
+        return {'anyOf': schemas}
 
 @dataclass
 class And(Constraint[T]):
@@ -381,7 +391,7 @@ class And(Constraint[T]):
         schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
         if not schemas:
             return {}
-        if len(self.constraints) == 1:
+        if len(schemas) == 1:
             return schemas[0]
         return {"allOf": schemas}
 
