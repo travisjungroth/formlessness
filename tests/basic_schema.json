@@ -73,6 +73,11 @@
               "const": {
                 "type": "date_picker"
               }
+            },
+            {
+              "const": {
+                "type": "checkbox"
+              }
             }
           ]
         }
