@@ -1,7 +1,6 @@
 from abc import ABC
 from collections.abc import Sequence
 from typing import Optional
-from typing import Type
 from typing import Union
 
 from formlessness.base_classes import Converter
