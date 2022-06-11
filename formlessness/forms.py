@@ -36,7 +36,7 @@ class Form(Parent, Converter[D, T], ABC):
 
 class BasicForm(Form[JSONDict, T]):
     # Defaults for instances of this class. Meant to be overridden by subclasses.
-    default_serializer: Serializer
+    default_serializer: Serializer = Serializer()
     default_deserializer: Deserializer
     default_data_constraints: tuple[Constraint[JSONDict], ...] = ()
     default_object_constraints: tuple[Constraint[T], ...] = ()
@@ -61,11 +61,9 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
-        self.default = default
-        self.default_data = (
-            MISSING if self.default is MISSING else self.serialize(self.default)
-        )
         self.children = {child.key: child for child in children}
+        self.default = default
+        self.default_data = MISSING if default is MISSING else self.serialize(default)
         self.data_constraint &= And(
             *self.default_data_constraints,
             *extra_data_constraints,
@@ -134,7 +132,7 @@ class BasicForm(Form[JSONDict, T]):
 
     def serialize(self, obj: T) -> JSONDict:
         data: JSONDict = {}
-        for child, sub_obj in self.converter_to_sub_object(obj):
+        for child, sub_obj in self.converter_to_sub_object(obj).items():
             data[child.key] = child.serialize(sub_obj)
         return self.serializer.serialize(data)
 

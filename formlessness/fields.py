@@ -88,9 +88,7 @@ class BasicField(Field[D, T]):
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
         self.default = default
-        self.default_data = (
-            MISSING if self.default is MISSING else self.serialize(self.default)
-        )
+        self.default_data = MISSING if default is MISSING else self.serialize(default)
         self.data_constraint = And(
             *self.default_data_constraints, *extra_data_constraints
         )
