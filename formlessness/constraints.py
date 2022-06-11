@@ -199,7 +199,6 @@ class FunctionConstraint(Constraint[T]):
             self.message = f"Must pass `{self.function.__qualname__}` constraint."
 
     def __call__(self, *args, **kwargs):
-        # todo: preserve the function metadata, perhaps with functools.wraps.
         return self.function(*args, **kwargs)
 
     def satisfied_by(self, value: T) -> bool:
@@ -269,9 +268,6 @@ class Choices(Constraint[T]):
         return self.message
 
 
-# TODO: Add Between. Use inclusive start and stop.
-
-
 @dataclass
 class Comparison(Constraint[T]):
     operand: T
@@ -339,9 +335,6 @@ class LE(Comparison[T]):
     operator: Callable[[T, T], bool] = le
     comparison_string: str = "less than or equal to"
 
-
-# TODO: Add Not Equal (NEQ)
-# TODO: Add Regexp
 
 """
 Complex Constraints
@@ -510,10 +503,6 @@ class Not(Constraint[T]):
         if isinstance(inverted, Not):
             return replace(self, constraint=self.constraint.simplify(), simplified=True)
         return ~self.constraint.simplify()
-
-
-# TODO: Add Implies, maybe called If or Conditional
-#  https://en.wikipedia.org/wiki/Material_conditional
 
 
 @dataclass
