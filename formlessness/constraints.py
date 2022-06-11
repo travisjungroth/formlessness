@@ -10,7 +10,7 @@ from operator import ge
 from operator import gt
 from operator import le
 from operator import lt
-from typing import Any, Optional
+from typing import Any
 from typing import Callable
 from typing import ClassVar
 from typing import Container
@@ -18,9 +18,12 @@ from typing import Final
 from typing import Generic
 from typing import Iterable
 from typing import Mapping
+from typing import Optional
 from typing import Sequence
 
-from formlessness.types import T, JSONData, JSONDict
+from formlessness.types import JSONData
+from formlessness.types import JSONDict
+from formlessness.types import T
 
 """
 Base class
@@ -201,7 +204,7 @@ class OfType(Constraint[T]):
         return self.message
 
     def json_schema(self) -> JSONData:
-        return {'type': self.json_type} if self.json_type else {}
+        return {"type": self.json_type} if self.json_type else {}
 
 
 @dataclass
@@ -474,14 +477,14 @@ Constraint instances
 """
 
 
-is_int = OfType(int, "Must be an integer.", 'integer')
-is_float = OfType(float, "Must be a float.", 'number')
-is_str = OfType(str, "Must be a string.", 'string')
+is_int = OfType(int, "Must be an integer.", "integer")
+is_float = OfType(float, "Must be a float.", "number")
+is_str = OfType(str, "Must be a string.", "string")
 is_date = OfType(date, "Must be a date.")
 is_datetime = OfType(datetime, "Must be a datetime.")
 is_time = OfType(time, "Must be a time.")
 is_list = OfType(list, "Must be a list.", "array")
-is_dict = OfType(dict, "Must be a dictionary.", 'object')
+is_dict = OfType(dict, "Must be a dictionary.", "object")
 is_null = OfType(type(None), "Must not be set.", "null")
 is_bool = OfType(bool, "Must be a boolean.", "boolean")
 is_iterable = OfType(Iterable, "Must be iterable.")
