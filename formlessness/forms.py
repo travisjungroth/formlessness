@@ -113,7 +113,7 @@ class BasicForm(Form[JSONDict, T]):
     def _data_schema(self) -> JSONDict:
         return {
             "type": "object",
-            "properties": {k: {} for k, v in self.converters.items()},
+            "properties": {k: v._data_schema() for k, v in self.converters.items()},
             "required": [
                 k
                 for k, converter in self.converters.items()
