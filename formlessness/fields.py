@@ -5,6 +5,8 @@ from datetime import time
 from typing import Iterable
 from typing import Optional
 from typing import Sequence
+from typing import Type
+from typing import Union
 
 from formlessness.base_classes import Converter
 from formlessness.constraints import And
@@ -37,6 +39,7 @@ from formlessness.serializers import isoformat
 from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
+from formlessness.utils import MISSING
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 from formlessness.widgets import Widget
@@ -70,8 +73,10 @@ class BasicField(Field[D, T]):
         label: Optional[str] = None,
         description: Optional[str] = None,
         widget: Widget = None,
+        default: Union[T, object] = MISSING,
         choices: Iterable[T] = (),
         required: bool = True,
+        nullable: bool = False,
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -82,6 +87,10 @@ class BasicField(Field[D, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
+        self.default = default
+        self.default_data = (
+            MISSING if self.default is MISSING else self.serialize(self.default)
+        )
         self.data_constraint = And(
             *self.default_data_constraints, *extra_data_constraints
         )
@@ -94,12 +103,13 @@ class BasicField(Field[D, T]):
             self.data_constraint &= Choices(data_choices)
             self.object_constraint &= Choices(self.choices)
         self.required = required
-        if self.required:
-            self.data_constraint &= not_null
-            self.object_constraint &= not_null
-        else:
+        self.nullable = nullable
+        if self.nullable:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
+        else:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
         self.data_constraint = self.data_constraint.simplify()
         self.object_constraint = self.object_constraint.simplify()
         self.display_info: JSONDict = remove_null_values(

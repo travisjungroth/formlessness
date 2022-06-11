@@ -28,3 +28,6 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
 
 def remove_null_values(mapping: Mapping) -> dict:
     return {k: v for k, v in mapping.items() if v is not None}
+
+
+MISSING = object()

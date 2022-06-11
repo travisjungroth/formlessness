@@ -81,20 +81,27 @@ def form() -> BasicForm[Film]:
                     DateField(
                         label="Green Light Date",
                         required=False,
+                        nullable=True,
                     ),
                     StrField(
                         label="Director",
                         required=False,
+                        nullable=True,
                     ),
                     BasicForm(
                         label="Location",
                         serializer=serializer(asdict),
                         deserializer=KwargsDeserializer(Location),
+                        nullable=True,
                         children=[StrField(label="City"), StrField(label="Country")],
                     ),
                 ],
             ),
-            StrField(label="Distributor"),
+            StrField(
+                label="Distributor",
+                default="Netflix",
+                required=False,
+            ),
         ],
     )
 
@@ -106,7 +113,6 @@ def form_data(film) -> JSONDict:
         "release_date": "2021-10-09",
         "green_light_date": "2017-05-05",
         "location": {"city": "Eastcheap", "country": "England"},
-        "distributor": "Netflix",
     }
 
 
@@ -142,6 +148,7 @@ def test_issues(form):
     }
     assert form.validate_data(data)
     obj = form.deserialize(data)
+    print(form.validate_object(obj))
     assert form.validate_object(obj)
 
     data = {
@@ -302,7 +309,7 @@ def test_data_schema(form):
             "release_date": {"type": "string"},
             "title": {"type": "string"},
         },
-        "required": ["title", "release_date", "location", "distributor"],
+        "required": ["title", "release_date", "location"],
         "type": "object",
         "unevaluatedProperties": False,
     }
