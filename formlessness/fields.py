@@ -66,16 +66,11 @@ class BasicField(Field[D, T]):
 
     def __init__(
         self,
-        # Data to pass to the Display
         label: Optional[str] = None,
         description: Optional[str] = None,
-        shadow: str = "",
         widget: Widget = None,
-        # Choices are included in the Display and will add a Choices.
         choices: Iterable[T] = (),
-        # Adds a not_null Criteria
         required: bool = True,
-        # These constraints are added to the class defaults to create the two Constraints.
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
