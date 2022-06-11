@@ -109,3 +109,12 @@ class BasicForm(Form[JSONDict, T]):
         for child, sub_obj in self.converter_to_sub_object(obj):
             data[child.key] = child.serialize(sub_obj)
         return self.serializer.serialize(data)
+
+    def _data_schema(self) -> JSONDict:
+        return {
+            'type': 'object',
+            'properties': {k: {} for k, v in self.converters.items()},
+            'required': [],
+            'unevaluatedProperties': False,
+        }
+
