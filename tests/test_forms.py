@@ -90,7 +90,7 @@ def form() -> BasicForm[Film]:
                     BasicForm(
                         label="Location",
                         deserializer=KwargsDeserializer(Location),
-                        default=Location('San Francisco', 'USA'),
+                        default=Location("San Francisco", "USA"),
                         nullable=True,
                         children=[StrField(label="City"), StrField(label="Country")],
                     ),
@@ -300,7 +300,7 @@ def test_data_schema(form):
                     "city": {"type": "string"},
                     "country": {"type": "string"},
                 },
-                'default': {'city': 'San Francisco', 'country': 'USA'},
+                "default": {"city": "San Francisco", "country": "USA"},
                 "required": ["city", "country"],
                 "type": "object",
                 "unevaluatedProperties": False,
