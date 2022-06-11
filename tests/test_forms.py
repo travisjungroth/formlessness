@@ -277,6 +277,12 @@ def test_display_json(form):
     )
 
 
-def test_data_schema(form, form_data):
+def test_data_schema_against_form_data(form, form_data):
     schema = form.data_schema()
     validate_json(form_data, schema)
+
+
+@pytest.skip()
+def test_data_schema(form):
+    schema = form.data_schema()
+    expected = {}
