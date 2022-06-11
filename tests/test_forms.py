@@ -134,7 +134,7 @@ def test_make_object(form, form_data, film):
     """
     obj = form.make_object(form_data)
     assert obj == film
-    form_data["release_date"] = date(2022, 1, 1) # noqa
+    form_data["release_date"] = date(2022, 1, 1)  # noqa
     with pytest.raises(FormErrors):
         form.make_object(form_data)
 
