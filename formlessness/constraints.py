@@ -18,8 +18,11 @@ from typing import Final
 from typing import Generic
 from typing import Iterable
 from typing import Mapping
+from typing import Optional
 from typing import Sequence
 
+from formlessness.types import JSONData
+from formlessness.types import JSONDict
 from formlessness.types import T
 
 """
@@ -94,6 +97,9 @@ class Constraint(Generic[T], ABC):
     def __str__(self):
         pass
 
+    def json_schema(self) -> Optional[JSONDict]:
+        return None
+
 
 """
 Simple Constraints
@@ -123,6 +129,9 @@ class ValidClass(Constraint[Any]):
 
     def __str__(self):
         return "Valid"
+
+    def json_schema(self) -> JSONDict:
+        return {}
 
 
 Valid: Final[ValidClass] = ValidClass()
@@ -178,6 +187,7 @@ class OfType(Constraint[T]):
 
     type_: type
     message: str
+    json_type: Optional[str] = None
     _instances: ClassVar[dict[type, OfType]] = {}
 
     def __post_init__(self):
@@ -195,6 +205,9 @@ class OfType(Constraint[T]):
 
     def __str__(self):
         return self.message
+
+    def json_schema(self) -> Optional[JSONData]:
+        return {"type": self.json_type} if self.json_type else None
 
 
 @dataclass
@@ -321,6 +334,19 @@ class Or(Constraint[T]):
                 constraints.append(v)
         return Or(*constraints)
 
+    def json_schema(self) -> Optional[JSONDict]:
+        schemas = []
+        for c in self.constraints:
+            schema = c.json_schema()
+            if schema is None:
+                return None
+            schemas.append(schema)
+        if not schemas:
+            return {}
+        if len(schemas) == 1:
+            return schemas[0]
+        return {"anyOf": schemas}
+
 
 @dataclass
 class And(Constraint[T]):
@@ -359,6 +385,14 @@ class And(Constraint[T]):
         if len(constraints) == 1:
             return constraints[0]
         return And(*constraints)
+
+    def json_schema(self) -> Optional[JSONDict]:
+        schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
+        if not schemas:
+            return {}
+        if len(schemas) == 1:
+            return schemas[0]
+        return {"allOf": schemas}
 
 
 # TODO: Add Not
@@ -467,19 +501,21 @@ Constraint instances
 """
 
 
-is_int = OfType(int, "Must be an integer.")
-is_float = OfType(float, "Must be a float.")
-is_str = OfType(str, "Must be a string.")
-is_date = OfType(date, "Must be a date.")
+is_null = OfType(type(None), "Must not be set.", "null")
+is_int = OfType(int, "Must be an integer.", "integer")
+is_float = OfType(float, "Must be a float.", "number")
+is_str = OfType(str, "Must be a string.", "string")
+is_bool = OfType(bool, "Must be a boolean.", "boolean")
+is_list = OfType(list, "Must be a list.", "array")
+is_dict = OfType(dict, "Must be a dictionary.", "object")
 is_datetime = OfType(datetime, "Must be a datetime.")
+is_date = OfType(date, "Must be a date.")
 is_time = OfType(time, "Must be a time.")
-is_list = OfType(list, "Must be a list.")
-is_dict = OfType(dict, "Must be a dictionary.")
 is_iterable = OfType(Iterable, "Must be iterable.")
 is_list_of_str = list_of(is_str, "Must be a list of strings.")
 is_list_of_int = list_of(is_int, "Must be a list of integers.")
 
 
-@constraint("Must not be set.")
-def is_null(value: Any) -> bool:
-    return value is None
+@constraint("Must be set.")
+def not_null(value: Any) -> bool:
+    return value is not None

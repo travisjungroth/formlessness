@@ -21,6 +21,7 @@ from formlessness.constraints import is_list_of_str
 from formlessness.constraints import is_null
 from formlessness.constraints import is_str
 from formlessness.constraints import is_time
+from formlessness.constraints import not_null
 from formlessness.deserializers import Deserializer
 from formlessness.deserializers import FunctionDeserializer
 from formlessness.deserializers import SplitDeserializer
@@ -66,16 +67,11 @@ class BasicField(Field[D, T]):
 
     def __init__(
         self,
-        # Data to pass to the Display
         label: Optional[str] = None,
         description: Optional[str] = None,
-        shadow: str = "",
         widget: Widget = None,
-        # Choices are included in the Display and will add a Choices.
         choices: Iterable[T] = (),
-        # Adds a not_null Criteria
         required: bool = True,
-        # These constraints are added to the class defaults to create the two Constraints.
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -98,7 +94,10 @@ class BasicField(Field[D, T]):
             self.data_constraint &= Choices(data_choices)
             self.object_constraint &= Choices(self.choices)
         self.required = required
-        if not self.required:
+        if self.required:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+        else:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
         self.data_constraint = self.data_constraint.simplify()

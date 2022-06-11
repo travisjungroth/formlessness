@@ -8,6 +8,8 @@ from formlessness.base_classes import Parent
 from formlessness.constraints import And
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
+from formlessness.constraints import is_null
+from formlessness.constraints import not_null
 from formlessness.deserializers import Deserializer
 from formlessness.exceptions import DeserializationError
 from formlessness.exceptions import FormErrors
@@ -37,12 +39,11 @@ class BasicForm(Form[JSONDict, T]):
 
     def __init__(
         self,
-        # Data to pass to the Display
         label: Optional[str] = None,
         description: Optional[str] = None,
         collapsable: bool = False,
         collapsed: bool = False,
-        # These constraints are added to the class defaults to create the two Constraints.
+        required: bool = True,
         extra_data_constraints: Sequence[Constraint] = (),
         extra_object_constraints: Sequence[Constraint] = (),
         serializer: Serializer[D, T] = None,
@@ -54,6 +55,12 @@ class BasicForm(Form[JSONDict, T]):
         self.key = key
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
+        if self.required:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+        else:
+            self.data_constraint |= is_null
+            self.object_constraint |= is_null
         self.data_constraint = And(
             *self.default_data_constraints, *extra_data_constraints
         ).simplify()
@@ -109,3 +116,13 @@ class BasicForm(Form[JSONDict, T]):
         for child, sub_obj in self.converter_to_sub_object(obj):
             data[child.key] = child.serialize(sub_obj)
         return self.serializer.serialize(data)
+
+    def _data_schema(self) -> JSONDict:
+        return {
+            "type": "object",
+            "properties": {k: v._data_schema() for k, v in self.converters.items()},
+            "required": [
+                k for k, converter in self.converters.items() if converter.required
+            ],
+            "unevaluatedProperties": False,
+        }

@@ -33,6 +33,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
 
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
+    required: bool = True
 
     def make_object(self, data: D) -> T:
         """
@@ -52,6 +53,16 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
 
     def validate_object(self, obj: T) -> ConstraintMap:
         return ConstraintMap(self.object_constraint.validate(obj))
+
+    def data_schema(self) -> JSONDict:
+        """Experimental and would break with Not"""
+        return self._data_schema() | {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+        }
+
+    def _data_schema(self) -> JSONDict:
+        schema = self.data_constraint.json_schema()
+        return schema if schema is not None else {}
 
 
 class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]], ABC):
