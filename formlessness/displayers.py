@@ -14,13 +14,6 @@ from formlessness.types import JSONDict
 Display = JSONDict
 
 
-def filter_display_info(display_info: Display) -> Display:
-    """
-    Helper to remove falsy values.
-    """
-    return {k: v for k, v in display_info.items() if v}
-
-
 class Displayer(Generic[D], ABC):
     """
     Things that can create Displays.

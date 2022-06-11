@@ -181,6 +181,8 @@ def test_display(form):
     expected = {
         "type": "form",
         "label": "Favorite Film",
+        "collapsable": False,
+        "collapsed": False,
         "description": "If you had to pick one.",
         "objectPath": "",
         "contents": [
@@ -219,6 +221,8 @@ def test_display(form):
                         "label": "Location",
                         "objectPath": "/location",
                         "type": "form",
+                        "collapsable": False,
+                        "collapsed": False,
                         "contents": [
                             {
                                 "label": "City",

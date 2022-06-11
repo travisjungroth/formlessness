@@ -3,6 +3,7 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from typing import Iterable
+from typing import Optional
 from typing import Sequence
 
 from formlessness.base_classes import Converter
@@ -28,7 +29,6 @@ from formlessness.deserializers import datetime_from_iso_str
 from formlessness.deserializers import time_from_iso_str
 from formlessness.displayers import Display
 from formlessness.displayers import Displayer
-from formlessness.displayers import filter_display_info
 from formlessness.serializers import FunctionSerializer
 from formlessness.serializers import JoinSerializer
 from formlessness.serializers import Serializer
@@ -37,6 +37,7 @@ from formlessness.types import D
 from formlessness.types import JSONDict
 from formlessness.types import T
 from formlessness.utils import key_and_label
+from formlessness.utils import remove_null_values
 from formlessness.widgets import Widget
 from formlessness.widgets import date_picker
 from formlessness.widgets import text
@@ -66,8 +67,8 @@ class BasicField(Field[D, T]):
     def __init__(
         self,
         # Data to pass to the Display
-        label: str = "",
-        description: str = "",
+        label: Optional[str] = None,
+        description: Optional[str] = None,
         shadow: str = "",
         widget: Widget = None,
         # Choices are included in the Display and will add a Choices.
@@ -102,15 +103,12 @@ class BasicField(Field[D, T]):
             self.object_constraint |= is_null
         self.data_constraint = self.data_constraint.simplify()
         self.object_constraint = self.object_constraint.simplify()
-
-        self.display_info: JSONDict = filter_display_info(
+        self.display_info: JSONDict = remove_null_values(
             {
                 "type": "field",
                 "label": label,
                 "description": description,
-                "shadow": shadow,
                 "widget": widget or self.default_widget,
-                "choices": data_choices or None,
             }
         )
 

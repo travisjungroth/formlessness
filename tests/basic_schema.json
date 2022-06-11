@@ -16,12 +16,10 @@
       "format": "json-pointer"
     },
     "collapsable": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "collapsed": {
-      "type": "boolean",
-      "default": false
+      "type": "boolean"
     },
     "contents": {
       "type": "array",
@@ -43,6 +41,8 @@
   "required": [
     "type",
     "objectPath",
+    "collapsable",
+    "collapsed",
     "contents"
   ],
   "definitions": {
@@ -96,16 +96,16 @@
           "type": "string"
         },
         "collapsable": {
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
         },
         "collapsed": {
-          "type": "boolean",
-          "default": false
+          "type": "boolean"
         }
       },
       "required": [
         "type",
+        "collapsable",
+        "collapsed",
         "contents"
       ],
       "contents": {

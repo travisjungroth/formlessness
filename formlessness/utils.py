@@ -1,3 +1,6 @@
+from collections.abc import Mapping
+
+
 def key_and_label(key: str, label: str) -> tuple[str, str]:
     """
     If one of key or label is missing, generate it from the other.
@@ -21,3 +24,7 @@ def key_and_label(key: str, label: str) -> tuple[str, str]:
         )
         return key, label
     raise ValueError("Must set key or label.")
+
+
+def remove_null_values(mapping: Mapping) -> dict:
+    return {k: v for k, v in mapping.items() if v is not None}
