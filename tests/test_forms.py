@@ -4,6 +4,7 @@ import json
 from dataclasses import asdict
 from dataclasses import dataclass
 from datetime import date
+from functools import partial
 from typing import Optional
 
 import jsonschema
@@ -17,6 +18,7 @@ from formlessness.fields import StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
 from formlessness.serializers import serializer
+from formlessness.types import JSONDict
 
 
 @dataclass
@@ -96,30 +98,38 @@ def form() -> BasicForm[Film]:
     )
 
 
-def test_make_object(form):
-    """
-    Form.make_object is the main interface to the whole thing,
-    to go from data to an object and do all the validation.
-    """
-    data = {
+@pytest.fixture
+def form_data(film) -> JSONDict:
+    return {
         "title": "The King",
         "release_date": "2021-10-09",
         "green_light_date": "2017-05-05",
         "location": {"city": "Eastcheap", "country": "England"},
         "distributor": "Netflix",
     }
-    film = Film(
+
+
+@pytest.fixture
+def film() -> Film:
+    return Film(
         title="The King",
         release_date=date(2021, 10, 9),
         green_light_date=date(2017, 5, 5),
         location=Location("Eastcheap", "England"),
         distributor="Netflix",
     )
-    obj = form.make_object(data)
+
+
+def test_make_object(form, form_data, film):
+    """
+    Form.make_object is the main interface to the whole thing,
+    to go from data to an object and do all the validation.
+    """
+    obj = form.make_object(form_data)
     assert obj == film
-    data["release_date"] = date(2022, 1, 1)
+    form_data["release_date"] = date(2022, 1, 1)
     with pytest.raises(FormErrors):
-        form.make_object(data)
+        form.make_object(form_data)
 
 
 def test_issues(form):
@@ -252,9 +262,20 @@ def test_display(form):
     assert display == expected
 
 
+validate_json = partial(
+    jsonschema.validate, format_checker=jsonschema.draft7_format_checker
+)
+
+
 def test_display_json(form):
     with open("tests/basic_schema.json") as f:
         schema = json.load(f)
-    jsonschema.validate(
-        form.display(), schema, format_checker=jsonschema.draft7_format_checker
+    validate_json(
+        form.display(),
+        schema,
     )
+
+
+def test_data_schema(form, form_data):
+    schema = form.data_schema()
+    validate_json(form_data, schema)
