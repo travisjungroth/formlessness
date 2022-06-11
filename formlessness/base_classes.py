@@ -30,6 +30,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
     """
     Things that validate, serialize and deserialize data, like Forms and Fields.
     """
+
     data_constraint: Constraint[D] = Valid
     object_constraint: Constraint[T] = Valid
 
