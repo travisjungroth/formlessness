@@ -347,7 +347,8 @@ class Or(Constraint[T]):
             return {}
         if len(schemas) == 1:
             return schemas[0]
-        return {'anyOf': schemas}
+        return {"anyOf": schemas}
+
 
 @dataclass
 class And(Constraint[T]):
