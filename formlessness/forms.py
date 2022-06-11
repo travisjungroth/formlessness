@@ -5,9 +5,10 @@ from typing import Optional
 from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.constraints import And, is_null
+from formlessness.constraints import And
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
+from formlessness.constraints import is_null
 from formlessness.deserializers import Deserializer
 from formlessness.exceptions import DeserializationError
 from formlessness.exceptions import FormErrors
