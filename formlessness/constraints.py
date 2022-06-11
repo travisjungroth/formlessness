@@ -108,7 +108,8 @@ Simple Constraints
 
 class ValidClass(Constraint[Any]):
     """
-    This is the canonical Constraint that is always satisfied. Equivalent to true, top, ⊤, unit, 1, etc.
+    This is the canonical Constraint that is always satisfied.
+    Equivalent to true, top, ⊤, 1, etc.
     """
 
     __singleton: ValidClass
@@ -118,7 +119,7 @@ class ValidClass(Constraint[Any]):
             cls.__singleton = super().__new__(cls)
         return cls.__singleton
 
-    def validate(self, value: Any) -> True:
+    def validate(self, value: Any) -> ValidClass:
         return self
 
     def satisfied_by(self, value: Any) -> bool:
@@ -127,7 +128,7 @@ class ValidClass(Constraint[Any]):
     def __bool__(self) -> bool:
         return True
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "Valid"
 
     def json_schema(self) -> JSONDict:
@@ -135,6 +136,38 @@ class ValidClass(Constraint[Any]):
 
 
 Valid: Final[ValidClass] = ValidClass()
+
+
+class InvalidClass(Constraint[Any]):
+    """
+    This is the canonical Constraint that is never satisfied.
+    Equivalent to false, bottom, ⊥, 0, etc.
+    """
+
+    __singleton: InvalidClass
+
+    def __new__(cls):
+        if not hasattr(cls, "__singleton"):
+            cls.__singleton = super().__new__(cls)
+        return cls.__singleton
+
+    def validate(self, value: Any) -> InvalidClass:
+        return self
+
+    def satisfied_by(self, value: Any) -> bool:
+        return False
+
+    def __bool__(self) -> bool:
+        return False
+
+    def __str__(self):
+        return "Invalid"
+
+    def json_schema(self) -> JSONDict:
+        return {"not": {}}
+
+
+Invalid: Final[InvalidClass] = InvalidClass()
 
 
 @dataclass
