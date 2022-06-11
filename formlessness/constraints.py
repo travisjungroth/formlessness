@@ -168,9 +168,6 @@ class InvalidClass(Constraint[Any]):
     def satisfied_by(self, value: Any) -> bool:
         return False
 
-    def __bool__(self) -> bool:
-        return False
-
     def __invert__(self) -> ValidClass:
         return Valid
 
@@ -290,9 +287,13 @@ class Comparison(Constraint[T]):
     def __str__(self):
         return f"Must be {self.comparison_string} {self.operand}."
 
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}({self.operand})"
 
-@dataclass
+
+@dataclass(repr=False)
 class GT(Comparison[T]):
+
     """
     Greater Than
 
@@ -303,12 +304,12 @@ class GT(Comparison[T]):
     >>> GT(0).satisfied_by('1')
     False
     """
-
     operator: Callable[[T, T], bool] = gt
+
     comparison_string: str = "greater than"
 
 
-@dataclass
+@dataclass(repr=False)
 class GE(Comparison[T]):
     """
     Greater Than Or Equal To
@@ -318,7 +319,7 @@ class GE(Comparison[T]):
     comparison_string: str = "greater than or equal to"
 
 
-@dataclass
+@dataclass(repr=False)
 class LT(Comparison[T]):
     """
     Less Than
@@ -328,7 +329,7 @@ class LT(Comparison[T]):
     comparison_string: str = "less than"
 
 
-@dataclass
+@dataclass(repr=False)
 class LE(Comparison[T]):
     """
     Less Than Or Equal To
@@ -371,6 +372,12 @@ class Or(Constraint[T]):
         return not self.constraints or any(self.constraints)
 
     def simplify(self) -> Constraint:
+        """
+        >>> Or(Valid).simplify()
+        Valid
+        >>> Or(GT(1)).simplify()
+        GT(1)
+        """
         if self.simplified:
             return self
         if not self.constraints:
@@ -472,6 +479,12 @@ class Not(Constraint[T]):
         return self.message or f"Not ({self.constraint})"
 
     def __bool__(self) -> bool:
+        """
+        >>> bool(Not(Valid))
+        False
+        >>> bool(Not(Invalid))
+        True
+        """
         return not self.constraint
 
     def __invert__(self) -> Constraint:
@@ -485,6 +498,8 @@ class Not(Constraint[T]):
         'Must be a string.'
         >>> Not(Not(And())).simplify()
         Valid
+        >>> str(Not(is_str).simplify().simplify())
+        'Not (Must be a string.)'
         """
         if self.simplified:
             return self
