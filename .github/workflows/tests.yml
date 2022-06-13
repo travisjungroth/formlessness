@@ -17,17 +17,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up Python
-      uses: actions/setup-python@v4
-    - name: Load cached local for Poetry
-      id: cached-poetry-install
-      uses: actions/cache@v3
-      with:
-        path: ~/.local
-        key: local-${{ hashFiles('**/pyproject.toml') }}-${{ hashFiles('**/python-version') }}
-    - name: Install Poetry
-      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
+#    - name: Load cached local for Poetry
+#      id: cached-poetry-install
+#      uses: actions/cache@v3
+#      with:
+#        path: ~/.local
+#        key: local-${{ hashFiles('**/pyproject.toml') }}
+#    - name: Install Poetry
+#      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
+#      uses: snok/install-poetry@v1
+    - run: pipx install poetry
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
