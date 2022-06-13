@@ -10,23 +10,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-      - name: Load cached local for Poetry
-        id: cached-poetry-install
-        uses: actions/cache@v3
-        with:
-          path: ~/.local
-          key: local-${{ hashFiles('**/pyproject.toml') }}
-      - name: Install Poetry
-        if: steps.cached-poetry-install.outputs.cache-hit != 'true'
-        uses: snok/install-poetry@v1
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
-      - name: Install packages
-        run: poetry install --no-interaction --no-root
-      - run: poetry run mkdocs gh-deploy --force
+    - uses: actions/checkout@v3
+    - name: Set up Python base
+      uses: actions/setup-python@v4
+      with:
+        python-version-file: .python-version
+        cache: 'pip'
+    - name: Install base packages
+      run: pip install -r .github/requirements.txt
+    - name: Set up Python venv
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+    - name: Install venv packages
+      run: poetry install --no-interaction --no-root
+    - run: poetry run mkdocs gh-deploy --force
