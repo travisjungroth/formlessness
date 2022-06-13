@@ -22,6 +22,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+        cache-dependency-path: '.github/requirements.txt'
     - run: pip install -r .github/requirements.txt
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
