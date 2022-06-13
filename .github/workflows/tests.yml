@@ -21,15 +21,9 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Load cached local for Poetry
-      id: cached-poetry-install
-      uses: actions/cache@v3
-      with:
-        path: ~/.local
-        key: local-${{ hashFiles('**/pyproject.toml') }}-${{ matrix.python-version }}
+        cache: 'pip'
     - name: Install Poetry
-      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
+      run: which poetry >> /dev/null || pip install -r .github/requirements.txt
     - name: Set up Python ${{ matrix.python-version }} venv
       uses: actions/setup-python@v4
       with:
