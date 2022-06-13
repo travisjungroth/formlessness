@@ -17,11 +17,26 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install poetry
-      run: pipx install poetry
-    - uses: actions/setup-python@v4
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: ${{ matrix.python-version }}
+    - name: Load cached local for Poetry
+      id: cached-poetry-install
+      uses: actions/cache@v3
+      with:
+        path: ~/.local
+        key: local-${{ hashFiles('**/pyproject.toml') }}-${{ hashFiles('**/python-version') }}
+    - name: Install Poetry
+      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
+      uses: snok/install-poetry@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
         cache: 'poetry'
-    - run: poetry install
-    - run: poetry run pytest
+    - name: Install packages
+      run: poetry install --no-interaction --no-root
+    - run: poetry run pytest --cov --cov-report=xml
+    - name: Codecov
+      uses: codecov/codecov-action@v3.1.0
