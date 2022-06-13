@@ -32,8 +32,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'poetry'
+    - run: source $(poetry env info --path)/bin/activate
     - name: Install packages
       run: poetry install --no-interaction --no-root
-    - run: poetry run pytest --cov --cov-report=xml
+    - run: pytest --cov --cov-report=xml
     - name: Codecov
       uses: codecov/codecov-action@v3.1.0
