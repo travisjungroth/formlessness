@@ -17,14 +17,20 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ matrix.python-version }} base
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: '.github/requirements.txt'
-    - run: pip install -r .github/requirements.txt
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Load cached local for Poetry
+      id: cached-poetry-install
+      uses: actions/cache@v3
+      with:
+        path: ~/.local
+        key: local-${{ hashFiles('**/pyproject.toml') }}-${{ matrix.python-version }}
+    - name: Install Poetry
+      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
+      uses: snok/install-poetry@v1
+    - name: Set up Python ${{ matrix.python-version }} venv
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
