@@ -10,12 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v3
       - name: Install Poetry
         uses: snok/install-poetry@v1
-        with:
-          virtualenvs-in-project: true
+      - name: Set up Python
+        uses: actions/setup-python@v4
       - name: Update dependencies
         run: |
           pip install poetryup
