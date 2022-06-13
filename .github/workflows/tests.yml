@@ -16,31 +16,23 @@ jobs:
         python-version: ['3.9', '3.10']
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }} base
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Load cached local for Poetry
-      id: cached-poetry-install
-      uses: actions/cache@v3
+        cache: 'pip'
+        cache-dependency-path: '**/requirements.txt'
+    - name: Install base packages
+      run: pip install -r .github/requirements.txt
+    - name: Set up Python ${{ matrix.python-version }} venv
+      uses: actions/setup-python@v4
       with:
-        path: ~/.local
-        key: local-${{ steps.setup-python.outputs.python-version }}
-    - name: Install Poetry
-      if: steps.cached-poetry-install.outputs.cache-hit != 'true'
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-in-project: true
-    - name: Load cached virtual environment
-      id: cached-venv
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
-    - name: Install packages
-      if: steps.cached-venv.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction
-    - run: poetry run pytest --cov --cov-report=xml
+        python-version: ${{ matrix.python-version }}
+        cache: 'poetry'
+    - name: Install venv packages
+      run: poetry install --no-interaction --no-root
+    - name: Test
+      run: poetry run pytest --cov --cov-report=xml
     - name: Codecov
       uses: codecov/codecov-action@v3.1.0
