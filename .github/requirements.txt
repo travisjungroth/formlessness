@@ -1,1 +1,1 @@
-poetry
+poetry==1.1.13
