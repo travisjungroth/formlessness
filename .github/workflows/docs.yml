@@ -11,26 +11,20 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v3
       - name: Load cached local for Poetry
         id: cached-poetry-install
         uses: actions/cache@v3
         with:
           path: ~/.local
-          key: local-${{ steps.setup-python.outputs.python-version }}
+          key: local-${{ hashFiles('**/pyproject.toml') }}
       - name: Install Poetry
         if: steps.cached-poetry-install.outputs.cache-hit != 'true'
         uses: snok/install-poetry@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          virtualenvs-in-project: true
-      - name: Load cached virtual environment
-        id: cached-venv
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: venv-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
       - name: Install packages
-        if: steps.cached-venv.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --no-root
       - run: poetry run mkdocs gh-deploy --force
