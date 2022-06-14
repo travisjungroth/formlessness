@@ -36,7 +36,7 @@ class Form(Parent, Converter[D, T], ABC):
 class BasicForm(Form[JSONDict, T]):
     # Defaults for instances of this class. Meant to be overridden by subclasses.
     default_serializer: Serializer = Serializer()
-    default_deserializer: Deserializer
+    default_deserializer: Deserializer = Deserializer()
     default_data_constraints: tuple[Constraint[JSONDict], ...] = ()
     default_object_constraints: tuple[Constraint[T], ...] = ()
     # See schemas/basic_form.json for the JSON Schema of the Display.
