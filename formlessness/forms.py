@@ -145,3 +145,8 @@ class BasicForm(Form[JSONDict, T]):
 
     def required_keys(self) -> list[str]:
         return [k for k, converter in self.converters.items() if converter.required]
+
+    def data_schema(self) -> JSONDict:
+        return self._data_schema() | {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+        }
