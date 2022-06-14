@@ -1,5 +1,7 @@
 def test_truth():
-  assert True
+    assert True
+
+
 # from __future__ import annotations
 
 # import json
