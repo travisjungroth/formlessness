@@ -15,8 +15,8 @@ class TestCommaListStrField:
         scope="session",
         params=[CommaListStrField("Label"), seperated_field(",", label="Label")],
     )
-#     def field(self, request):
-#         return request.param
+    def field(self, request):
+        return request.param
 
     @pytest.fixture(params=[1, None, (), {}])
     def bad_data(self, request):
@@ -50,8 +50,8 @@ class TestCommaListStrField:
         data, obj = data_to_object
         return obj
 
-    def test_no_data_issues(self, field, good_data):
-        assert field.validate_data(good_data)
+#     def test_no_data_issues(self, field, good_data):
+#         assert field.validate_data(good_data)
 
     def test_has_data_issues(self, field, bad_data: str):
         assert not field.validate_data(bad_data)
