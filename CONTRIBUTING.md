@@ -10,9 +10,9 @@ Find something in [issues](https://github.com/travisjungroth/formlessness/issues
 
 Open a PR. There are strict formatters. If there are any problems, you may get an automatic commit on top of yours fixing them.
 
-The only commits allowed on `main` are squashed commits via PR. 
+The only commits allowed on `main` are squashed commits via PR.
 
 1. Your commit on `main` won't have you listed as the author.
 2. You will be listed as a co-author, which GitHub recognizes.
 
-I'll make changes as-needed on PRs before pulling them in, instead of making suggestions. 
+I'll make changes as-needed on PRs before pulling them in, instead of making suggestions.
