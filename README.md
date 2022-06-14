@@ -47,3 +47,6 @@ Otherwise, follow the [installation docs](https://python-poetry.org/docs/master/
 ### Run docs locally
 
     mkdocs serve
+
+---
+Formlessness is not an official Netflix project.
