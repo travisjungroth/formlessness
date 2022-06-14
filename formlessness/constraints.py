@@ -368,26 +368,28 @@ class Or(Constraint[T]):
 
     def simplify(self) -> Constraint:
         """
-        >>> Or(Valid).simplify()
+        >>> Or(Invalid, Valid, Valid).simplify()
         Valid
-        >>> Or(GT(1)).simplify()
+        >>> Or(GT(1), Invalid).simplify()
         GT(1)
         """
         if self.simplified:
             return self
-        if not self.constraints:
-            return Valid
-        if len(self.constraints) == 1:
-            return self.constraints[0].simplify()
         constraints = []
         for v in self.constraints:
             v = v.simplify()
             if v is Valid:
                 return Valid
+            if v is Invalid:
+                continue
             if isinstance(v, Or):
                 constraints.extend(v.constraints)
             else:
                 constraints.append(v)
+        if not constraints:
+            return Valid
+        if len(constraints) == 1:
+            return constraints[0]
         return Or(*constraints, simplified=True)
 
     def json_schema(self) -> Optional[JSONDict]:
