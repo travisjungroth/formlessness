@@ -443,6 +443,8 @@ class And(Constraint[T]):
         constraints = []
         for v in self.constraints:
             v = v.simplify()
+            if v is Invalid:
+                return Invalid
             if v is Valid:
                 continue
             if isinstance(v, And):
