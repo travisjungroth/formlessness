@@ -20,6 +20,73 @@ Formlessness is a Python library for handling the backend work of web forms. It 
  * Simple representation of complex validation logic.
  * High extendability.
 
+## Example
+
+<!--phmdoctest-share-names-->
+```python
+from pprint import pprint
+
+from formlessness.forms import BasicForm
+from formlessness.fields import IntField, StrField
+from formlessness.constraints import GE
+
+form = BasicForm(
+    label='Person',
+    children=[
+        BasicForm(
+            label='Name',
+            children=[
+                StrField(label='First Name'),
+                StrField(label='Last Name'),
+            ]
+        ),
+        IntField(label='Age', required=False, extra_data_constraints=[GE(0)])
+    ],
+)
+pprint(form.display(), sort_dicts=False)
+```
+This is the form definition for the front end.
+```
+{'type': 'form',
+ 'label': 'Person',
+ 'collapsable': False,
+ 'collapsed': False,
+ 'objectPath': '',
+ 'contents': [{'type': 'form',
+               'label': 'Name',
+               'collapsable': False,
+               'collapsed': False,
+               'objectPath': '/name',
+               'contents': [{'type': 'field',
+                             'label': 'First Name',
+                             'widget': {'type': 'text'},
+                             'objectPath': '/name/first_name'},
+                            {'type': 'field',
+                             'label': 'Last Name',
+                             'widget': {'type': 'text'},
+                             'objectPath': '/name/last_name'}]},
+              {'type': 'field',
+               'label': 'Age',
+               'widget': {'type': 'text'},
+               'objectPath': '/age'}]}
+```
+A JSON Schema is automatically generated.
+```python
+pprint(form.data_schema(), sort_dicts=False)
+```
+
+```
+{'type': 'object',
+ 'properties': {'name': {'type': 'object',
+                         'properties': {'first_name': {'type': 'string'},
+                                        'last_name': {'type': 'string'}},
+                         'required': ['first_name', 'last_name'],
+                         'unevaluatedProperties': False},
+                'age': {'type': 'integer'}},
+ 'required': ['name'],
+ 'unevaluatedProperties': False,
+ '$schema': 'http://json-schema.org/draft-07/schema#'}
+```
 ## Development
 
 ### Poetry
