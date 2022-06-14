@@ -272,7 +272,7 @@ validate_json = partial(
 
 
 def test_display_json(form):
-    with open("tests/basic_schema.json") as f:
+    with open("schemas/basic_form.json") as f:
         schema = json.load(f)
     validate_json(
         form.display(),
