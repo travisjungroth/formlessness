@@ -3,5 +3,5 @@ coverage:
     project:
       default:
         threshold: 5%
-        only_pulls: true
-    patch: false
+    patch:
+      informational: true
