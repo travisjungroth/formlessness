@@ -366,6 +366,9 @@ class Or(Constraint[T]):
     def __bool__(self):
         return not self.constraints or any(self.constraints)
 
+    def __invert__(self) -> Constraint:
+        return And(*[~c for c in self.constraints]).simplify()
+
     def simplify(self) -> Constraint:
         """
         >>> Or(Invalid, Valid, Valid).simplify()
@@ -430,6 +433,9 @@ class And(Constraint[T]):
 
     def __bool__(self):
         return all(self.constraints)
+
+    def __invert__(self) -> Constraint:
+        return Or(*[~c for c in self.constraints]).simplify()
 
     def simplify(self) -> Constraint:
         if self.simplified:
