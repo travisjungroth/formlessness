@@ -13,6 +13,7 @@ from formlessness.constraints import Choices
 from formlessness.constraints import Constraint
 from formlessness.constraints import EachItem
 from formlessness.constraints import OfType
+from formlessness.constraints import is_bool
 from formlessness.constraints import is_date
 from formlessness.constraints import is_datetime
 from formlessness.constraints import is_float
@@ -42,6 +43,7 @@ from formlessness.utils import MISSING
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 from formlessness.widgets import Widget
+from formlessness.widgets import checkbox
 from formlessness.widgets import date_picker
 from formlessness.widgets import text
 
@@ -193,6 +195,14 @@ class CommaListIntField(BasicField[str, list[int]]):
     default_data_constraints = (is_str,)
     default_object_constraints = (is_list_of_int,)
     default_widget = text
+
+
+class BoolField(BasicField[bool, bool]):
+    default_serializer = FunctionSerializer(bool)
+    default_deserializer = FunctionDeserializer(bool, "Must be a boolean.")
+    default_data_constraints = (is_bool,)
+    default_object_constraints = (is_bool,)
+    default_widget = checkbox
 
 
 def seperated_field(
