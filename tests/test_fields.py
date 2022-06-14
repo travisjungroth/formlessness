@@ -50,8 +50,8 @@ class TestCommaListStrField:
         data, obj = data_to_object
         return obj
 
-#     def test_no_data_issues(self, field, good_data):
-#         assert field.validate_data(good_data)
+    def test_no_data_issues(self, field, good_data):
+        assert field.validate_data(good_data)
 
     def test_has_data_issues(self, field, bad_data: str):
         assert not field.validate_data(bad_data)
