@@ -15,19 +15,17 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10']
 
-    env:
-      PYTHON_VERSION: python${{ matrix.python-version }}
-
     steps:
     - uses: actions/checkout@v3
     - name: Install poetry
       run: pipx install poetry
-    - name: Set up Python ${{ matrix.python-version }} venv
+    - name: Set up Python ${{ matrix.python-version }}
+      id: setup-python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'poetry'
-    - run: poetry env use $PYTHON_VERSION
+    - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
     - name: Install venv packages
       run: poetry install --no-interaction --no-root
     - name: Test
