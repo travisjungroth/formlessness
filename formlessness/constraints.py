@@ -506,6 +506,42 @@ class Not(Constraint[T]):
 
 
 @dataclass
+class If(Constraint[T]):
+    p: Constraint
+    q: Constraint
+    message: str = ""
+
+    def satisfied_by(self, value: T) -> bool:
+        """
+        >>> con = If(is_int, GT(1))
+        >>> con.satisfied_by(0)
+        False
+        >>> con.satisfied_by(2)
+        True
+        >>> con.satisfied_by('A')
+        True
+        """
+        if self.p.satisfied_by(value):
+            return self.q.satisfied_by(value)
+        return True
+
+    def validate(self, value: T) -> Constraint:
+        return Or(~self.p, self.q).validate(value)
+
+    def __str__(self) -> str:
+        return self.message or f"If ({self.p}) Then ({self.q})"
+
+    def __bool__(self) -> bool:
+        return bool(self.q) if self.p else True
+
+    def __invert__(self) -> Constraint:
+        return And(self.p, ~self.q).simplify()
+
+    def simplify(self) -> Constraint:
+        return Or(~self.p, self.q).simplify()
+
+
+@dataclass
 class EachItem(Constraint[Iterable[T]]):
     """
     Check a Constraint against all items of an Iterable.
