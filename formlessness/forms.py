@@ -39,6 +39,7 @@ class BasicForm(Form[JSONDict, T]):
     default_deserializer: Deserializer
     default_data_constraints: tuple[Constraint[JSONDict], ...] = ()
     default_object_constraints: tuple[Constraint[T], ...] = ()
+    # See schemas/basic_form.json for the JSON Schema of the Display.
 
     def __init__(
         self,
