@@ -17,19 +17,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }} base
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-        cache-dependency-path: '**/requirements.txt'
-    - name: Install base packages
-      run: pip install -r .github/requirements.txt
-    - name: Set up Python ${{ matrix.python-version }} venv
+    - name: Install poetry
+      run: pipx install poetry
+    - name: Set up Python ${{ matrix.python-version }}
+      id: setup-python
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'poetry'
+    - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
     - name: Install venv packages
       run: poetry install --no-interaction --no-root
     - name: Test

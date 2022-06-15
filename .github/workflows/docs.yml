@@ -1,6 +1,7 @@
 name: Docs
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -11,18 +12,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python base
+    - run: pipx install poetry
+    - name: Set up Python
+      id: setup-python
       uses: actions/setup-python@v4
       with:
         python-version-file: .python-version
-        cache: 'pip'
-    - name: Install base packages
-      run: pip install -r .github/requirements.txt
-    - name: Set up Python venv
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
         cache: 'poetry'
+    - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
     - name: Install venv packages
       run: poetry install --no-interaction --no-root
     - run: poetry run mkdocs gh-deploy --force
