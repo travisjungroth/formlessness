@@ -25,7 +25,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'poetry'
-#     - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
+    - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
     - name: Install venv packages
       run: poetry install --no-interaction --no-root
     - name: Test
