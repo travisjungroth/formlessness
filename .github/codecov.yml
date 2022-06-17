@@ -4,4 +4,4 @@ coverage:
       default:
         threshold: 5%
     patch:
-      informational: true
+      threshold: 100%
