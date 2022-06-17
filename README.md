@@ -82,7 +82,7 @@ pprint(form.data_schema(), sort_dicts=False)
                                         'last_name': {'type': 'string'}},
                          'required': ['first_name', 'last_name'],
                          'unevaluatedProperties': False},
-                'age': {'type': 'integer'}},
+                'age': {'allOf': [{'type': 'integer'}, {'minimum': 0}]}},
  'required': ['name'],
  'unevaluatedProperties': False,
  '$schema': 'http://json-schema.org/draft-07/schema#'}

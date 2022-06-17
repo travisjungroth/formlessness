@@ -717,3 +717,16 @@ def _(constraint: Not) -> tuple[JSONDict, bool]:
     if faithful:
         return {"not": validator}, True
     return {}, False
+
+
+@to_json.register
+def _(constraint: Comparison) -> tuple[JSONDict, bool]:
+    value = constraint.operand
+    if not isinstance(value, float) and not isinstance(value, int):
+        return {}, False
+    d = {ge: "minimum", gt: "exclusiveMinimum", le: "maximum", lt: "exclusiveMaximum"}
+    try:
+        key = d[constraint.operator]
+    except KeyError:
+        return {}, False
+    return {key: value}, True
