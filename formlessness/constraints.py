@@ -8,6 +8,7 @@ from dataclasses import replace
 from datetime import date
 from datetime import datetime
 from datetime import time
+from functools import singledispatch
 from operator import ge
 from operator import gt
 from operator import le
@@ -23,7 +24,6 @@ from typing import Mapping
 from typing import Optional
 from typing import Sequence
 
-from formlessness.types import JSONData
 from formlessness.types import JSONDict
 from formlessness.types import T
 
@@ -103,9 +103,6 @@ class Constraint(Generic[T], ABC):
     def __str__(self):
         pass
 
-    def json_schema(self) -> JSONValidator:
-        return JSONValidator()
-
 
 """
 Simple Constraints
@@ -143,8 +140,6 @@ class ValidClass(Constraint[Any]):
     def __str__(self) -> str:
         return "Valid"
 
-    def json_schema(self) -> JSONValidator:
-        return JSONValidator({}, weakened=False)
 
 
 Valid: Final[ValidClass] = ValidClass()
@@ -178,8 +173,6 @@ class InvalidClass(Constraint[Any]):
     def __str__(self):
         return "Invalid"
 
-    def json_schema(self) -> JSONValidator:
-        return JSONValidator({"not": {}}, weakened=False)
 
 
 Invalid: Final[InvalidClass] = InvalidClass()
@@ -253,11 +246,6 @@ class OfType(Constraint[T]):
     def __str__(self):
         return self.message
 
-    def json_schema(self) -> JSONValidator:
-        if self.json_type:
-            return JSONValidator({"type": self.json_type}, weakened=False)
-        return JSONValidator()
-
 
 @dataclass
 class Choices(Constraint[T]):
@@ -304,7 +292,6 @@ class GT(Comparison[T]):
     """
 
     operator: Callable[[T, T], bool] = gt
-
     comparison_string: str = "greater than"
 
 
@@ -397,21 +384,6 @@ class Or(Constraint[T]):
             return constraints[0]
         return Or(*constraints, simplified=True)
 
-    def json_schema(self) -> JSONValidator:
-        schemas = []
-        for c in self.constraints:
-            schema = c.json_schema()
-            if schema.weakened or schema.anything():
-                return JSONValidator()
-            schemas.append(schema)
-        if not schemas:
-            return JSONValidator()
-        if len(schemas) == 1:
-            return schemas[0]
-        return JSONValidator(
-            {"anyOf": [schema.data for schema in schemas]}, weakened=False
-        )
-
 
 @dataclass
 class And(Constraint[T]):
@@ -461,24 +433,6 @@ class And(Constraint[T]):
             return constraints[0]
         return And(*constraints, simplified=True)
 
-    def json_schema(self) -> JSONValidator:
-        schemas = []
-        weakened = False
-        for c in self.constraints:
-            schema = c.json_schema()
-            if schema.weakened:
-                weakened = True
-            if not schema.anything():
-                schemas.append(schema)
-        if not schemas:
-            return JSONValidator()
-        if len(schemas) == 1:
-            (schema,) = schemas
-            return JSONValidator(schema.data, weakened=schema.weakened or weakened)
-        return JSONValidator(
-            {"allOf": [schema.data for schema in schemas]}, weakened=weakened
-        )
-
 
 @dataclass
 class Not(Constraint[T]):
@@ -527,12 +481,6 @@ class Not(Constraint[T]):
         if isinstance(inverted, Not):
             return replace(self, constraint=self.constraint.simplify(), simplified=True)
         return ~self.constraint.simplify()
-
-    def json_schema(self) -> JSONValidator:
-        schema = self.constraint.json_schema()
-        if schema.weakened:
-            return JSONValidator()
-        return JSONValidator({"not": schema.data}, weakened=False)
 
 
 @dataclass
@@ -707,19 +655,65 @@ class HasKeys(Constraint):
         return f"Must set {', '.join(self.keys)}"
 
 
-class JSONValidator(Mapping[str, JSONData]):
-    def __init__(self, data: JSONDict = None, weakened=False):
-        self.data = data if data is not None else {}
-        self.weakened = weakened
+def constraint_to_json(constraint: Constraint) -> JSONDict:
+    return to_json(constraint)[0]
 
-    def anything(self) -> bool:
-        return not self.data
+@singledispatch
+def to_json(constraint: Any):
+    raise NotImplementedError()
 
-    def __getitem__(self, k: str) -> JSONData:
-        return self.data[k]
 
-    def __len__(self) -> int:
-        return len(self.data)
+@to_json.register
+def _(constraint: Constraint) -> tuple[JSONDict, bool]:
+    return {}, False
 
-    def __iter__(self) -> Iterator[JSONData]:
-        return iter(self.data)
+
+@to_json.register
+def _(constraint: ValidClass) -> tuple[JSONDict, bool]:
+    return {}, True
+
+
+@to_json.register
+def _(constraint: InvalidClass) -> tuple[JSONDict, bool]:
+    return {'not': {}}, True
+
+
+@to_json.register
+def _(constraint: OfType) -> tuple[JSONDict, bool]:
+    if constraint.json_type:
+        return {'type': constraint.json_type}, True
+    return {}, False
+
+
+@to_json.register
+def _(constraint: Or) -> tuple[JSONDict, bool]:
+    validators = []
+    for c in constraint.constraints:
+        validator, faithful = to_json(c)
+        if not faithful:
+            return {}, False
+        validators.append(validator)
+    return {"anyOf": validators}, True
+
+@to_json.register
+def _(constraint: And) -> tuple[JSONDict, bool]:
+    validators = []
+    faithful = True
+    for c in constraint.constraints:
+        validator, faithful = to_json(c)
+        if not faithful:
+            faithful = False
+        elif validator != {}:
+            validators.append(validator)
+    if not validators:
+        return {}, faithful
+    if len(validators) == 1:
+        return validators[0], faithful
+    return {'allOf': validators}, faithful
+
+@to_json.register
+def _(constraint: Not) -> tuple[JSONDict, bool]:
+    validator, faithful = to_json(constraint.constraint)
+    if faithful:
+        return {'not': validator}, True
+    return {}, False

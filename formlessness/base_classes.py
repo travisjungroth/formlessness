@@ -5,7 +5,7 @@ from typing import Mapping
 from typing import Protocol
 from typing import Union
 
-from formlessness.constraints import Constraint
+from formlessness.constraints import Constraint, to_json, constraint_to_json
 from formlessness.constraints import ConstraintMap
 from formlessness.constraints import Valid
 from formlessness.deserializers import Deserializer
@@ -58,7 +58,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         return ConstraintMap(self.object_constraint.validate(obj))
 
     def _data_schema(self) -> JSONDict:
-        schema = dict(self.data_constraint.json_schema())
+        schema = constraint_to_json(self.data_constraint)
         if self.default is not MISSING:
             schema["default"] = self.default_data
         return schema
