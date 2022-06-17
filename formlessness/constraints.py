@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Iterator
 from dataclasses import dataclass
 from dataclasses import replace
 from datetime import date
@@ -141,7 +140,6 @@ class ValidClass(Constraint[Any]):
         return "Valid"
 
 
-
 Valid: Final[ValidClass] = ValidClass()
 
 
@@ -172,7 +170,6 @@ class InvalidClass(Constraint[Any]):
 
     def __str__(self):
         return "Invalid"
-
 
 
 Invalid: Final[InvalidClass] = InvalidClass()
@@ -658,6 +655,7 @@ class HasKeys(Constraint):
 def constraint_to_json(constraint: Constraint) -> JSONDict:
     return to_json(constraint)[0]
 
+
 @singledispatch
 def to_json(constraint: Any):
     raise NotImplementedError()
@@ -675,13 +673,13 @@ def _(constraint: ValidClass) -> tuple[JSONDict, bool]:
 
 @to_json.register
 def _(constraint: InvalidClass) -> tuple[JSONDict, bool]:
-    return {'not': {}}, True
+    return {"not": {}}, True
 
 
 @to_json.register
 def _(constraint: OfType) -> tuple[JSONDict, bool]:
     if constraint.json_type:
-        return {'type': constraint.json_type}, True
+        return {"type": constraint.json_type}, True
     return {}, False
 
 
@@ -694,6 +692,7 @@ def _(constraint: Or) -> tuple[JSONDict, bool]:
             return {}, False
         validators.append(validator)
     return {"anyOf": validators}, True
+
 
 @to_json.register
 def _(constraint: And) -> tuple[JSONDict, bool]:
@@ -709,11 +708,12 @@ def _(constraint: And) -> tuple[JSONDict, bool]:
         return {}, faithful
     if len(validators) == 1:
         return validators[0], faithful
-    return {'allOf': validators}, faithful
+    return {"allOf": validators}, faithful
+
 
 @to_json.register
 def _(constraint: Not) -> tuple[JSONDict, bool]:
     validator, faithful = to_json(constraint.constraint)
     if faithful:
-        return {'not': validator}, True
+        return {"not": validator}, True
     return {}, False

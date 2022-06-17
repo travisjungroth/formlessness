@@ -5,9 +5,10 @@ from typing import Mapping
 from typing import Protocol
 from typing import Union
 
-from formlessness.constraints import Constraint, to_json, constraint_to_json
+from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.constraints import Valid
+from formlessness.constraints import constraint_to_json
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import Display
 from formlessness.displayers import Displayer
