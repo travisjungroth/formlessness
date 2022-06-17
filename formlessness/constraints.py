@@ -712,9 +712,6 @@ class JSONValidator(Mapping[str, JSONData]):
         self.data = data if data is not None else {}
         self.weakened = weakened
 
-    def anything(self) -> bool:
-        return not self.data
-
     def __getitem__(self, k: str) -> JSONData:
         return self.data[k]
 
@@ -723,3 +720,6 @@ class JSONValidator(Mapping[str, JSONData]):
 
     def __iter__(self) -> Iterator[JSONData]:
         return iter(self.data)
+
+    def anything(self) -> bool:
+        return not self.data
