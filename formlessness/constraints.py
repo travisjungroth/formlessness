@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
+from collections.abc import Iterator
 from dataclasses import dataclass
 from dataclasses import replace
 from datetime import date
@@ -102,8 +103,8 @@ class Constraint(Generic[T], ABC):
     def __str__(self):
         pass
 
-    def json_schema(self) -> Optional[JSONDict]:
-        return None
+    def json_schema(self) -> JSONValidator:
+        return JSONValidator()
 
 
 """
@@ -142,8 +143,8 @@ class ValidClass(Constraint[Any]):
     def __str__(self) -> str:
         return "Valid"
 
-    def json_schema(self) -> JSONDict:
-        return {}
+    def json_schema(self) -> JSONValidator:
+        return JSONValidator({}, weakened=False)
 
 
 Valid: Final[ValidClass] = ValidClass()
@@ -177,8 +178,8 @@ class InvalidClass(Constraint[Any]):
     def __str__(self):
         return "Invalid"
 
-    def json_schema(self) -> JSONDict:
-        return {"not": {}}
+    def json_schema(self) -> JSONValidator:
+        return JSONValidator({"not": {}}, weakened=False)
 
 
 Invalid: Final[InvalidClass] = InvalidClass()
@@ -252,8 +253,10 @@ class OfType(Constraint[T]):
     def __str__(self):
         return self.message
 
-    def json_schema(self) -> Optional[JSONData]:
-        return {"type": self.json_type} if self.json_type else None
+    def json_schema(self) -> JSONValidator:
+            if self.json_type:
+                return JSONValidator({"type": self.json_type}, weakened=False)
+            return JSONValidator()
 
 
 @dataclass
@@ -289,7 +292,6 @@ class Comparison(Constraint[T]):
 
 @dataclass(repr=False)
 class GT(Comparison[T]):
-
     """
     Greater Than
 
@@ -395,18 +397,18 @@ class Or(Constraint[T]):
             return constraints[0]
         return Or(*constraints, simplified=True)
 
-    def json_schema(self) -> Optional[JSONDict]:
+    def json_schema(self) -> JSONValidator:
         schemas = []
         for c in self.constraints:
             schema = c.json_schema()
-            if schema is None:
-                return None
+            if schema.weakened or schema.anything():
+                return JSONValidator()
             schemas.append(schema)
         if not schemas:
-            return {}
+            return JSONValidator()
         if len(schemas) == 1:
             return schemas[0]
-        return {"anyOf": schemas}
+        return JSONValidator({"anyOf": [schema.data for schema in schemas]}, weakened=False)
 
 
 @dataclass
@@ -457,13 +459,21 @@ class And(Constraint[T]):
             return constraints[0]
         return And(*constraints, simplified=True)
 
-    def json_schema(self) -> Optional[JSONDict]:
-        schemas = list(filter(None, [c.json_schema() for c in self.constraints]))
+    def json_schema(self) -> JSONValidator:
+        schemas = []
+        weakened = False
+        for c in self.constraints:
+            schema = c.json_schema()
+            if schema.weakened:
+                weakened = True
+            if not schema.anything():
+                schemas.append(schema)
         if not schemas:
-            return {}
+            return JSONValidator()
         if len(schemas) == 1:
-            return schemas[0]
-        return {"allOf": schemas}
+            schema, = schemas
+            return JSONValidator(schema.data, weakened=schema.weakened or weakened)
+        return JSONValidator({"allOf": [schema.data for schema in schemas]}, weakened=weakened)
 
 
 @dataclass
@@ -513,6 +523,12 @@ class Not(Constraint[T]):
         if isinstance(inverted, Not):
             return replace(self, constraint=self.constraint.simplify(), simplified=True)
         return ~self.constraint.simplify()
+
+    def json_schema(self) -> JSONValidator:
+        schema = self.constraint.json_schema()
+        if schema.weakened:
+            return JSONValidator()
+        return JSONValidator({'not': schema.data}, weakened=False)
 
 
 @dataclass
@@ -652,7 +668,6 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
 Constraint instances
 """
 
-
 is_null = OfType(type(None), "Must not be set.", "null")
 is_int = OfType(int, "Must be an integer.", "integer")
 is_float = OfType(float, "Must be a float.", "number")
@@ -686,3 +701,21 @@ class HasKeys(Constraint):
 
     def __str__(self):
         return f"Must set {', '.join(self.keys)}"
+
+
+class JSONValidator(Mapping[str, JSONData]):
+    def __init__(self, data: JSONDict = None, weakened=False):
+        self.data = data if data is not None else {}
+        self.weakened = weakened
+
+    def anything(self) -> bool:
+        return not self.data
+
+    def __getitem__(self, k: str) -> JSONData:
+        return self.data[k]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Iterator[JSONData]:
+        return iter(self.data)

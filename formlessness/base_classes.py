@@ -58,7 +58,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         return ConstraintMap(self.object_constraint.validate(obj))
 
     def _data_schema(self) -> JSONDict:
-        schema = self.data_constraint.json_schema() or {}
+        schema = dict(self.data_constraint.json_schema())
         if self.default is not MISSING:
             schema["default"] = self.default_data
         return schema
