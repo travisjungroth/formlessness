@@ -8,6 +8,7 @@ from typing import Union
 from formlessness.constraints import Constraint
 from formlessness.constraints import ConstraintMap
 from formlessness.constraints import Valid
+from formlessness.constraints import constraint_to_json
 from formlessness.deserializers import Deserializer
 from formlessness.displayers import Display
 from formlessness.displayers import Displayer
@@ -58,7 +59,7 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         return ConstraintMap(self.object_constraint.validate(obj))
 
     def _data_schema(self) -> JSONDict:
-        schema = self.data_constraint.json_schema() or {}
+        schema = constraint_to_json(self.data_constraint)
         if self.default is not MISSING:
             schema["default"] = self.default_data
         return schema
