@@ -254,9 +254,9 @@ class OfType(Constraint[T]):
         return self.message
 
     def json_schema(self) -> JSONValidator:
-            if self.json_type:
-                return JSONValidator({"type": self.json_type}, weakened=False)
-            return JSONValidator()
+        if self.json_type:
+            return JSONValidator({"type": self.json_type}, weakened=False)
+        return JSONValidator()
 
 
 @dataclass
@@ -408,7 +408,9 @@ class Or(Constraint[T]):
             return JSONValidator()
         if len(schemas) == 1:
             return schemas[0]
-        return JSONValidator({"anyOf": [schema.data for schema in schemas]}, weakened=False)
+        return JSONValidator(
+            {"anyOf": [schema.data for schema in schemas]}, weakened=False
+        )
 
 
 @dataclass
@@ -471,9 +473,11 @@ class And(Constraint[T]):
         if not schemas:
             return JSONValidator()
         if len(schemas) == 1:
-            schema, = schemas
+            (schema,) = schemas
             return JSONValidator(schema.data, weakened=schema.weakened or weakened)
-        return JSONValidator({"allOf": [schema.data for schema in schemas]}, weakened=weakened)
+        return JSONValidator(
+            {"allOf": [schema.data for schema in schemas]}, weakened=weakened
+        )
 
 
 @dataclass
@@ -528,7 +532,7 @@ class Not(Constraint[T]):
         schema = self.constraint.json_schema()
         if schema.weakened:
             return JSONValidator()
-        return JSONValidator({'not': schema.data}, weakened=False)
+        return JSONValidator({"not": schema.data}, weakened=False)
 
 
 @dataclass
