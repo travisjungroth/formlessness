@@ -193,7 +193,9 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
     def inner_data_schema(self) -> JSONDict:
         return {
             "type": "object",
-            "properties": {k: v.inner_data_schema() for k, v in self.converters().items()},
+            "properties": {
+                k: v.inner_data_schema() for k, v in self.converters().items()
+            },
             "required": self.required_keys(),
             "unevaluatedProperties": False,
         } | super().inner_data_schema()
