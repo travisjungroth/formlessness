@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Iterable
 from collections.abc import Sequence
 from typing import Any
 from typing import Mapping
