@@ -44,7 +44,7 @@ class Form(Converter[D, T], Displayer, ABC):
     def validate_data(self, data: D) -> ConstraintMap:
         return ConstraintMap(
             top_constraint=self.data_constraint.validate(data),
-            child_constraints=self._validate_sub_data(data)
+            child_constraints=self._validate_sub_data(data),
         )
 
     @abstractmethod
@@ -54,7 +54,7 @@ class Form(Converter[D, T], Displayer, ABC):
     def validate_object(self, obj: T) -> ConstraintMap:
         return ConstraintMap(
             top_constraint=self.object_constraint.validate(obj),
-            child_constraints=self._validate_sub_objects(obj)
+            child_constraints=self._validate_sub_objects(obj),
         )
 
     @abstractmethod
@@ -74,7 +74,6 @@ class Fixed:
             elif isinstance(child, Fixed):
                 converters |= child.converters()
         return converters
-
 
 
 class FixedMappingForm(Fixed, Form[JSONDict, dict]):
@@ -104,12 +103,9 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         self.default = default
         self.default_data = MISSING if default is MISSING else self.serialize(default)
         self.data_constraint &= And(
-            *extra_data_constraints,
-            HasKeys(self.required_keys())
+            *extra_data_constraints, HasKeys(self.required_keys())
         )
-        self.object_constraint &= And(
-            *extra_object_constraints
-        )
+        self.object_constraint &= And(*extra_object_constraints)
         self.required = required
         self.nullable = nullable
         if self.nullable:
@@ -199,7 +195,7 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
             else:
                 child_path = object_path
             contents.append(child.display(child_path))
-        return self.display_info | {'objectPath': object_path, 'contents': contents}
+        return self.display_info | {"objectPath": object_path, "contents": contents}
 
     def _data_schema(self) -> JSONDict:
         return {
@@ -208,7 +204,6 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
             "required": self.required_keys(),
             "unevaluatedProperties": False,
         } | super()._data_schema()
-
 
     def required_keys(self) -> list[str]:
         return [k for k, converter in self.converters().items() if converter.required]
