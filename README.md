@@ -23,17 +23,18 @@ Formlessness is a Python library for handling the backend work of web forms. It 
 ## Example
 
 <!--phmdoctest-share-names-->
+
 ```python
 from pprint import pprint
 
-from formlessness.forms import BasicForm
+from formlessness.forms import FixedMappingForm
 from formlessness.fields import IntField, StrField
 from formlessness.constraints import GE
 
-form = BasicForm(
+form = FixedMappingForm(
     label='Person',
     children=[
-        BasicForm(
+        FixedMappingForm(
             label='Name',
             children=[
                 StrField(label='First Name'),

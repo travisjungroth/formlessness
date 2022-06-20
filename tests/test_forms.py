@@ -15,7 +15,7 @@ from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
 from formlessness.fields import DateField
 from formlessness.fields import StrField
-from formlessness.forms import BasicForm
+from formlessness.forms import FixedMappingForm
 from formlessness.sections import BasicSection
 from formlessness.types import JSONDict
 
@@ -52,8 +52,8 @@ def not_sunday(day: date):
 
 
 @pytest.fixture
-def form() -> BasicForm[Film]:
-    return BasicForm(
+def form() -> FixedMappingForm[Film]:
+    return FixedMappingForm(
         label="Favorite Film",
         description="If you had to pick one.",
         extra_object_constraints=[green_light_before_release],
@@ -85,7 +85,7 @@ def form() -> BasicForm[Film]:
                         required=False,
                         nullable=True,
                     ),
-                    BasicForm(
+                    FixedMappingForm(
                         label="Location",
                         deserializer=KwargsDeserializer(Location),
                         default=Location("San Francisco", "USA"),

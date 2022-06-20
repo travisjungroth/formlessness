@@ -4,7 +4,7 @@ from typing import Optional
 
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
-from formlessness.new_forms import Fixed
+from formlessness.forms import Fixed
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 
