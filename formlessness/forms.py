@@ -125,7 +125,7 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         )
 
     def deserialize(self, data: JSONDict, path: Sequence[str] = ()) -> T:
-        # todo split this into prep_deserialize or something
+        # todo move out to deserializer
         new_data = {}
         errors = {}
         for key, child in self.converters().items():
