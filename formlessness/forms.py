@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Sequence, Iterable
-from typing import Any, Iterator
+from collections.abc import Iterable
+from collections.abc import Sequence
+from typing import Any
 from typing import Mapping
 from typing import Optional
 from typing import Union
