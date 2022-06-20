@@ -77,7 +77,8 @@ pprint(form.data_schema(), sort_dicts=False)
 ```
 
 ```
-{'type': 'object',
+{'$schema': 'http://json-schema.org/draft-07/schema#',
+ 'type': 'object',
  'properties': {'name': {'type': 'object',
                          'properties': {'first_name': {'type': 'string'},
                                         'last_name': {'type': 'string'}},
@@ -85,8 +86,7 @@ pprint(form.data_schema(), sort_dicts=False)
                          'unevaluatedProperties': False},
                 'age': {'allOf': [{'type': 'integer'}, {'minimum': 0}]}},
  'required': ['name'],
- 'unevaluatedProperties': False,
- '$schema': 'http://json-schema.org/draft-07/schema#'}
+ 'unevaluatedProperties': False}
 ```
 ## Development
 

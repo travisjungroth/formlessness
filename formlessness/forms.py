@@ -62,9 +62,9 @@ class Form(Converter[D, T], Displayer, ABC):
         pass
 
     def data_schema(self) -> JSONDict:
-        return self._data_schema() | {
+        return {
             "$schema": "http://json-schema.org/draft-07/schema#",
-        }
+        } | self._data_schema()
 
 
 class Fixed:
