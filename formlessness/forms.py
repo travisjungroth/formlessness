@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC
 from abc import abstractmethod
-from collections.abc import Sequence
-from typing import Any
+from collections.abc import Sequence, Iterable
+from typing import Any, Iterator
 from typing import Mapping
 from typing import Optional
 from typing import Union
@@ -151,19 +151,11 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         except DeserializationError as e:
             raise FormErrors({tuple(path): e})
 
-    def converter_to_sub_object(self, obj: T) -> Mapping[Converter, Any]:
-        """
-        Given an object, breaks it apart and maps it to the children converters.
-        Useful for validation and serialization.
-        """
+    def keys_and_sub_objects(self, obj: T) -> Iterable[str, Any]:
+        converters = self.converters()
         if isinstance(obj, Mapping):
-            converters = self.converters()
-            return {converters[k]: v for k, v in obj.items()}
-        return {
-            child: getattr(obj, attr)
-            for attr, child in self.converters().items()
-            if hasattr(obj, attr)
-        }
+            yield from ((k, obj[k]) for k in converters.keys() if k in obj)
+        yield from ((attr, getattr(obj, attr)) for attr in converters.keys())
 
     def _validate_sub_data(self, data: JSONDict) -> Mapping[str, ConstraintMap]:
         return {
@@ -182,9 +174,10 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         return d
 
     def serialize(self, obj: T) -> JSONDict:
+        converters = self.converters()
         data: JSONDict = {}
-        for child, sub_obj in self.converter_to_sub_object(obj).items():
-            data[child.key] = child.serialize(sub_obj)
+        for key, sub_obj in self.keys_and_sub_objects(obj):
+            data[key] = converters[key].serialize(sub_obj)
         return self.serializer.serialize(data)
 
     def display(self, object_path: str = "") -> Display:
