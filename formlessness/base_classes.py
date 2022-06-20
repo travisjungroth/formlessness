@@ -28,7 +28,7 @@ class Keyed(Protocol):
         return hash(self.key)
 
 
-class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
+class Converter(Serializer[D, T], Deserializer[D, T], ABC):
     """
     Things that validate, serialize and deserialize data, like Forms and Fields.
     """
@@ -63,6 +63,9 @@ class Converter(Keyed, Serializer[D, T], Deserializer[D, T], ABC):
         if self.default is not MISSING:
             schema["default"] = self.default_data
         return schema
+
+
+
 
 
 class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]], ABC):

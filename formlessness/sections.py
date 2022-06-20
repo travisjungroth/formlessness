@@ -4,11 +4,12 @@ from typing import Optional
 
 from formlessness.base_classes import Keyed
 from formlessness.base_classes import Parent
+from formlessness.new_forms import Fixed
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 
 
-class Section(Parent, ABC):
+class Section(Fixed, Parent, ABC):
     """
     Arbitrary section of a form. Not a Converter.
     """
