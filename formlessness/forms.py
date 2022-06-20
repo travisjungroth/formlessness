@@ -61,11 +61,6 @@ class Form(Converter[D, T], Displayer, ABC):
     def _validate_sub_objects(self, obj: T) -> ConstraintMap:
         pass
 
-    def data_schema(self) -> JSONDict:
-        return {
-            "$schema": "http://json-schema.org/draft-07/schema#",
-        } | self._data_schema()
-
 
 class Fixed:
     children: dict[str, Union[Converter, Fixed]]
@@ -195,13 +190,13 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
             contents.append(child.display(child_path))
         return self.display_info | {"objectPath": object_path, "contents": contents}
 
-    def _data_schema(self) -> JSONDict:
+    def inner_data_schema(self) -> JSONDict:
         return {
             "type": "object",
-            "properties": {k: v._data_schema() for k, v in self.converters().items()},
+            "properties": {k: v.inner_data_schema() for k, v in self.converters().items()},
             "required": self.required_keys(),
             "unevaluatedProperties": False,
-        } | super()._data_schema()
+        } | super().inner_data_schema()
 
     def required_keys(self) -> list[str]:
         return [k for k, converter in self.converters().items() if converter.required]

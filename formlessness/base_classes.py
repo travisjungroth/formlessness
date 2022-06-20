@@ -58,11 +58,16 @@ class Converter(Serializer[D, T], Deserializer[D, T], ABC):
     def validate_object(self, obj: T) -> ConstraintMap:
         return ConstraintMap(self.object_constraint.validate(obj))
 
-    def _data_schema(self) -> JSONDict:
+    def inner_data_schema(self) -> JSONDict:
         schema = constraint_to_json(self.data_constraint)
         if self.default is not MISSING:
             schema["default"] = self.default_data
         return schema
+
+    def data_schema(self) -> JSONDict:
+        return {
+            "$schema": "http://json-schema.org/draft-07/schema#",
+        } | self.inner_data_schema()
 
 
 class Parent(Displayer[JSONDict], Keyed, Mapping[str, Union["Parent", Converter]], ABC):
