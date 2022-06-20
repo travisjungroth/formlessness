@@ -152,11 +152,14 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         except DeserializationError as e:
             raise FormErrors({tuple(path): e})
 
-    def keys_and_sub_objects(self, obj: T) -> Iterable[str, Any]:
+    def pre_serialize(self, obj: T) -> dict[str, Any]:
+        # todo: move out to Serializers.
         converters = self.converters()
         if isinstance(obj, Mapping):
-            yield from ((k, obj[k]) for k in converters.keys() if k in obj)
-        yield from ((attr, getattr(obj, attr)) for attr in converters.keys())
+            g = ((k, obj[k]) for k in converters.keys() if k in obj)
+        else:
+            g = ((attr, getattr(obj, attr)) for attr in converters.keys())
+        return {key: converters[key].serialize(sub_object) for key, sub_object in g}
 
     def _validate_sub_data(self, data: JSONDict) -> Mapping[str, ConstraintMap]:
         return {
@@ -175,10 +178,7 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
         return d
 
     def serialize(self, obj: T) -> JSONDict:
-        converters = self.converters()
-        data: JSONDict = {}
-        for key, sub_obj in self.keys_and_sub_objects(obj):
-            data[key] = converters[key].serialize(sub_obj)
+        data = self.pre_serialize(obj)
         return self.serializer.serialize(data)
 
     def display(self, object_path: str = "") -> Display:
