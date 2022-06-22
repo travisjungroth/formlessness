@@ -70,6 +70,7 @@ class Fixed:
 
 class BasicForm(Fixed, Form[JSONDict, dict]):
     """FixedMappingForm"""
+
     # See schemas/basic_form.json for the JSON Schema of the Display.
 
     def __init__(
