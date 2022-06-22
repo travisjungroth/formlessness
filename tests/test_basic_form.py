@@ -51,7 +51,7 @@ def not_sunday(day: date):
 
 
 @pytest.fixture
-def form() -> BasicForm[Film]:
+def form() -> BasicForm:
     return BasicForm(
         label="Favorite Film",
         description="If you had to pick one.",
@@ -188,6 +188,10 @@ def test_issues(form):
     obj = form.deserialize(data)
     print(obj.release_date.weekday())
     assert not form.validate_object(obj)
+
+
+def test_serialize(form, form_data, film):
+    assert form.serialize(film) == form_data | {'distributor': 'Netflix', 'director': None}
 
 
 def test_display(form):
