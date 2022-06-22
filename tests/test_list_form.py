@@ -6,10 +6,10 @@ from formlessness.constraints import LE
 from formlessness.constraints import FunctionConstraint
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
-from formlessness.fields import IntField, StrField
+from formlessness.fields import IntField
+from formlessness.fields import StrField
 from formlessness.forms import BasicForm
 from formlessness.forms import VariableListForm
-from tests.test_basic_form import Film
 
 
 @pytest.fixture
