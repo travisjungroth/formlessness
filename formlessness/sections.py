@@ -2,14 +2,14 @@ from abc import ABC
 from collections.abc import Iterable
 from typing import Optional
 
-from formlessness.base_classes import Keyed
-from formlessness.base_classes import Parent
+from formlessness.base_classes import Keyed, Converter
+from formlessness.displayers import Display
 from formlessness.forms import Fixed
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 
 
-class Section(Fixed, Parent, ABC):
+class Section(Fixed, ABC):
     """
     Arbitrary section of a form. Not a Converter.
     """
@@ -37,3 +37,13 @@ class BasicSection(Section):
             }
         )
         self.children = {child.key: child for child in children}
+
+    def display(self, object_path: str = "") -> Display:
+        contents = []
+        for key, child in self.children.items():
+            if isinstance(child, Converter):
+                child_path = f"{object_path}/{key}"
+            else:
+                child_path = object_path
+            contents.append(child.display(child_path))
+        return self.display_info | {"contents": contents}
