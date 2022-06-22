@@ -2,9 +2,7 @@ from abc import ABC
 from collections.abc import Iterable
 from typing import Optional
 
-from formlessness.base_classes import Converter
 from formlessness.base_classes import Keyed
-from formlessness.displayers import Display
 from formlessness.forms import Fixed
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
@@ -38,4 +36,3 @@ class BasicSection(Section):
             }
         )
         self.children = {child.key: child for child in children}
-
