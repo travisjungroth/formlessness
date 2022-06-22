@@ -137,6 +137,7 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
 
             try:
                 # todo: could catch the errors and prepend to keys
+                # in the resultant map, to avoid passing path
                 new_data[key] = child.deserialize(data[key], [*path, key])
             except FormErrors as e:
                 errors |= e.issues_map
@@ -217,7 +218,54 @@ class VariableMappingForm:
     converter: Converter  # acts as the reference
 
 
-class VariableListForm:
+class VariableListForm(Form[D, T]):
     """"""
 
-    converter: Converter
+    content: Converter
+
+    def _validate_sub_data(self, data: list) -> dict[str, ConstraintMap]:
+        return {
+            str(i): self.content.validate_data(sub_data)
+            for i, sub_data in enumerate(data)
+        }
+
+    def _validate_sub_objects(self, obj: list) -> Mapping[str, ConstraintMap]:
+        return {
+            str(i): self.content.validate_object(sub_obj)
+            for i, sub_obj in enumerate(obj)
+        }
+
+    def deserialize(self, data: JSONDict, path: Sequence[str] = ()) -> T:
+        # todo: move to a deserializer
+        errors = {}
+        new_data = []
+        for i, sub_data in enumerate(data):
+            try:
+                new_data.append(self.content.deserialize(sub_data))
+            except FormErrors as e:
+                errors |= e.issues_map
+            except DeserializationError as e:
+                errors[tuple([*path, str(i)])] = e
+
+        if errors:
+            raise FormErrors(errors)
+
+        try:
+            return self.deserializer.deserialize(new_data)
+        except DeserializationError as e:
+            raise FormErrors({tuple(path): e})
+
+    def serialize(self, obj: list) -> list[JSONDict]:
+        return [self.content.serialize(x) for x in obj]
+
+    def display(self, object_path: str = "") -> Display:
+        return self.display_info | {
+            "objectPath": object_path,
+            "content": self.content.display(f"{object_path}/*"),
+        }
+
+    def inner_data_schema(self) -> JSONDict:
+        # Todo add array stuff
+        return {
+            "type": "array",
+        } | super().inner_data_schema()

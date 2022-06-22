@@ -1,4 +1,5 @@
 from abc import ABC
+from collections.abc import Sequence
 from typing import Any
 from typing import Iterator
 from typing import Mapping
@@ -51,6 +52,9 @@ class Converter(Serializer[D, T], Deserializer[D, T], ABC):
         if not constraint_map:
             raise FormErrors(constraint_map)
         return obj
+
+    def deserialize(self, data: D, path: Sequence[str] = ()) -> T:
+        return super().deserialize(data)
 
     def validate_data(self, data: D) -> ConstraintMap:
         return ConstraintMap(self.data_constraint.validate(data))
