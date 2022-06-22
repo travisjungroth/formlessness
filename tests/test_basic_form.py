@@ -191,7 +191,10 @@ def test_issues(form):
 
 
 def test_serialize(form, form_data, film):
-    assert form.serialize(film) == form_data | {'distributor': 'Netflix', 'director': None}
+    assert form.serialize(film) == form_data | {
+        "distributor": "Netflix",
+        "director": None,
+    }
 
 
 def test_display(form):

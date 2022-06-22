@@ -2,11 +2,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from formlessness.constraints import LE, FunctionConstraint
+from formlessness.constraints import LE
+from formlessness.constraints import FunctionConstraint
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
 from formlessness.fields import IntField
-from formlessness.forms import VariableListForm, BasicForm
+from formlessness.forms import BasicForm
+from formlessness.forms import VariableListForm
 from tests.test_basic_form import Film
 
 
@@ -47,7 +49,7 @@ class Place:
 def list_of_places_form():
     return VariableListForm(
         content=BasicForm(
-            key='*',
+            key="*",
             deserializer=KwargsDeserializer(Film),
         )
     )
