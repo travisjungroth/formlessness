@@ -221,7 +221,48 @@ class VariableMappingForm:
 class VariableListForm(Form[D, T]):
     """"""
 
-    content: Converter
+    def __init__(
+        self,
+        content: Converter,
+        label: Optional[str] = None,
+        description: Optional[str] = None,
+        collapsable: bool = False,
+        collapsed: bool = False,
+        default: Union[T, object] = MISSING,
+        required: bool = True,
+        nullable: bool = False,
+        extra_data_constraints: Sequence[Constraint] = (),
+        extra_object_constraints: Sequence[Constraint] = (),
+        serializer: Serializer[D, T] = Serializer(),
+        deserializer: Deserializer[D, T] = Deserializer(),
+        key: str = "",
+    ):
+        key, label = key_and_label(key, label)
+        self.key = key
+        self.serializer = serializer
+        self.deserializer = deserializer
+        self.content = content
+        self.default = default
+        self.default_data = MISSING if default is MISSING else self.serialize(default)
+        self.data_constraint &= And(*extra_data_constraints)
+        self.object_constraint &= And(*extra_object_constraints)
+        self.required = required
+        self.nullable = nullable
+        if self.nullable:
+            self.data_constraint |= is_null
+            self.object_constraint |= is_null
+        else:
+            self.data_constraint &= not_null
+            self.object_constraint &= not_null
+        self.display_info = remove_null_values(
+            {
+                "type": "variable_list_form",
+                "label": label,
+                "description": description,
+                "collapsable": collapsable,
+                "collapsed": collapsed,
+            }
+        )
 
     def _validate_sub_data(self, data: list) -> dict[str, ConstraintMap]:
         return {
