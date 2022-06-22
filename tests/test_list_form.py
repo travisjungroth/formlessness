@@ -6,7 +6,7 @@ from formlessness.constraints import LE
 from formlessness.constraints import FunctionConstraint
 from formlessness.deserializers import KwargsDeserializer
 from formlessness.exceptions import FormErrors
-from formlessness.fields import IntField
+from formlessness.fields import IntField, StrField
 from formlessness.forms import BasicForm
 from formlessness.forms import VariableListForm
 from tests.test_basic_form import Film
@@ -39,6 +39,11 @@ def test_list_of_ints_make_object_outer_constraint(list_of_ints_form):
         list_of_ints_form.make_object(data)
 
 
+def test_list_of_ints_serialize(list_of_ints_form):
+    obj = [1, 2, 3, 4, 5]
+    assert list_of_ints_form.serialize(obj) == obj
+
+
 @dataclass
 class Place:
     city: str
@@ -48,8 +53,37 @@ class Place:
 @pytest.fixture
 def list_of_places_form():
     return VariableListForm(
+        label="Places",
         content=BasicForm(
             key="*",
-            deserializer=KwargsDeserializer(Film),
-        )
+            deserializer=KwargsDeserializer(Place),
+            children=[
+                StrField(
+                    label="City",
+                    extra_data_constraints=[FunctionConstraint(str.istitle)],
+                ),
+                StrField(label="Country"),
+            ],
+        ),
     )
+
+
+def test_list_of_places_form_make_object(list_of_places_form):
+    data = [
+        {"city": "Los Gatos", "country": "USA"},
+        {"city": "Los Angeles", "country": "USA"},
+    ]
+    obj = [Place(**kwargs) for kwargs in data]
+    assert list_of_places_form.make_object(data) == obj
+
+    with pytest.raises(FormErrors):
+        list_of_places_form.make_object(data + [{"city": "sonoma", "country": "USA"}])
+
+
+def test_list_of_places_form_serialize(list_of_places_form):
+    data = [
+        {"city": "Los Gatos", "country": "USA"},
+        {"city": "Los Angeles", "country": "USA"},
+    ]
+    obj = [Place(**kwargs) for kwargs in data]
+    assert list_of_places_form.serialize(obj) == data
