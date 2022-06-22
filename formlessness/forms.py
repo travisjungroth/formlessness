@@ -67,6 +67,16 @@ class Fixed:
                 converters |= child.converters()
         return converters
 
+    def display(self, object_path: str = "") -> Display:
+        contents = []
+        for key, child in self.children.items():
+            if isinstance(child, Converter):
+                child_path = f"{object_path}/{key}"
+            else:
+                child_path = object_path
+            contents.append(child.display(child_path))
+        return self.display_info | {"contents": contents}
+
 
 class BasicForm(Fixed, Form[JSONDict, dict]):
     """FixedMappingForm"""
@@ -176,14 +186,7 @@ class BasicForm(Fixed, Form[JSONDict, dict]):
         return self.serializer.serialize(data)
 
     def display(self, object_path: str = "") -> Display:
-        contents = []
-        for key, child in self.children.items():
-            if isinstance(child, Converter):
-                child_path = f"{object_path}/{key}"
-            else:
-                child_path = object_path
-            contents.append(child.display(child_path))
-        return self.display_info | {"objectPath": object_path, "contents": contents}
+        return super().display(object_path) | {"objectPath": object_path}
 
     def inner_data_schema(self) -> JSONDict:
         return {

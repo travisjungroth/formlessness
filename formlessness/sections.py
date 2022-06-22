@@ -39,12 +39,3 @@ class BasicSection(Section):
         )
         self.children = {child.key: child for child in children}
 
-    def display(self, object_path: str = "") -> Display:
-        contents = []
-        for key, child in self.children.items():
-            if isinstance(child, Converter):
-                child_path = f"{object_path}/{key}"
-            else:
-                child_path = object_path
-            contents.append(child.display(child_path))
-        return self.display_info | {"contents": contents}

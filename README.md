@@ -52,12 +52,10 @@ This is the form definition for the front end.
  'label': 'Person',
  'collapsable': False,
  'collapsed': False,
- 'objectPath': '',
  'contents': [{'type': 'form',
                'label': 'Name',
                'collapsable': False,
                'collapsed': False,
-               'objectPath': '/name',
                'contents': [{'type': 'field',
                              'label': 'First Name',
                              'widget': {'type': 'text'},
@@ -65,11 +63,13 @@ This is the form definition for the front end.
                             {'type': 'field',
                              'label': 'Last Name',
                              'widget': {'type': 'text'},
-                             'objectPath': '/name/last_name'}]},
+                             'objectPath': '/name/last_name'}],
+               'objectPath': '/name'},
               {'type': 'field',
                'label': 'Age',
                'widget': {'type': 'text'},
-               'objectPath': '/age'}]}
+               'objectPath': '/age'}],
+ 'objectPath': ''}
 ```
 A JSON Schema is automatically generated.
 ```python
