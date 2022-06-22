@@ -29,14 +29,6 @@ from formlessness.utils import MISSING
 from formlessness.utils import key_and_label
 from formlessness.utils import remove_null_values
 
-"""
-What are the differences between forms and fields?
-Fields have widgets
-Could field extend forms?
-Could forms have widgets?
-Forms could have widgets, or something widget-like! Like collapsable.
-"""
-
 
 class Form(Converter[D, T], Displayer, ABC):
     display_info: Display = {}
@@ -76,7 +68,8 @@ class Fixed:
         return converters
 
 
-class FixedMappingForm(Fixed, Form[JSONDict, dict]):
+class BasicForm(Fixed, Form[JSONDict, dict]):
+    """FixedMappingForm"""
     # See schemas/basic_form.json for the JSON Schema of the Display.
 
     def __init__(
@@ -203,19 +196,6 @@ class FixedMappingForm(Fixed, Form[JSONDict, dict]):
 
     def required_keys(self) -> list[str]:
         return [k for k, converter in self.converters().items() if converter.required]
-
-
-class FixedListForm:
-    """Could this mostly be a fixed mapping with int keys?"""
-
-    contents: list  # converter or list_section
-    order: list[int]
-
-
-class VariableMappingForm:
-    """"""
-
-    converter: Converter  # acts as the reference
 
 
 class VariableListForm(Form[D, T]):

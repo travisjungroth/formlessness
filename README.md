@@ -27,14 +27,14 @@ Formlessness is a Python library for handling the backend work of web forms. It 
 ```python
 from pprint import pprint
 
-from formlessness.forms import FixedMappingForm
+from formlessness.forms import BasicForm
 from formlessness.fields import IntField, StrField
 from formlessness.constraints import GE
 
-form = FixedMappingForm(
+form = BasicForm(
     label='Person',
     children=[
-        FixedMappingForm(
+        BasicForm(
             label='Name',
             children=[
                 StrField(label='First Name'),
