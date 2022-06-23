@@ -62,8 +62,6 @@ class Constraint(Generic[T], ABC):
     must be reimplemented.
     """
 
-    simplified: bool = True
-
     def satisfied_by(self, value: T) -> bool:
         """
         Returns True iff the value satisfies this Constraint.
@@ -112,7 +110,7 @@ class Constraint(Generic[T], ABC):
         >>> not_list.satisfied_by(1)
         True
         """
-        return Not(self) if self.simplified else ~self.simplify()
+        return Not(self)
 
     def simplify(self) -> Constraint:
         """
