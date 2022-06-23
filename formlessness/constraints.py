@@ -62,19 +62,13 @@ class Constraint(Generic[T], ABC):
     must be reimplemented.
     """
 
-    # The Constraints that must always be checked before this Constraint is checked.
-    # Use this to avoid duplicating checks, like type checks.
-    requires: Iterable[Constraint] = ()
     simplified: bool = True
-
-    def requirements_satisfied_by(self, value: T) -> bool:
-        return all(x.satisfied_by(value) for x in self.requires)
 
     def satisfied_by(self, value: T) -> bool:
         """
         Returns True iff the value satisfies this Constraint.
         """
-        return self.requirements_satisfied_by(value) and bool(self.validate(value))
+        return bool(self.validate(value))
 
     def validate(self, value: T) -> Constraint:
         """
@@ -89,12 +83,12 @@ class Constraint(Generic[T], ABC):
     def __bool__(self) -> bool:
         """
         Returns True iff this Constraint is always satisfied.
-        >>> bool(Valid) and bool(Or()) and bool(And())
+        >>> bool(Valid) and bool(And())
         True
         >>> bool(GT(0))
         False
         """
-        return False
+        return self.simplify() is Valid
 
     def __and__(self, other: Constraint) -> Constraint:
         """
@@ -118,7 +112,7 @@ class Constraint(Generic[T], ABC):
         >>> not_list.satisfied_by(1)
         True
         """
-        return Not(self)
+        return Not(self) if self.simplified else ~self.simplify()
 
     def simplify(self) -> Constraint:
         """
@@ -227,7 +221,7 @@ class FunctionConstraint(Constraint[T]):
         return self.function(*args, **kwargs)
 
     def satisfied_by(self, value: T) -> bool:
-        return self.requirements_satisfied_by(value) and self.function(value)
+        return And(*self.requires).satisfied_by(value) and self.function(value)
 
     def __str__(self):
         return self.message
@@ -403,7 +397,7 @@ class Or(Constraint[T]):
         return self.message or f"({sep.join(map(str, self.constraints))})"
 
     def __bool__(self):
-        return not self.constraints or any(self.constraints)
+        return any(self.constraints)
 
     def __invert__(self) -> Constraint:
         return And(*[~c for c in self.constraints]).simplify()
@@ -414,6 +408,8 @@ class Or(Constraint[T]):
         Valid
         >>> Or(GT(1), Invalid).simplify()
         GT(1)
+        >>> Or().simplify()
+        Invalid
         """
         if self.simplified:
             return self
@@ -429,7 +425,7 @@ class Or(Constraint[T]):
             else:
                 constraints.append(v)
         if not constraints:
-            return Valid
+            return Invalid
         if len(constraints) == 1:
             return constraints[0]
         return Or(*constraints, simplified=True)
@@ -464,6 +460,14 @@ class And(Constraint[T]):
         return Or(*[~c for c in self.constraints]).simplify()
 
     def simplify(self) -> Constraint:
+        """
+        >>> And(Invalid, Valid, Valid).simplify()
+        Invalid
+        >>> And(GT(1), Valid).simplify()
+        GT(1)
+        >>> And().simplify()
+        Valid
+        """
         if self.simplified:
             return self
         constraints = []
@@ -502,15 +506,6 @@ class Not(Constraint[T]):
     def __str__(self):
         return self.message or f"Not ({self.constraint})"
 
-    def __bool__(self) -> bool:
-        """
-        >>> bool(Not(Valid))
-        False
-        >>> bool(Not(Invalid))
-        True
-        """
-        return not self.constraint
-
     def __invert__(self) -> Constraint:
         return self.constraint
 
@@ -538,6 +533,7 @@ class If(Constraint[T]):
     p: Constraint
     q: Constraint
     message: str = ""
+    simplified: ClassVar[bool] = False
 
     def satisfied_by(self, value: T) -> bool:
         """
@@ -549,51 +545,41 @@ class If(Constraint[T]):
         >>> ints_are_positive.satisfied_by('A')
         True
         >>> ints_are_positive.satisfied_by(-.5)
+        True
         """
         if self.p.satisfied_by(value):
             return self.q.satisfied_by(value)
         return True
 
-    def validate(self, value: T) -> Constraint:
-        return Or(~self.p, self.q).validate(value)
-
     def __str__(self) -> str:
         return self.message or f"If ({self.p}) Then ({self.q})"
-
-    def __bool__(self) -> bool:
-        """
-        >>> bool(If(Invalid, GT(0)))
-        True
-        >>> bool(If(GT(0), Valid))
-        True
-        >>> bool(If(is_int, GT(0)))
-        False
-        """
-        return bool(self.q) if self.p else True
-
-    def __invert__(self) -> Constraint:
-        return And(self.p, ~self.q).simplify()
 
     def simplify(self) -> Constraint:
         return Or(~self.p, self.q).simplify()
 
 
 @dataclass
-class EachItem(Constraint[Iterable[T]]):
+class EachItem(Constraint[Iterable]):
     """
     Check a Constraint against all items of an Iterable.
     """
 
-    item_constraint: Constraint[T]
+    item_constraint: Constraint
     message: str = "Each item {}"
 
-    def __post_init__(self):
-        self.requires = [is_iterable]
-
-    def satisfied_by(self, value: Iterable[T]) -> bool:
-        return self.requirements_satisfied_by(value) and all(
-            self.item_constraint.validate(item) for item in value
-        )
+    def satisfied_by(self, value: Iterable) -> bool:
+        """
+        >>> EachItem(is_str).satisfied_by(['A'])
+        True
+        >>> EachItem(is_str).satisfied_by([1])
+        False
+        >>> EachItem(is_int).satisfied_by(1)
+        False
+        """
+        try:
+            return all(self.item_constraint.satisfied_by(item) for item in value)
+        except TypeError:
+            return False
 
     def __str__(self):
         """
@@ -601,6 +587,9 @@ class EachItem(Constraint[Iterable[T]]):
         Each item must be greater than 0.
         """
         return self.message.format(str(self.item_constraint).lower())
+
+    def simplify(self) -> Constraint:
+        return Valid if self.item_constraint else self
 
 
 def list_of(constraint: Constraint, message: str) -> Constraint:
@@ -704,7 +693,6 @@ def not_null(value: Any) -> bool:
 @dataclass
 class HasKeys(Constraint):
     keys: list[str]
-    requires: ClassVar = [is_dict]
 
     def validate(self, value: T) -> Constraint:
         missing_keys = [k for k in self.keys if k not in value]
