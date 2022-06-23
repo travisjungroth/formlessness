@@ -39,17 +39,24 @@ class Constraint(Generic[T], ABC):
 
     Constraints can be made from other Constraints.
     These are called complex, as opposed to simple.
-    >>> Or(is_int, is_str).satisfied_by(0.5)
-    False
+    >>> Or(is_int, is_str).satisfied_by('A')
+    True
 
-    Validating a Constraint tells you what's unsatisfying about the value.
-    >>> is_list_of_strings = is_list & EachItem(is_str)
-    >>> str(is_list_of_strings.validate(['A', 1, 'B']))
+    Validating a Constraint returns the unsatisfied Constraints.
+    >>> is_positive_int = is_int & GT(0)
+    >>> is_positive_int.validate(-1)
+    GT(0)
+
+    Casting a constraint as a string should give a human-readable message.
+    >>> str(EachItem(is_str))
     'Each item must be a string.'
 
     Constraints that are satisfied by all values are truthy. Others are falsy.
-    >>> bool(Or() and And() and Valid)
-    True
+    Combine this with .validate() to see what, if anything, is unsatisfied.
+    >>> valid = (GT(0) & LT(10)).validate(20)
+    >>> if not valid:
+    ...    str(valid)
+    'Must be less than 10.'
 
     When implementing a Constraint class, one or both of satisfied_by() and validate()
     must be reimplemented.
@@ -58,6 +65,7 @@ class Constraint(Generic[T], ABC):
     # The Constraints that must always be checked before this Constraint is checked.
     # Use this to avoid duplicating checks, like type checks.
     requires: Iterable[Constraint] = ()
+    simplified: bool = True
 
     def requirements_satisfied_by(self, value: T) -> bool:
         return all(x.satisfied_by(value) for x in self.requires)
@@ -81,16 +89,35 @@ class Constraint(Generic[T], ABC):
     def __bool__(self) -> bool:
         """
         Returns True iff this Constraint is always satisfied.
+        >>> bool(Valid) and bool(Or()) and bool(And())
+        True
+        >>> bool(GT(0))
+        False
         """
         return False
 
     def __and__(self, other: Constraint) -> Constraint:
+        """
+        >>> float_over_10 = is_float & GT(10)
+        >>> float_over_10.satisfied_by(11)
+        False
+        """
         return And(self, other).simplify()
 
     def __or__(self, other: Constraint) -> Constraint:
+        """
+        >>> big_or_small = LT(10) | GT(1000)
+        >>> big_or_small.satisfied_by(5)
+        True
+        """
         return Or(self, other).simplify()
 
     def __invert__(self) -> Constraint:
+        """
+        >>> not_list = ~is_list
+        >>> not_list.satisfied_by(1)
+        True
+        """
         return Not(self)
 
     def simplify(self) -> Constraint:
@@ -101,7 +128,9 @@ class Constraint(Generic[T], ABC):
 
     @abstractmethod
     def __str__(self):
-        pass
+        """
+        Should provide a human readable message.
+        """
 
 
 """
@@ -113,6 +142,8 @@ class ValidClass(Constraint[Any]):
     """
     This is the canonical Constraint that is always satisfied.
     Equivalent to true, top, ⊤, 1, etc.
+
+    Use its singleton Valid, just like how None is a singleton.
     """
 
     __singleton: ValidClass
@@ -148,6 +179,8 @@ class InvalidClass(Constraint[Any]):
     """
     This is the canonical Constraint that is never satisfied.
     Equivalent to false, bottom, ⊥, 0, etc.
+
+    Use its singleton Invalid, just like how None is a singleton.
     """
 
     __singleton: InvalidClass
@@ -179,7 +212,7 @@ Invalid: Final[InvalidClass] = InvalidClass()
 @dataclass
 class FunctionConstraint(Constraint[T]):
     """
-    Pass in a predicate function that takes a value and returns True if satisfied.
+    Pass in a predicate function that takes a value and returns True iff satisfied.
     """
 
     function: Callable[[T], bool]
@@ -206,9 +239,11 @@ def constraint(
     """
     Decorator to make a Constraint from a function.
 
-    @constraint("Must be uppercase.", requires=[is_str])
-    def is_uppercase(value: str) -> bool:
-        return value.isupper()
+    >>> @constraint("Must be uppercase.", requires=[is_str])
+    ... def is_uppercase(value: str) -> bool:
+    ...    return value.isupper()
+    >>> is_uppercase.satisfied_by('ABC')
+    True
     """
 
     def f(function: Callable[[T], bool]) -> FunctionConstraint[T]:
@@ -221,28 +256,45 @@ def constraint(
 class OfType(Constraint[T]):
     """
     Do an isinstance check against a type.
+
+    >>> OfType(frozenset).satisfied_by(frozenset())
+    True
     """
 
     type_: type
-    message: str
+    message: str = "Must be of type {}."
     json_type: Optional[str] = None
     _instances: ClassVar[dict[type, OfType]] = {}
 
-    def __post_init__(self):
-        self._instances[self.type_] = self
-
     @classmethod
-    def get(cls, type_: type) -> OfType:
+    def get(
+        cls,
+        type_: type,
+        message: str = "Must be of type {}.",
+        json_type: Optional[str] = None,
+    ) -> OfType:
+        """
+        Dynamically get-or-create the Constraint for a type.
+        Many are already declared in this file.
+        >>> int_check = OfType.get(int)
+        >>> int_check == is_int
+        True
+        >>> print(int_check)
+        Must be an integer.
+        """
         try:
             return cls._instances[type_]
         except KeyError:
-            return cls(type_, f"Must be of type {type_}.")
+            return cls(type_, message, json_type)
+
+    def __post_init__(self):
+        self._instances[self.type_] = self
 
     def satisfied_by(self, value: T) -> bool:
         return isinstance(value, self.type_)
 
     def __str__(self):
-        return self.message
+        return self.message.format(self.type_)
 
 
 @dataclass
@@ -475,10 +527,10 @@ class Not(Constraint[T]):
         """
         if self.simplified:
             return self
-        inverted = ~self.constraint
-        if isinstance(inverted, Not):
+        inverted_constraint = ~self.constraint
+        if isinstance(inverted_constraint, Not):
             return replace(self, constraint=self.constraint.simplify(), simplified=True)
-        return ~self.constraint.simplify()
+        return inverted_constraint.simplify()
 
 
 @dataclass
@@ -489,13 +541,14 @@ class If(Constraint[T]):
 
     def satisfied_by(self, value: T) -> bool:
         """
-        >>> con = If(is_int, GT(1))
-        >>> con.satisfied_by(0)
+        >>> ints_are_positive = If(is_int, GT(0))
+        >>> ints_are_positive.satisfied_by(-1)
         False
-        >>> con.satisfied_by(2)
+        >>> ints_are_positive.satisfied_by(1)
         True
-        >>> con.satisfied_by('A')
+        >>> ints_are_positive.satisfied_by('A')
         True
+        >>> ints_are_positive.satisfied_by(-.5)
         """
         if self.p.satisfied_by(value):
             return self.q.satisfied_by(value)
@@ -508,6 +561,14 @@ class If(Constraint[T]):
         return self.message or f"If ({self.p}) Then ({self.q})"
 
     def __bool__(self) -> bool:
+        """
+        >>> bool(If(Invalid, GT(0)))
+        True
+        >>> bool(If(GT(0), Valid))
+        True
+        >>> bool(If(is_int, GT(0)))
+        False
+        """
         return bool(self.q) if self.p else True
 
     def __invert__(self) -> Constraint:
@@ -524,11 +585,9 @@ class EachItem(Constraint[Iterable[T]]):
     """
 
     item_constraint: Constraint[T]
-    message: str = ""
+    message: str = "Each item {}"
 
     def __post_init__(self):
-        if not self.message:
-            self.message = f"Each item {str(self.item_constraint).lower()}"
         self.requires = [is_iterable]
 
     def satisfied_by(self, value: Iterable[T]) -> bool:
@@ -537,7 +596,11 @@ class EachItem(Constraint[Iterable[T]]):
         )
 
     def __str__(self):
-        return self.message
+        """
+        >>> print(EachItem(GT(0)))
+        Each item must be greater than 0.
+        """
+        return self.message.format(str(self.item_constraint).lower())
 
 
 def list_of(constraint: Constraint, message: str) -> Constraint:
@@ -650,7 +713,7 @@ class HasKeys(Constraint):
         return HasKeys(missing_keys)
 
     def __str__(self):
-        return f"Must set {', '.join(self.keys)}"
+        return f"Must set {', '.join(self.keys)}."
 
 
 def constraint_to_json(constraint: Constraint) -> JSONDict:
@@ -658,7 +721,7 @@ def constraint_to_json(constraint: Constraint) -> JSONDict:
 
 
 @singledispatch
-def to_json(constraint: Any):
+def to_json(constraint: Any) -> tuple[JSONDict, bool]:
     raise NotImplementedError()
 
 
