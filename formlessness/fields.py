@@ -124,7 +124,7 @@ class BasicField(Field[D, T]):
         return self.display_info.get("label") or self.key
 
     def serialize(self, obj: T) -> D:
-        return self.serializer.serialize(obj)
+        return self.serializer.serialize(obj) if obj is not None else None
 
     def deserialize(self, data: D, path: Sequence[str] = ()) -> T:
         return self.deserializer.deserialize(data)

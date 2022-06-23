@@ -3,10 +3,8 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from datetime import date
-from functools import partial
 from typing import Optional
 
-import jsonschema
 import pytest
 
 from formlessness.constraints import constraint
@@ -18,6 +16,7 @@ from formlessness.fields import StrField
 from formlessness.forms import BasicForm
 from formlessness.sections import BasicSection
 from formlessness.types import JSONDict
+from tests.utils import validate_json
 
 
 @dataclass
@@ -52,7 +51,7 @@ def not_sunday(day: date):
 
 
 @pytest.fixture
-def form() -> BasicForm[Film]:
+def form() -> BasicForm:
     return BasicForm(
         label="Favorite Film",
         description="If you had to pick one.",
@@ -191,6 +190,13 @@ def test_issues(form):
     assert not form.validate_object(obj)
 
 
+def test_serialize(form, form_data, film):
+    assert form.serialize(film) == form_data | {
+        "distributor": "Netflix",
+        "director": None,
+    }
+
+
 def test_display(form):
     expected = {
         "type": "form",
@@ -264,11 +270,6 @@ def test_display(form):
     }
     display = form.display()
     assert display == expected
-
-
-validate_json = partial(
-    jsonschema.validate, format_checker=jsonschema.draft7_format_checker
-)
 
 
 def test_display_json(form):
