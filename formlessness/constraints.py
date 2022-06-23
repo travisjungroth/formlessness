@@ -62,8 +62,6 @@ class Constraint(Generic[T], ABC):
     must be reimplemented.
     """
 
-    simplified: bool = True
-
     def satisfied_by(self, value: T) -> bool:
         """
         Returns True iff the value satisfies this Constraint.
@@ -96,7 +94,7 @@ class Constraint(Generic[T], ABC):
         >>> float_over_10.satisfied_by(11)
         False
         """
-        return And(self, other).simplify()
+        return And(self, other)
 
     def __or__(self, other: Constraint) -> Constraint:
         """
@@ -104,7 +102,7 @@ class Constraint(Generic[T], ABC):
         >>> big_or_small.satisfied_by(5)
         True
         """
-        return Or(self, other).simplify()
+        return Or(self, other)
 
     def __invert__(self) -> Constraint:
         """
@@ -112,7 +110,7 @@ class Constraint(Generic[T], ABC):
         >>> not_list.satisfied_by(1)
         True
         """
-        return Not(self) if self.simplified else ~self.simplify()
+        return Not(self)
 
     def simplify(self) -> Constraint:
         """
@@ -400,7 +398,7 @@ class Or(Constraint[T]):
         return any(self.constraints)
 
     def __invert__(self) -> Constraint:
-        return And(*[~c for c in self.constraints]).simplify()
+        return And(*[~c for c in self.constraints])
 
     def simplify(self) -> Constraint:
         """
@@ -457,7 +455,7 @@ class And(Constraint[T]):
         return all(self.constraints)
 
     def __invert__(self) -> Constraint:
-        return Or(*[~c for c in self.constraints]).simplify()
+        return Or(*[~c for c in self.constraints])
 
     def simplify(self) -> Constraint:
         """
@@ -533,7 +531,6 @@ class If(Constraint[T]):
     p: Constraint
     q: Constraint
     message: str = ""
-    simplified: ClassVar[bool] = False
 
     def satisfied_by(self, value: T) -> bool:
         """

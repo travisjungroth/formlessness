@@ -88,6 +88,8 @@ class BasicField(Field[D, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.key = key
+        self.required = required
+        self.nullable = nullable
         self.default = default
         self.default_data = MISSING if default is MISSING else self.serialize(default)
         self.data_constraint = And(
@@ -101,14 +103,14 @@ class BasicField(Field[D, T]):
         if self.choices:
             self.data_constraint &= Choices(data_choices)
             self.object_constraint &= Choices(self.choices)
-        self.required = required
-        self.nullable = nullable
         if self.nullable:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
         else:
             self.data_constraint &= not_null
             self.object_constraint &= not_null
+        self.data_constraint = self.data_constraint.simplify()
+        self.object_constraint = self.object_constraint.simplify()
         self.display_info: JSONDict = remove_null_values(
             {
                 "type": "field",
