@@ -37,26 +37,27 @@ class Constraint(Generic[T], ABC):
     >>> is_int.satisfied_by(0)
     True
 
-    Constraints can be made from other Constraints. These are complex, as opposed to simple.
+    Constraints can be made from other Constraints.
+    These are called complex, as opposed to simple.
     >>> Or(is_int, is_str).satisfied_by(0.5)
     False
 
     Validating a Constraint tells you what's unsatisfying about the value.
     >>> is_list_of_strings = is_list & EachItem(is_str)
-    >>> str(is_list_of_strings.validate({'1', '2'}))
-    'Must be a list.'
+    >>> str(is_list_of_strings.validate(['A', 1, 'B']))
+    'Each item must be a string.'
 
     Constraints that are satisfied by all values are truthy. Others are falsy.
     >>> bool(Or() and And() and Valid)
     True
 
-    When implementing a Constraint class, one or both of satisfied_by() and validate() must be implemented.
+    When implementing a Constraint class, one or both of satisfied_by() and validate()
+    must be reimplemented.
     """
 
     # The Constraints that must always be checked before this Constraint is checked.
     # Use this to avoid duplicating checks, like type checks.
     requires: Iterable[Constraint] = ()
-    simplified: True
 
     def requirements_satisfied_by(self, value: T) -> bool:
         return all(x.satisfied_by(value) for x in self.requires)
@@ -260,7 +261,6 @@ class Choices(Constraint[T]):
 class Comparison(Constraint[T]):
     operand: T
     operator: ClassVar[Callable[[T, T], bool]]
-    comparison_string: ClassVar[str]
 
     def satisfied_by(self, value: T) -> bool:
         try:
@@ -269,7 +269,8 @@ class Comparison(Constraint[T]):
             return False
 
     def __str__(self):
-        return f"Must be {self.comparison_string} {self.operand}."
+        words = self.__class__.__doc__.splitlines()[1].lower().strip()
+        return f"Must be {words} {self.operand}."
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}({self.operand})"
@@ -282,14 +283,17 @@ class GT(Comparison[T]):
 
     >>> GT(5).satisfied_by(6)
     True
-    >>> GT('B').satisfied_by('A')
+    >>> GT(6).satisfied_by(5)
     False
+    >>> GT('A').satisfied_by('B')
+    True
     >>> GT(0).satisfied_by('1')
     False
+    >>> str(GT(0))
+    'Must be greater than 0.'
     """
 
-    operator: Callable[[T, T], bool] = gt
-    comparison_string: str = "greater than"
+    operator: ClassVar[Callable[[T, T], bool]] = gt
 
 
 @dataclass(repr=False)
@@ -298,8 +302,7 @@ class GE(Comparison[T]):
     Greater Than Or Equal To
     """
 
-    operator: Callable[[T, T], bool] = ge
-    comparison_string: str = "greater than or equal to"
+    operator: ClassVar[Callable[[T, T], bool]] = ge
 
 
 @dataclass(repr=False)
@@ -308,8 +311,7 @@ class LT(Comparison[T]):
     Less Than
     """
 
-    operator: Callable[[T, T], bool] = lt
-    comparison_string: str = "less than"
+    operator: ClassVar[Callable[[T, T], bool]] = lt
 
 
 @dataclass(repr=False)
@@ -318,8 +320,7 @@ class LE(Comparison[T]):
     Less Than Or Equal To
     """
 
-    operator: Callable[[T, T], bool] = le
-    comparison_string: str = "less than or equal to"
+    operator: ClassVar[Callable[[T, T], bool]] = le
 
 
 """
@@ -527,7 +528,7 @@ class EachItem(Constraint[Iterable[T]]):
 
     def __post_init__(self):
         if not self.message:
-            self.message = f"Each item {str(self.item_constraint).lower()}."
+            self.message = f"Each item {str(self.item_constraint).lower()}"
         self.requires = [is_iterable]
 
     def satisfied_by(self, value: Iterable[T]) -> bool:
