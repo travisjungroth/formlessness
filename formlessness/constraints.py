@@ -110,7 +110,7 @@ class Constraint(Generic[T], ABC):
         >>> not_list.satisfied_by(1)
         True
         """
-        return Not(self).simplify()
+        return Not(self)
 
     def simplify(self) -> Constraint:
         """
