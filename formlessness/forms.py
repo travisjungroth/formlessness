@@ -62,6 +62,8 @@ class BasicForm(Form[JSONDict, T]):
         self.serializer = serializer or self.default_serializer
         self.deserializer = deserializer or self.default_deserializer
         self.children = {child.key: child for child in children}
+        self.required = required
+        self.nullable = nullable
         self.default = default
         self.default_data = MISSING if default is MISSING else self.serialize(default)
         self.data_constraint &= And(
@@ -72,14 +74,14 @@ class BasicForm(Form[JSONDict, T]):
         self.object_constraint &= And(
             *self.default_object_constraints, *extra_object_constraints
         )
-        self.required = required
-        self.nullable = nullable
         if self.nullable:
             self.data_constraint |= is_null
             self.object_constraint |= is_null
         else:
             self.data_constraint &= not_null
             self.object_constraint &= not_null
+        self.data_constraint = self.data_constraint.simplify()
+        self.object_constraint = self.object_constraint.simplify()
         self.display_info = remove_null_values(
             {
                 "type": "form",
