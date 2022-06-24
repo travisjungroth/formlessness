@@ -330,11 +330,16 @@ class GT(Comparison[T]):
     True
     >>> GT(0).satisfied_by('1')
     False
-    >>> str(GT(0))
-    'Must be greater than 0.'
+    >>> print(GT(0))
+    Must be greater than 0.
+    >>> print(~GT(0))
+    Must be less than or equal to 0.
     """
 
     operator: ClassVar[Callable[[T, T], bool]] = gt
+
+    def __invert__(self) -> LE:
+        return LE(self.operand)
 
 
 @dataclass(repr=False)
@@ -345,6 +350,9 @@ class GE(Comparison[T]):
 
     operator: ClassVar[Callable[[T, T], bool]] = ge
 
+    def __invert__(self) -> LT:
+        return LT(self.operand)
+
 
 @dataclass(repr=False)
 class LT(Comparison[T]):
@@ -354,6 +362,9 @@ class LT(Comparison[T]):
 
     operator: ClassVar[Callable[[T, T], bool]] = lt
 
+    def __invert__(self) -> GE:
+        return GE(self.operand)
+
 
 @dataclass(repr=False)
 class LE(Comparison[T]):
@@ -362,6 +373,9 @@ class LE(Comparison[T]):
     """
 
     operator: ClassVar[Callable[[T, T], bool]] = le
+
+    def __invert__(self) -> GT:
+        return GT(self.operand)
 
 
 """
