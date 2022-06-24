@@ -20,7 +20,6 @@ from typing import Final
 from typing import Generic
 from typing import Iterable
 from typing import Mapping
-from typing import Optional
 from typing import Sequence
 
 from formlessness.types import JSONDict
