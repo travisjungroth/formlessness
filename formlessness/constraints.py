@@ -20,7 +20,6 @@ from typing import Final
 from typing import Generic
 from typing import Iterable
 from typing import Mapping
-from typing import Optional
 from typing import Sequence
 
 from formlessness.types import JSONDict
@@ -255,7 +254,6 @@ class OfType(Constraint[T]):
 
     type_: type
     message: str = "Must be of type {}."
-    json_type: Optional[str] = None
     _instances: ClassVar[dict[type, OfType]] = {}
 
     @classmethod
@@ -263,7 +261,6 @@ class OfType(Constraint[T]):
         cls,
         type_: type,
         message: str = "Must be of type {}.",
-        json_type: Optional[str] = None,
     ) -> OfType:
         """
         Dynamically get-or-create the Constraint for a type.
@@ -277,7 +274,7 @@ class OfType(Constraint[T]):
         try:
             return cls._instances[type_]
         except KeyError:
-            return cls(type_, message, json_type)
+            return cls(type_, message)
 
     def __post_init__(self):
         self._instances[self.type_] = self
@@ -285,7 +282,7 @@ class OfType(Constraint[T]):
     def satisfied_by(self, value: T) -> bool:
         return isinstance(value, self.type_)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.message.format(self.type_)
 
 
@@ -667,13 +664,13 @@ class ConstraintMap(Mapping[tuple[str, ...], Constraint]):
 Constraint instances
 """
 
-is_null = OfType(type(None), "Must not be set.", "null")
-is_int = OfType(int, "Must be an integer.", "integer")
-is_float = OfType(float, "Must be a float.", "number")
-is_str = OfType(str, "Must be a string.", "string")
-is_bool = OfType(bool, "Must be a boolean.", "boolean")
-is_list = OfType(list, "Must be a list.", "array")
-is_dict = OfType(dict, "Must be a dictionary.", "object")
+is_null = OfType(type(None), "Must not be set.")
+is_int = OfType(int, "Must be an integer.")
+is_float = OfType(float, "Must be a float.")
+is_str = OfType(str, "Must be a string.")
+is_bool = OfType(bool, "Must be a boolean.")
+is_list = OfType(list, "Must be a list.")
+is_dict = OfType(dict, "Must be a dictionary.")
 is_datetime = OfType(datetime, "Must be a datetime.")
 is_date = OfType(date, "Must be a date.")
 is_time = OfType(time, "Must be a time.")
@@ -725,11 +722,23 @@ def _(constraint: InvalidClass) -> tuple[JSONDict, bool]:
     return {"not": {}}, True
 
 
+_python_type_to_json_type = {
+    type(None): "null",
+    int: "integer",
+    float: "number",
+    str: "string",
+    bool: "boolean",
+    list: "array",
+    dict: "object",
+}
+
+
 @to_json.register
 def _(constraint: OfType) -> tuple[JSONDict, bool]:
-    if constraint.json_type:
-        return {"type": constraint.json_type}, True
-    return {}, False
+    try:
+        return {"type": _python_type_to_json_type[constraint.type_]}, True
+    except KeyError:
+        return {}, False
 
 
 @to_json.register
