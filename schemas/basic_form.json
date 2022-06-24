@@ -13,7 +13,7 @@
     },
     "objectPath": {
       "type": "string",
-      "format": "json-pointer"
+      "pattern": "^(/\\w+|/\\*)*$"
     },
     "collapsable": {
       "type": "boolean"
@@ -60,7 +60,7 @@
         },
         "objectPath": {
           "type": "string",
-          "format": "json-pointer"
+          "pattern": "^(/\\w+|/\\*)*$"
         },
         "widget": {
           "anyOf": [
