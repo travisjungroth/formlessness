@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from abc import ABC
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -376,6 +377,34 @@ class LE(Comparison[T]):
 
     def __invert__(self) -> GT:
         return GT(self.operand)
+
+
+@dataclass
+class Regex(Constraint[str]):
+    pattern: re.Pattern
+    message: str = ""
+
+    def __init__(self, pattern: str, message: str = ""):
+        self.pattern: re.Pattern = re.compile(pattern)
+        self.message = message
+
+    def satisfied_by(self, value: str) -> bool:
+        r"""
+        >>> Regex("\w+").satisfied_by("snake_case")
+        True
+        >>> Regex("\w").satisfied_by("snake_case")
+        False
+        >>> Regex("\w+").satisfied_by("abc!")
+        False
+        """
+        return self.pattern.fullmatch(value) is not None
+
+    def __str__(self) -> str:
+        r"""
+        >>> print(Regex("\w+"))
+        Must match regex \w+
+        """
+        return self.message or f"Must match regex {self.pattern.pattern}"
 
 
 """
