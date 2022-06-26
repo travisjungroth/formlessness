@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
+from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Callable, cast
+from typing import Callable
 from typing import Generic
 from typing import Iterable
 from typing import Protocol
+from typing import cast
 
 from formlessness.types import D
 from formlessness.types import JSONDict

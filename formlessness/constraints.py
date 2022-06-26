@@ -313,7 +313,7 @@ class Comparison(Constraint[T]):
     def __str__(self):
         docstring = self.__class__.__doc__
         if not docstring:
-            raise Exception('Missing docstring for Comparison.')
+            raise Exception("Missing docstring for Comparison.")
         words = docstring.splitlines()[1].lower().strip()
         return f"Must be {words} {self.operand}."
 

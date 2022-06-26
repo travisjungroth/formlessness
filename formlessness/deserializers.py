@@ -5,9 +5,10 @@ from dataclasses import dataclass
 from datetime import date
 from datetime import datetime
 from datetime import time
-from typing import Any, cast
+from typing import Any
 from typing import Callable
 from typing import Generic
+from typing import cast
 
 from formlessness.exceptions import DeserializationError
 from formlessness.types import D
