@@ -19,11 +19,7 @@ jobs:
       - name: Update dependencies
         run: |
           pip install poetryup
-          poetryup
-          if [ -n "$(git status --porcelain)" ]; then
-            # working tree NOT clean, bump project version
-            poetry version patch
-          fi
+          poetryup --no-install
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
