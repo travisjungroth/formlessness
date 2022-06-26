@@ -302,7 +302,7 @@ class Choices(Constraint[T]):
 @dataclass
 class Comparison(Constraint[T]):
     operand: T
-    operator: ClassVar[Callable[[T, T], bool]]
+    operator: ClassVar[Callable]
 
     def satisfied_by(self, value: T) -> bool:
         try:
@@ -311,7 +311,10 @@ class Comparison(Constraint[T]):
             return False
 
     def __str__(self):
-        words = self.__class__.__doc__.splitlines()[1].lower().strip()
+        docstring = self.__class__.__doc__
+        if not docstring:
+            raise Exception("Missing docstring for Comparison.")
+        words = docstring.splitlines()[1].lower().strip()
         return f"Must be {words} {self.operand}."
 
     def __repr__(self):
@@ -337,7 +340,7 @@ class GT(Comparison[T]):
     Must be less than or equal to 0.
     """
 
-    operator: ClassVar[Callable[[T, T], bool]] = gt
+    operator: ClassVar[Callable] = gt
 
     def __invert__(self) -> LE:
         return LE(self.operand)
@@ -349,7 +352,7 @@ class GE(Comparison[T]):
     Greater Than Or Equal To
     """
 
-    operator: ClassVar[Callable[[T, T], bool]] = ge
+    operator: ClassVar[Callable] = ge
 
     def __invert__(self) -> LT:
         return LT(self.operand)
@@ -361,7 +364,7 @@ class LT(Comparison[T]):
     Less Than
     """
 
-    operator: ClassVar[Callable[[T, T], bool]] = lt
+    operator: ClassVar[Callable] = lt
 
     def __invert__(self) -> GE:
         return GE(self.operand)
@@ -373,7 +376,7 @@ class LE(Comparison[T]):
     Less Than Or Equal To
     """
 
-    operator: ClassVar[Callable[[T, T], bool]] = le
+    operator: ClassVar[Callable] = le
 
     def __invert__(self) -> GT:
         return GT(self.operand)
@@ -728,10 +731,10 @@ def not_null(value: Any) -> bool:
 
 
 @dataclass
-class HasKeys(Constraint):
+class HasKeys(Constraint[dict]):
     keys: list[str]
 
-    def validate(self, value: T) -> Constraint:
+    def validate(self, value: dict) -> Constraint:
         missing_keys = [k for k in self.keys if k not in value]
         if not missing_keys:
             return Valid

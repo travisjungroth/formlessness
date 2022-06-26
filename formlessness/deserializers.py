@@ -8,6 +8,7 @@ from datetime import time
 from typing import Any
 from typing import Callable
 from typing import Generic
+from typing import cast
 
 from formlessness.exceptions import DeserializationError
 from formlessness.types import D
@@ -20,7 +21,7 @@ class Deserializer(Generic[D, T], ABC):
     """
 
     def deserialize(self, data: D) -> T:
-        return data
+        return cast(D, data)
 
 
 def deserializer(
@@ -53,7 +54,7 @@ class FunctionDeserializer(Deserializer[D, T]):
 
 @dataclass
 class KwargsDeserializer(Deserializer[dict[str, Any], T]):
-    function: Callable[[...], T]
+    function: Callable[..., T]
     error_message: str = "Failed to deserialize."
 
     def deserialize(self, data: dict[str, Any]) -> T:

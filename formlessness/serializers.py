@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from abc import ABC
+from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Callable
 from typing import Generic
 from typing import Iterable
 from typing import Protocol
+from typing import cast
 
 from formlessness.types import D
 from formlessness.types import JSONDict
@@ -18,7 +20,7 @@ class Serializer(Generic[D, T], ABC):
     """
 
     def serialize(self, obj: T) -> D:
-        return obj
+        return cast(D, obj)
 
 
 def serializer(f: Callable[[T], D]) -> FunctionSerializer[D, T]:
@@ -57,6 +59,7 @@ class MethodSerializer(Serializer[D, T]):
 
 
 class AsDict(Protocol):
+    @abstractmethod
     def as_dict(self) -> JSONDict:
         pass
 
@@ -65,6 +68,7 @@ as_dict: MethodSerializer[JSONDict, AsDict] = MethodSerializer("as_dict")
 
 
 class ISOFormat(Protocol):
+    @abstractmethod
     def isoformat(self) -> str:
         pass
 
