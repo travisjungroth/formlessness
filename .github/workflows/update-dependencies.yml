@@ -20,10 +20,6 @@ jobs:
         run: |
           pip install poetryup
           poetryup
-          if [ -n "$(git status --porcelain)" ]; then
-            # working tree NOT clean, bump project version
-            poetry version patch
-          fi
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
