@@ -1,7 +1,8 @@
 from collections.abc import Mapping
+from typing import Optional
 
 
-def key_and_label(key: str, label: str) -> tuple[str, str]:
+def key_and_label(key: Optional[str], label: Optional[str]) -> tuple[str, str]:
     """
     If one of key or label is missing, generate it from the other.
 

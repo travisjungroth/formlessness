@@ -54,7 +54,7 @@ class Form(Converter[D, T], Displayer, ABC):
         pass
 
 
-class Fixed:
+class Fixed(Keyed, ABC):
     children: dict[str, Union[Converter, Fixed]]
     order: list[str]
 
@@ -78,7 +78,7 @@ class Fixed:
         return self.display_info | {"contents": contents}
 
 
-class BasicForm(Fixed, Form[JSONDict, dict]):
+class BasicForm(Fixed, Form[JSONDict, T]):
     """FixedMappingForm"""
 
     # See schemas/basic_form.json for the JSON Schema of the Display.
