@@ -1,5 +1,7 @@
 from typing import Final
 from typing import TypedDict
+
+
 class Widget(TypedDict):
     type: str
 
