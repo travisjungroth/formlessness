@@ -9,11 +9,11 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from functools import singledispatch
+from operator import eq
 from operator import ge
 from operator import gt
 from operator import le
 from operator import lt
-from operator import eq
 from operator import ne
 from typing import Any
 from typing import Callable
@@ -322,6 +322,7 @@ class Comparison(Constraint[T]):
     def __repr__(self):
         return f"{self.__class__.__qualname__}({self.operand})"
 
+
 @dataclass(repr=False)
 class EQ(Comparison[T]):
     """
@@ -333,6 +334,7 @@ class EQ(Comparison[T]):
     def __invert__(self) -> NE:
         return NE(self.operand)
 
+
 @dataclass(repr=False)
 class NE(Comparison[T]):
     """
@@ -343,7 +345,6 @@ class NE(Comparison[T]):
 
     def __invert__(self) -> EQ:
         return EQ(self.operand)
-
 
 
 @dataclass(repr=False)
