@@ -1,8 +1,6 @@
 from formlessness.constraints import GE
 from formlessness.constraints import Comparison
-from formlessness.constraints import Regex
 from formlessness.constraints import to_json
-
 
 
 def test_json_ge():
