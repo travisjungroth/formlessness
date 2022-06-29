@@ -9,10 +9,12 @@ from datetime import date
 from datetime import datetime
 from datetime import time
 from functools import singledispatch
+from operator import eq
 from operator import ge
 from operator import gt
 from operator import le
 from operator import lt
+from operator import ne
 from typing import Any
 from typing import Callable
 from typing import ClassVar
@@ -322,6 +324,30 @@ class Comparison(Constraint[T]):
 
 
 @dataclass(repr=False)
+class EQ(Comparison[T]):
+    """
+    Equal To
+    """
+
+    operator: ClassVar[Callable] = eq
+
+    def __invert__(self) -> NE:
+        return NE(self.operand)
+
+
+@dataclass(repr=False)
+class NE(Comparison[T]):
+    """
+    Not Equal To
+    """
+
+    operator: ClassVar[Callable] = ne
+
+    def __invert__(self) -> EQ:
+        return EQ(self.operand)
+
+
+@dataclass(repr=False)
 class GT(Comparison[T]):
     """
     Greater Than
@@ -407,9 +433,6 @@ class Regex(Constraint[str]):
         >>> print(Regex(r"\w+"))
         Must match regex \w+
         """
-        return self.pattern.fullmatch(value) is not None
-
-    def __str__(self) -> str:
         return self.message or f"Must match regex {self.pattern.pattern}"
 
 
