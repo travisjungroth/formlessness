@@ -14,16 +14,15 @@ jobs:
         run: pipx install poetry
       - name: Set up Python
         uses: actions/setup-python@v4
+        id: setup-python
         with:
           python-version-file: .python-version
+          cache: 'poetry'
+      - run: poetry env use '${{ steps.setup-python.outputs.python-path }}'
       - name: Update dependencies
         run: |
           pip install poetryup
           poetryup
-          if [ -n "$(git status --porcelain)" ]; then
-            # working tree NOT clean, bump project version
-            poetry version patch
-          fi
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v4
         with:
