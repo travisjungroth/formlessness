@@ -407,6 +407,9 @@ class Regex(Constraint[str]):
         >>> print(Regex(r"\w+"))
         Must match regex \w+
         """
+        return self.pattern.fullmatch(value) is not None
+
+    def __str__(self) -> str:
         return self.message or f"Must match regex {self.pattern.pattern}"
 
 
