@@ -71,6 +71,11 @@
             },
             {
               "const": {
+                "type": "text_area"
+              }
+            },
+            {
+              "const": {
                 "type": "date_picker"
               }
             },
