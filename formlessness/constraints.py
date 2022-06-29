@@ -417,7 +417,7 @@ class Regex(Constraint[str]):
         self.message = message
 
     def satisfied_by(self, value: str) -> bool:
-        """
+        r"""
         >>> Regex(r"\w+").satisfied_by("snake_case")
         True
         >>> Regex(r"\w").satisfied_by("snake_case")
@@ -428,7 +428,7 @@ class Regex(Constraint[str]):
         return self.pattern.fullmatch(value) is not None
 
     def __str__(self) -> str:
-        """
+        r"""
         >>> print(Regex(r"\w+"))
         Must match regex \w+
         """
