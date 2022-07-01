@@ -14,10 +14,10 @@ mkdocstrings = {extras = ["python"], version = "^0.19.0"}
 mkdocs-material = "^8.3.8"
 coverage = {extras = ["toml"], version = "^6.4.1"}
 pre-commit = "^2.19.0"
-jsonschema = "^4.6.0"
+jsonschema = "^4.6.1"
 pytest-cov = "^3.0.0"
 isort = "^5.10.1"
-black = "^22.3.0"
+black = "^22.6.0"
 pytest-phmdoctest = "^1.0.0"
 
 [build-system]
