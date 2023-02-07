@@ -2,8 +2,8 @@ name: Update Dependencies
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron:  '0 6 1 * *' # at 06:00 on the first day of every month
+  # schedule:
+  #  - cron:  '0 6 1 * *' # at 06:00 on the first day of every month
 
 jobs:
   update_dependencies:
